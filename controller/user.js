@@ -82,7 +82,7 @@ exports.homePage = async (req, res, next) => {
   res.render('./store/vender', {
     ifLucknow: ifLucknow,
     venders: registervenders,
-    title: "vender Page",
+    title: "Tiffin Seva",
     opacity: opacity,
     currentPage: 'home',
     isLogedIn: req.isLogedIn,
