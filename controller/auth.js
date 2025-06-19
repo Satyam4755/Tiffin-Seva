@@ -1,5 +1,10 @@
 const { check, validationResult } = require("express-validator");
 const User = require("../models/user");
+const vender = require("../models/venders");
+const message = require("../models/message");
+const Orders = require("../models/orders");
+const venderOptions = require("../models/venderOption");
+const userOptions = require("../models/userOption");
 const bcrypt = require("bcryptjs");
 const cloudinary = require('cloudinary').v2;
 const { fileUploadInCloudinary } = require('../utils/cloudinary');
@@ -261,42 +266,79 @@ exports.deleteUserPage = async (req, res) => {
     }
 };
 exports.deleteUser = async (req, res) => {
-    const { id, email, password } = req.body;
+  const { email, password } = req.body;
 
-    try {
-        const user = await User.findOne({ email });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).send('User not found');
 
-        if (!user) return res.status(404).send('User not found');
-
-        const isMatched = await bcrypt.compare(password, user.password);
-        if (!isMatched) return res.status(401).render('./store/delete', {
-            title: "Delete Page",
-            isLogedIn: false,
-            errorMessage: ['Incorrect password'],
-            oldInput: { email },
-            user: req.session.user
-        });
-
-        // Delete profile picture if it exists
-        if (user.profilePicturePublicId) {
-            await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => {
-                console.warn("Error deleting old image:", err.message);
-            });
-        }
-
-        // Delete the user
-        await User.findByIdAndDelete(user._id);
-
-        // If the deleted user is logged in, destroy session
-        if (req.session.user && req.session.user._id.toString() === user._id.toString()) {
-            req.session.destroy(() => {
-                res.redirect('/logIn');
-            });
-        } else {
-            res.redirect('/');
-        }
-    } catch (err) {
-        console.error('Delete Error:', err);
-        res.status(500).send('Error deleting user');
+    const isMatched = await bcrypt.compare(password, user.password);
+    if (!isMatched) {
+      return res.status(401).render('./store/delete', {
+        title: "Delete Page",
+        isLogedIn: false,
+        errorMessage: ['Incorrect password'],
+        oldInput: { email },
+        user: req.session.user
+      });
     }
+
+    // 🔁 Get all vendors owned by the user
+    const userVenders = await vender.find({ vender: user._id });
+
+    // 🔁 Delete all related vendor-based data
+    for (const vender of userVenders) {
+      // Delete cloudinary images for each vendor
+      const cloudinaryDeletePromises = [];
+      if (vender.imagePublicId)
+        cloudinaryDeletePromises.push(cloudinary.uploader.destroy(vender.imagePublicId));
+      if (vender.MenuimagePublicId)
+        cloudinaryDeletePromises.push(cloudinary.uploader.destroy(vender.MenuimagePublicId));
+      await Promise.all(cloudinaryDeletePromises);
+
+      // Delete related collections
+      await Orders.deleteMany({ vender: vender._id });
+      await venderOptions.deleteMany({ vendorId: vender._id });
+      await userOptions.deleteMany({ vendor: vender._id });
+      await message.deleteMany({ vendorId: vender._id });
+
+      // Delete the vendor itself
+      await vender.findByIdAndDelete(vender._id);
+    }
+
+    // 🔁 Clean from other users' booked arrays
+    await User.updateMany(
+      { booked: user._id },
+      { $pull: { booked: user._id } }
+    );
+
+    // Delete user's own orders, messages, options
+    await Orders.deleteMany({ guest: user._id });
+    await message.deleteMany({ guestId: user._id });
+    await venderOptions.deleteMany({ guest: user._id });
+    await userOptions.deleteMany({ guest: user._id });
+
+    // 🔁 Delete profile picture from Cloudinary
+    if (user.profilePicturePublicId) {
+      await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => {
+        console.warn("Error deleting profile image:", err.message);
+      });
+    }
+
+    // 🔁 Delete the user itself
+    await User.findByIdAndDelete(user._id);
+
+    // 🔁 Destroy session if the user is logged in
+    if (req.session.user && req.session.user._id.toString() === user._id.toString()) {
+      req.session.destroy(() => {
+        res.redirect('/logIn');
+      });
+    } else {
+      res.redirect('/');
+    }
+
+  } catch (err) {
+    console.error('Delete Error:', err);
+    res.status(500).send('Error deleting user');
+  }
 };
