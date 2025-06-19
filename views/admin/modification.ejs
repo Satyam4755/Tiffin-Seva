@@ -1,0 +1,196 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fff8f1;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #ff6f00;
+    font-weight: 700;
+  }
+
+  #ask-option-btn {
+    display: block;
+    background-color: #ff7043;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin: 0 auto 20px;
+  }
+
+  #ask-option-btn:hover {
+    background-color: #f4511e;
+  }
+
+  #customer-choice-form {
+    background: #fff3e0;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    max-width: 500px;
+    margin: 0 auto 30px;
+    transition: all 0.3s ease;
+  }
+
+  #customer-choice-form input[type="text"] {
+    width: 90%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+  }
+
+  #customer-choice-form button {
+    background-color: #ff7043;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  #customer-choice-form button:hover {
+    background-color: #e65100;
+  }
+
+  .guest-options {
+    display: grid;
+    gap: 20px;
+  }
+
+  .guest-option-card {
+    background-color: #fff;
+    padding: 5px 5px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #ff7043;
+    transition: transform 0.2s ease;
+  }
+
+  .guest-option-card:hover {
+    transform: scale(1.01);
+  }
+
+  .guest-option-card h4 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #333;
+  }
+
+  .guest-option-card p {
+    margin: 8px 0;
+    font-size: 16px;
+    color: #555;
+  }
+
+  p {
+    text-align: center;
+    color: #777;
+    font-size: 17px;
+  }
+
+  @media screen and (max-width: 600px) {
+    .container {
+      padding: 20px 10px;
+    }
+
+    #ask-option-btn {
+      width: 100%;
+    }
+
+    .guest-option-card {
+      padding: 5px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+    }
+  }
+  .badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
+
+<%- include('../partials/nav') %>
+<div class="badaDabba">
+<div class="container">
+  <h1>🍽️ Guest's Custom Choice for MEAL!</h1>
+
+  <% if (!listingsData || listingsData.length === 0) { %>
+    <p>You have no listings yet!</p>
+  <% } else { %>
+    <% listingsData.forEach(listing=> { %>
+      <h2>🍱 Vendor Listing: <%= listing.vendor?.Name || 'Unknown' %>
+      </h2>
+    
+      <% if (listing.guests.length===0) { %>
+        <p>No orders for this listing.</p>
+        <% } else { %>
+          <% listing.guests.forEach(guestData=> { %>
+            <% if (guestData.optionSent) { %>
+              <div class="guest-option-card">
+                <h4>👤 Guest: <%= guestData.guest?.firstName || 'Unknown' %> <%= guestData.guest?.lastName || 'Guest' %>
+                </h4>
+            
+                <% if (guestData.optionDetails && guestData.optionDetails.mealSelected) { %>
+                  <p><strong>📍 Location:</strong>
+                    <%= guestData.order?.address || 'Unknown' %>
+                  </p>
+                  <p><strong>🍱 Meal Selected:</strong>
+                    <%= guestData.optionDetails.mealSelected %>
+                  </p>
+                  <% } else { %>
+                    <p><strong>✅ Option already sent.</strong></p>
+                    <p><em>Waiting for guest response...</em></p>
+                    <% } %>
+              </div>
+              <% } %>
+            <% }) %>
+        
+            <% const hasPendingGuests=listing.guests.some(g=> !g.optionSent); %>
+        
+              <% if (hasPendingGuests) { %>
+                <div id="customer-choice-form">
+                  <h4 style="text-align:center;">Send Meal Options to All Pending Guests</h4>
+                  <form action="/vender/customerChoiceBulk/<%= listing.vendor?._id %>" method="POST">
+                    <input type="text" name="regular" placeholder="Enter regular meal" required>
+                    <input type="text" name="optional" placeholder="Enter optional meal" required>
+                    <button type="submit">Send to All</button>
+                  </form>
+                </div>
+        <% } %>
+      <% } %>
+      <hr>
+    <% }) %>
+  <% } %>
+</div>
+</div>
+  <%-include('../partials/footer')%>
+</body>
+</html>

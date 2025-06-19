@@ -1,0 +1,133 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+<%- include('../partials/nav') %>
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+
+  .vendor-section {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-bottom: 30px;
+    transition: 0.3s;
+  }
+
+  .vendor-section:hover {
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  h1 {
+    text-align: center;
+    color: #2d3436;
+    margin-bottom: 30px;
+  }
+
+  h3 {
+    color: #0984e3;
+    font-size: 22px;
+    margin-bottom: 15px;
+  }
+
+  .option-block {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f1f2f6;
+  }
+
+  .option-block label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  input[type="radio"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+  }
+
+  button[type="submit"] {
+    background-color: #00b894;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #019875;
+  }
+
+  .no-booking {
+    text-align: center;
+    color: #636e72;
+    font-size: 18px;
+    margin-top: 30px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #2d3436;
+  }
+  .badaDabba{
+        margin-bottom: 18%;
+    }
+</style>
+<div class="badaDabba">
+<div class="container">
+  <h1>Choose Your Meal</h1>
+
+  <% if (!vendorOptionsList || vendorOptionsList.length === 0) { %>
+    <p class="no-booking">You have no bookings yet!</p>
+  <% } else { %>
+    <% vendorOptionsList.forEach((item) => { %>
+      <div class="vendor-section">
+        <h3><%= item.vendorName || 'Your Vendor' %></h3>
+        <h5 style="color: #d6220a;"> For vendor:<%=item.vendor.Name%></h5>
+
+        <% if (item.isSent) { %>
+          <p style="color: green;">✅ You have already submitted your meal choice.</p>
+        <% } else if (item.option) { %>
+          <form action="/user/options" method="POST">
+            <input type="hidden" name="vendorId" value="<%= item.vendorId %>">
+
+            <h5 style="margin-bottom: 12px;">Select a meal:</h5>
+            <div class="option-block">
+              <label>
+                <input type="radio" name="mealType" value="<%= item.option.regular %>" required>
+                <%= item.option.regular %>
+              </label>
+              <label>
+                <input type="radio" name="mealType" value="<%= item.option.optional %>">
+                <%= item.option.optional %>
+              </label>
+            </div>
+
+            <button type="submit">Submit Meal</button>
+          </form>
+        <% } else { %>
+          <p>No meal options available yet.</p>
+        <% } %>
+      </div>
+    <% }); %>
+  <% } %>
+</div>
+</div>
+  <%-include('../partials/footer')%>
+</body>
+</html>

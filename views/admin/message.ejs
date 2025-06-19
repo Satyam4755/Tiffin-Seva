@@ -1,0 +1,132 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fffaf4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px 30px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  h1 {
+    font-size: 24px;
+    color: #ff6f00;
+    margin-bottom: 25px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .vendor-block {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .guest-block {
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #fff7ef;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    color: #333;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  button[type="submit"] {
+    background-color: #ff7043;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #f4511e;
+  }
+
+  .sent-message {
+    color: green;
+    font-weight: 600;
+  }
+  .badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<%- include('../partials/nav') %>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
+<div class="badaDabba">
+<div class="container">
+  <h1>📢 Send Meal Message To Your Customers</h1>
+
+  <% if (!listingsData || listingsData.length === 0) { %>
+    <p style="text-align:center;">You have no vendor listings or orders.</p>
+  <% } else { %>
+    <% listingsData.forEach(listing => { %>
+      <div class="vendor-block">
+        <h2 style="color: #e65100;"><%= listing.vendor.Name || 'Vendor Listing' %></h2>
+
+        <% if (listing.guests.length === 0) { %>
+          <p>No guests found for this listing.</p>
+
+        <% } else { %>
+          <% const isMessageAlreadySent = listing.guests.some(g => g.messageSent); %>
+
+          <% if (isMessageAlreadySent) { %>
+            <% const firstWithMessage = listing.guests.find(g => g.messageSent && g.messageDetails); %>
+            <p class="sent-message">Message already sent ✅</p>
+            <% if (firstWithMessage) { %>
+              <p><strong>Message:</strong> <%= firstWithMessage.messageDetails.message %></p>
+            <% } %>
+
+          <% } else { %>
+            <!-- 📝 Show form ONCE for this vendor listing -->
+            <form action="/vender/send_message/<%= listing.vendor?._id %>" method="POST">
+              <div class="form-group">
+                <label for="message">Write Message:</label>
+                <textarea name="message" required></textarea>
+              </div>
+              <button type="submit">Send Message to All Guests</button>
+            </form>
+          <% } %>
+        <% } %>
+      </div>
+    <% }); %>
+  <% } %>
+</div>
+</div>
+<%- include('../partials/footer') %>

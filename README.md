@@ -1,2 +1,2 @@
-# Food-Delivery-System
-This is a Tiffin Delivery management system based full stack website.
+# Main-Getvenders
+This is the main project of get venders, including front end and back end.

@@ -1,0 +1,116 @@
+<%- include('../partials/head') %>
+
+<style>
+  body {
+    background: linear-gradient(to right, #f9f9f9, #fffbe7);
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  .success-container {
+    padding: 60px 20px;
+    animation: fadeIn 1.5s ease-in-out;
+  }
+
+  .success-icon {
+    font-size: 80px;
+    color: #4CAF50;
+    margin-bottom: 20px;
+    animation: popIn 0.8s ease-in-out;
+  }
+
+  h1 {
+    color: #4CAF50;
+    font-size: 3rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: #666;
+    margin: 10px 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .food-image {
+    width: 250px;
+    margin-top: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .button-container {
+    margin-top: 40px;
+  }
+
+  .btn {
+    background-color: #ff7043;
+    color: white;
+    padding: 15px 35px;
+    border: none;
+    border-radius: 40px;
+    font-size: 1.2em;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(255, 112, 67, 0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    background-color: #f4511e;
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(244, 81, 30, 0.4);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .confetti {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: url('https://img.freepik.com/free-photo/top-view-table-full-food_23-2149209253.jpg?semt=ais_hybrid&w=740');
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: 10;
+    opacity: 0.2;
+    background-blend-mode: overlay;
+  }
+</style>
+
+<body>
+<div class="confetti"></div>
+  <div class="success-container">
+    <div class="success-icon">✅</div>
+    <h1>Payment Successful!</h1>
+    <h2>Your vendor has been successfully booked 🎉</h2>
+    <h2>Thanks for trusting our service!</h2>
+    <h2>Check your booking details in the Booked section.</h2>
+
+    <div class="button-container">
+      <a href="/user/booked" class="btn">Go to Booked Section</a>
+    </div>
+
+    <img class="food-image" src="/IMG_3114 2.jpg" alt="Food Delivered">
+  </div>
+</body>
+</html>

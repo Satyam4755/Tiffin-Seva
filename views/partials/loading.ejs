@@ -1,0 +1,99 @@
+<style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      font-family: sans-serif;
+    }
+
+    /* #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    } */
+
+    @keyframes morph {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+}
+
+.delivery-scene {
+  width: 120px;
+  height: 120px;
+  background: #cceeff;
+  overflow: hidden;
+  position: relative;
+  animation: morph 6s ease-in-out infinite;
+}
+
+    .road {
+      position: absolute;
+      left: 0;
+      width: 400%;
+      height: 100%;
+      background-image: url('/road1.jpg');
+      background-repeat: repeat-x;
+      background-size: contain;
+      animation: roadScroll 4.0s linear infinite;
+      z-index: 1;
+    }
+
+    .delivery-man {
+      position: absolute;
+      bottom: 12.5px; /* this places the wheels on the road */
+      left: 25%;
+      width: 60px;
+      height: auto;
+      z-index: 2;
+    }
+
+    @keyframes roadScroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" style="display: none;">
+    <div class="delivery-scene">
+      <div class="road"></div>
+      <img src="/delivery.png" alt="Delivery Boy" class="delivery-man" />
+    </div>
+  </div>
+<script>
+  const form = document.querySelector('form');
+  const loadingOverlay = document.getElementById('loadingOverlay');
+
+  form.addEventListener('submit', () => {
+    // Show loading overlay
+    loadingOverlay.style = `
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    `;
+
+    // Disable scrolling and interaction
+    document.body.style.overflow = 'hidden';
+    document.body.style.pointerEvents = 'none';
+  });
+</script>

@@ -1,0 +1,35 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "app banane ke liye",
+  "main": "app.js",
+  "scripts": {
+    "khulja": "nodemon app.js",
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.6.0",
+    "connect-flash": "^0.1.1",
+    "connect-mongodb-session": "^5.0.0",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.1",
+    "mongodb": "^6.13.0",
+    "mongoose": "^8.13.1",
+    "multer": "^1.4.5-lts.2",
+    "mysql2": "^3.12.0",
+    "nodemon": "^3.1.9",
+    "streamifier": "^0.1.1",
+    "twilio": "^5.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.2",
+    "typescript-cached-transpile": "^0.0.6"
+  }
+}

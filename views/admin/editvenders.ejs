@@ -1,0 +1,184 @@
+<%-include('../partials/head')%>
+<%-include('../partials/nav')%>
+<%-include('../partials/background')%>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        color: #ff5a5f;
+        text-align: center;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+    }
+
+    .form-container {
+        background-color: white;
+        width: 90%;
+        max-width: 500px;
+        margin: auto;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container input,
+    .form-container select {
+        padding: 12px;
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+        transition: border 0.3s;
+        box-sizing: border-box;
+    }
+
+    .form-container input:focus {
+        border-color: #ff5a5f;
+        outline: none;
+    }
+
+    .form-container button {
+        padding: 12px 24px;
+        background-color: #ff5a5f;
+        color: white;
+        font-size: 1rem;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        margin-top: 10px;
+        width: 100%;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .form-container button:hover {
+        background-color: #e0484d;
+        transform: scale(1.05);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    .img1 {
+    position: absolute;
+    top: 15%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
+    transition: transform 0.4s ease;
+    z-index: -1;
+    }
+    .img2 {
+    position: absolute;
+    top: 40%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+}
+
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.5rem;
+            margin: 1.5rem 1rem 1rem;
+        }
+
+        .form-container {
+            padding: 1.5rem 1rem;
+            width: 95%;
+        }
+
+        .form-container input,
+        .form-container button {
+            font-size: 0.95rem;
+            padding: 10px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+        }
+
+        .form-container button {
+            padding: 10px 18px;
+            font-size: 0.95rem;
+        }
+    }
+    .badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+<div class="badaDabba">
+<h1><%= editing ? "Edit Your vender details" : "Add Your vender details " %></h1>
+
+
+<img src="/IMG_3108.jpg" alt="image" class="img2">
+<img src="/IMG_3110.jpg" class="img1" alt="image">
+
+
+
+
+<div class="form-container">
+    <form id="venderForm" action="/vender/<%= editing ? 'edit_vender' : 'addVenderShip' %>" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<%= editing ? vender._id : '' %>">
+
+        <div class="form-group">
+            <input type="file" name="image" accept="image/jpg,image/jpeg,image/png">
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="Name" value="<%= editing ? vender.Name : '' %>" placeholder="🏡 vender Name" required>
+        </div>
+
+
+        <div class="form-group">
+            <input type="number" name="PricePerday" value="<%= editing ? vender.PricePerday : '' %>" placeholder="💰 PricePerday " required>
+        </div>
+        <div class="form-group">
+            <input type="number" name="PricePerMonth" value="<%= editing ? vender.PricePerMonth : '' %>" placeholder="💰 PricePerMonth " required>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="Location" value="<%= editing ? vender.Location : '' %>" placeholder="📍 Location" required>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="Description" value="<%= editing ? vender.Description : '' %>" placeholder="📝 Description" required>
+        </div>
+
+        <div class="form-group">
+            <input type="number" name="Rating" value="<%= editing ? vender.Rating : '' %>" placeholder="⭐ Rating (1-5)" min="1" max="5" required>
+        </div>
+        <!-- menu -->
+         <div class="form-group">
+            <input type="file" name="Menuimage" accept="image/jpg,image/jpeg,image/png">
+        </div>
+
+        <button type="submit"><%= editing ? "✨ Update vender" : "🏡 Add vender" %></button>
+    </form>
+
+</div>
+</div>
+</div>
+  <%-include('../partials/loading')%>
+  <%-include('../partials/footer')%>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+
+<style>
+  body {
+    background: #fef9f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .container {
+    max-width: 95%;
+    margin: auto;
+    margin-top: 80px;
+    background: #fffdfb;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    border: 2px solid #ffe6cc;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 35px;
+    color: #ff7043;
+    font-weight: 700;
+    font-size: 36px;
+    text-shadow: 1px 1px 0px #ffd1b3;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    width: auto;
+    min-width: 1000px;
+    border-collapse: collapse;
+    background-color: #fff8f0;
+    border: 1px solid #ffccbc;
+  }
+
+  thead {
+    background-color: #ff7043;
+    color: #fff;
+  }
+
+  th, td {
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #ffccbc;
+  }
+
+  tr:nth-child(even) {
+    background-color: #fff3e0;
+  }
+
+  tr:hover {
+    background-color: #ffe0b2;
+    transition: background-color 0.3s ease;
+  }
+
+  td {
+    color: #5d4037;
+  }
+
+  p {
+    text-align: center;
+    font-size: 18px;
+    color: #777;
+    margin-top: 20px;
+  }
+
+  a {
+    color: #ff7043;
+    text-decoration: underline;
+  }
+
+  @media screen and (max-width: 768px) {
+    .container {
+      padding: 20px 15px;
+    }
+
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+
+    tbody{
+      width: fit-content;
+    }
+
+    table {
+      width: 40px;
+      background-color: #5d403700;
+      border-color: #5d403700;
+      overflow-x: scroll;
+    }
+    thead {
+      display: none;
+    }
+
+    tr {
+      margin-bottom: 25px;
+      width: fit-content;
+      border: 1px solid #ffccbc;
+      border-radius: 12px;
+      padding: 15px;
+      background: #fff3e0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    td {
+      width: 70vw;
+      overflow-y: scroll;
+      text-align: left;
+      padding: 14px 16px;
+      position: relative;
+      font-size: 15px;
+      border: none;
+      color: #5d4037;
+      background-color: #fff;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      font-size: 14px;
+      color: #ff7043;
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+  .badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<%- include('../partials/nav') %>
+<div class="badaDabba">
+<div class="container">
+  <h1>🍱 Guest Food Orders</h1>
+
+  <% if (!isVender) { %>
+    <p>You haven’t added any vendor yet. <a href="/vender/add_vender">Add one now</a>.</p>
+    <% } else if (orders.length===0) { %>
+      <p>No orders yet.</p>
+      <% } else { %>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Vendor</th>
+                <th>Guest Name</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Subscription</th>
+                <th>Duration</th>
+                <th>Payment</th>
+                <th>Price</th>
+                <th>Time Type</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(order=> { %>
+                <tr>
+                  <td data-label="Vendor">
+                    <%= order.vender ? order.vender.Name : 'Deleted Vendor' %>
+                  </td>
+                  <td data-label="Guest Name">
+                    <%= order.name || 'Unknown Guest' %>
+                  </td>
+                  <td data-label="Location">
+                    <%= order.address ? order.address : 'Unknown Location' %>
+                  </td>
+                  <td data-label="Phone">
+                    <%= order.phone || 'N/A' %>
+                  </td>
+                  <td data-label="Subscription">
+                    <%= order.subscription_model || 'Not Available' %>
+                  </td>
+                  <td data-label="Start / End">
+                    <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
+                      <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
+                    <% } else { %>
+                      <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
+                      <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
+                    <% } %>
+                  </td>
+                  <td data-label="Payment">
+                    <%= order.payment || 'N/A' %>
+                  </td>
+                  <td data-label="Price">
+                    ₹<%= order.totalAmount || 'N/A' %>
+                  </td>
+                  <td data-label="Time Type">
+                    <%= order.time_type || order.subscription_model==='Per Month' ? 'Two' : 'N/A' %>
+                  </td>
+                  <td data-label="Email">
+                    <%= order.guest ? order.guest.email : 'Email not found' %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+    <% } %>
+</div>
+</div>
+  <%-include('../partials/footer')%>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+
+<style>
+    body {
+        font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* min-height: 100vh; */
+    }
+/* Wrapper to center search form */
+.search-bar-form {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 10px;
+    max-width: 500px;
+    width: 80%;
+    margin: 20px auto;
+    position: relative;
+    padding: 0 20px;
+}
+
+/* Search input */
+#search-bar {
+    z-index: 10;
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 50px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.3s;
+}
+
+/* Input focus effect */
+#search-bar:focus {
+    border-color: #ff385c;
+    box-shadow: 0 0 5px rgba(255, 56, 92, 0.3);
+}
+
+/* Submit button */
+#search-btn {
+    z-index: 10;
+    padding: 10px 16px;
+    background: #ff385c;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+/* Hover/active effect */
+#search-btn:hover {
+    background: #e0274b;
+    transform: scale(1.05);
+}
+#search-btn:active {
+    transform: scale(0.95);
+}
+
+/* Dropdown styling */
+#location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 60px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-top: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+    z-index: 99;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown items */
+.dropdown-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background: #fce9ec;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .search-bar-form {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    #search-bar {
+        width: 80%;
+        border-radius: 30px;
+    }
+    #search-btn {
+        width: 60px;
+        border-radius: 30px;
+    }
+
+    #location-dropdown {
+        right: 0;
+    }
+}
+
+    h1 {
+        text-align: center;
+        margin-top: 40px;
+        color: #ff4d4f;
+        font-size: 40px;
+        letter-spacing: 2px;
+        font-weight: 700;
+        text-shadow: 0 2px 8px #ffd6d6;
+        animation: fadeInDown 0.8s ease forwards;
+    }
+
+    .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 32px;
+        padding: 18px 10px 0 10px;
+        max-height: 135vh;
+        overflow: hidden;
+    }
+
+    .card {
+        background: linear-gradient(135deg, #fff 60%, #fff0f6 100%);
+        border-radius: 22px;
+        box-shadow: 0 8px 32px rgba(255, 77, 79, 0.09), 0 2px 8px rgba(255, 77, 79, 0.08);
+        overflow: hidden;
+        width: 300px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 2px solid #ffe5e5;
+        position: relative;
+    }
+
+    .card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 16px 40px rgba(255, 77, 79, 0.18);
+    }
+
+    .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-top-left-radius: 22px;
+        border-top-right-radius: 22px;
+        transition: transform 0.4s, filter 0.4s;
+    }
+
+    .card img:hover {
+        transform: scale(1.08);
+        filter: brightness(1.1) saturate(1.2);
+    }
+
+    .content {
+        padding: 8px 8px 6px 8px;
+    }
+
+    .card h3 {
+        margin: 10px 0 6px;
+        color: #2c3e50;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    .card p {
+        margin: 4px 0;
+        color: #555;
+        font-size: 15px;
+        text-align: left;
+    }
+
+    .reserve {
+        background: linear-gradient(90deg, #3bd303 60%, #028f0e 100%);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 11px 22px;
+        margin-top: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 16px rgba(255, 77, 79, 0.18);
+        letter-spacing: 1px;
+    }
+
+    .reserve:hover {
+        background: linear-gradient(90deg, #028f0e 100%, #3bd303 60%);
+        transform: scale(1.07);
+        box-shadow: 0 8px 24px rgba(255, 77, 79, 0.22);
+    }
+
+    .fav-btn {
+        position: absolute;
+        right: 5%;
+        z-index: 2;
+    }
+
+    .fav-btn img {
+        width: 28px;
+        height: 28px;
+        transition: all 0.3s;
+        border-radius: 50%;
+        background: #ffffff00;
+        padding: 2px;
+    }
+
+    #favImg1 {
+        filter: grayscale(1);
+    }
+
+    #favImg1:hover {
+        transform: scale(1.2) rotate(10deg);
+        filter: brightness(1.0);
+    }
+
+    #favImg2:hover {
+        transform: scale(1.2) rotate(-10deg);
+        filter: grayscale(1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #ff4d4f;
+        margin-top: 48px;
+        font-size: 150%;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px #ffd6d6;
+    }
+
+    h3, p {
+        text-align: center;
+        padding: 0 15px;
+        text-shadow: #ffe5ec 0px 2px 8px;
+    }
+
+    .promo-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 48px 0 32px 0;
+    }
+
+    .promo-image {
+        max-width: 90vw;
+        width: 500px;
+        height: auto;
+        border-radius: 26px;
+        box-shadow: 0 10px 32px rgba(255, 77, 79, 0.13), 0 2px 8px rgba(255, 183, 197, 0.13);
+        transition: transform 0.4s cubic-bezier(.4,2,.3,1), box-shadow 0.4s;
+        object-fit: cover;
+    }
+
+    .promo-image:hover {
+        transform: scale(1.04) rotate(-1deg);
+        box-shadow: 0 16px 48px rgba(255, 183, 197, 0.22), 0 4px 16px rgba(255, 77, 79, 0.13);
+        filter: brightness(1.08) saturate(1.1);
+    }
+
+    /* --- OFFERS SECTION --- */
+    .offers-section {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 28px;
+        margin: 36px 0 0 0;
+    }
+
+    .offer-card {
+        background: linear-gradient(120deg, #fffbe6 60%, #ffe5ec 100%);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(255, 183, 197, 0.13);
+        width: 320px;
+        padding: 28px 22px 22px 22px;
+        margin: 0 0 16px 0;
+        border: 2px solid #ffb347;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-align: left;
+    }
+
+    .offer-card:hover {
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 12px 32px rgba(255, 183, 197, 0.22);
+        border-color: #ff4d4f;
+    }
+
+    .offer-card h3 {
+        color: #ff4d4f;
+        font-size: 20px;
+        margin-bottom: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-align: left;
+    }
+
+    .offer-card p {
+        color: #444;
+        font-size: 15px;
+        margin-bottom: 0;
+        text-align: left;
+    }
+
+    .offer-badge {
+        position: absolute;
+        top: -18px;
+        left: 18px;
+        background: linear-gradient(90deg, #ffb347 60%, #ff4d4f 100%);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 6px 18px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px #ffd6d6;
+        letter-spacing: 1px;
+    }
+
+    /* --- Birthday & Delivery Offers --- */
+    .special-offer {
+        background: linear-gradient(90deg, #fffbe6 60%, #ffe5ec 100%);
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(255, 183, 197, 0.13);
+        width: 90%;
+        max-width: 700px;
+        margin: 24px auto 0 auto;
+        padding: 28px 22px 22px 22px;
+        border: 2px solid #ffb347;
+        text-align: center;
+        font-size: 17px;
+        color: #ff4d4f;
+        font-weight: 600;
+        position: relative;
+    }
+
+    .special-offer strong {
+        color: #ff4d4f;
+    }
+
+    .special-offer .emoji {
+        font-size: 28px;
+        vertical-align: middle;
+        margin-right: 6px;
+    }
+
+    /* Remove underlines from all links inside .card */
+    .card a {
+        text-decoration: none !important;
+        color: inherit;
+    }
+
+    /* Remove underline from RESERVE button link */
+    .card .reserve {
+        text-decoration: none !important;
+    }
+
+    .img1 {
+    position: absolute;
+    top: 15%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
+    transition: transform 0.4s ease;
+    }
+    .img2 {
+    position: absolute;
+    top: 40%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
+    transition: transform 0.3s ease;
+}
+    .img3 {
+    position: absolute;
+    top: 95%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50% 100% 50% 100% / 40% 60% 40% 60%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+    }
+    .img4{
+    position: absolute;
+    bottom: -90%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50% 100% 50% 100% / 40% 60% 40% 60%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+    }
+
+    
+
+    @media (max-width: 900px) {
+        .cards-container, .offers-section {
+            flex-direction: row;
+            align-items: center;
+            gap: 18px;
+        }
+        .card, .offer-card {
+            width: 90%;
+            min-width: 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .card, .offer-card, .special-offer {
+            width: 90%;
+            padding: 16px 8px 12px 8px;
+        }
+        .promo-image {
+            width: 98vw;
+        }
+    }
+    .cards-container{
+        max-height: 438vh;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<%- include('../partials/nav') %>
+
+<% if (birthdayMessage) { %>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      Swal.fire({
+        title: '🎉 Happy Birthday!',
+        text: "<%= birthdayMessage %>",
+        icon: 'success',
+        confirmButtonText: 'Thanks!',
+        backdrop: `
+          rgba(0,0,123,0.4)
+          url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExczEzN3ByZDUxMjRuejNmemp1OXFpZGc5ZDlmdzB6NWRkZWhmM2M2MyZlcD12MV9naWZzX3RyZW5kaW5nJmN0PWc/kyLYXonQYYfwYDIeZl/giphy.gif")
+          left top
+          no-repeat
+        `,
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp'
+        }
+      });
+    });
+  </script>
+<% } %>
+<%if(showOptions) {%>
+    <form action="/" class="search-bar-form" method="get" style="position: relative;">
+        <input type="text" name="location" placeholder="Search for location" id="search-bar" autocomplete="off"
+            value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" onfocus="showDropdown()"
+            oninput="filterDropdown(this.value)" />
+
+        <div id="location-dropdown"
+            style="position: absolute; top: 40px; left: 0; right: 0; z-index: 10; background: white; border: 1px solid #ccc; border-radius: 4px; display: none;">
+            <% availableLocations.forEach(loc=> { %>
+                <div class="dropdown-item" onclick="selectLocation('<%= loc %>')">
+                    <%= loc %>
+                </div>
+                <% }) %>
+        </div>
+
+        <button type="submit" id="search-btn">🔍</button>
+    </form>
+    <% }%>
+
+<div class="mainDabba">
+
+<img src="/IMG_3133.jpg" alt="image" class="img3">
+<img src="/2.jpeg" class="img1" alt="image">
+
+<img src="/IMG_3134.jpg" class="img2" alt="image">
+<img src="/IMG_3135 2.jpg" class="img4" alt="image">
+
+        <div class="cards-container">
+            <% if (ifLucknow) { %>
+                <p style="text-align:center; margin-top: 40px; font-size: 18px; color: #888;">
+                    Please enter location under the Lucknow
+                </p>
+                <% } else if (venders.length===0) { %>
+                    <p style="text-align:center; margin-top: 40px; font-size: 18px; color: #888;">
+                        No vendors found
+                        <% if (searchQuery && searchQuery.trim() !=='' ) { %>
+                            for "<%= searchQuery %>"
+                                <% } %>.
+                    </p>
+                    <% } else { %>
+
+                        <div class="cards-container">
+                            <% venders.forEach(vender=> { %>
+                                <div class="card">
+
+                                    <a href="/user/vender-list/<%= vender._id %>">
+                                        <img src="<%= vender.image %>" alt="vender Image">
+                                        <div class="content">
+                                            <h3>
+                                                <%= vender.Name %>
+                                            </h3>
+                                            <p><strong>Price Per Day:</strong> ₹<%= vender.PricePerday %>
+                                            </p>
+                                            <p><strong>Price Per Month:</strong> ₹<%= vender.PricePerMonth %>
+                                            </p>
+                                            <p><strong>Location:</strong>
+                                                <%= vender.Location %>
+                                            </p>
+                                            <p><strong>Ratings:</strong>
+                                                <% for(let i=1; i<=vender.Rating; i++) { %>⭐<% } %>
+                                            </p>
+                                            <% if (showOptions) { %>
+                                                <form action="/user/favourite_list" method="post" class="fav-btn">
+                                                    <input type="hidden" name="venderId" value="<%= vender._id %>">
+                                                    <% if(opacity[vender._id]==10) { %>
+                                                        <button type="submit" style="background: none; border: none;">
+                                                            <img id="favImg2"
+                                                                src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
+                                                                alt="Favourite">
+                                                        </button>
+                                                        <% } else { %>
+                                                            <button type="submit"
+                                                                style="background: none; border: none;">
+                                                                <img id="favImg1"
+                                                                    src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
+                                                                    alt="Favourite">
+                                                            </button>
+                                                            <% } %>
+                                                </form>
+                                                <% } %>
+                                                    <% if (showOptions) { %>
+                                                        <a href="/user/booking/<%= vender._id %>">
+                                                            <button class="reserve">RESERVE</button>
+                                                        </a>
+                                                        <% } else if (!isLogedIn) { %>
+                                                            <a href="/logIn">
+                                                                <button class="reserve">RESERVE</button>
+                                                            </a>
+                                                            <% } %>
+                                        </div>
+                                    </a>
+                                </div>
+                                <% }) %>
+                        </div>
+                        <% } %>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div class="promo-image-container">
+            <img src="/3.jpeg" alt="Promotional" class="promo-image">
+        </div>
+
+        <h2>Why Choose Us?</h2>
+        <h3 class="special-offer" style="min-width: 90%;">
+            🥘 Tiffin Seva is a modern, multi-vendor food delivery and listing platform that brings together convenience, affordability, and mouth-watering taste—all in one place. With secure vendor access 🔐, seamless image & PDF uploads via Cloudinary 📸📄, and an intuitive interface, Tiffin Seva ensures a hassle-free experience for both vendors and food lovers. From homestyle meals to gourmet tiffins, we make quality food accessible with efficient charges and exceptional service 🌍✨.
+Powered by the robust MERN stack ⚙️ (MongoDB, Express.js, React.js, Node.js), Tiffin Seva isn’t just a platform—it’s a flavorful journey crafted with technology and passion, delivering real-world impact through clean code and delicious solutions 🚀💻.
+        </h3>
+
+        <h2>OFFERS!</h2>
+        <p style="font-size:17px; color:#ff4d4f; font-weight:600; margin-bottom:24px;">
+            Check out our latest offers and discounts for a limited time!
+        </p>
+        <div class="offers-section">
+            <div class="offer-card">
+                <div class="offer-badge">Missed Meal?</div>
+                <h3>If missed! Will cover in next Month</h3>
+                <p>The meal's cost you missed will be deducted in next month.</p>
+            </div>
+            <div class="offer-card">
+                <div class="offer-badge">Exchange Meal</div>
+                <h3>Exchange the Meal!</h3>
+                <p>Get a chance to exchange your boring meal with optional meals of your choice!</p>
+            </div>
+        </div>
+
+        <div class="special-offer">
+            <span class="emoji">🎉</span> <strong>Free meal on your birthday!</strong><br>
+            If you are a registered user and your birthday is today, you will receive a free meal voucher.<br>
+            <strong>Note:</strong> This offer is valid only for registered users.
+        </div>
+
+        <div class="special-offer">
+            <span class="emoji">🚚</span> <strong>Free Delivery!!</strong><br>
+            Enjoy free delivery on all your orders!<br>
+            <strong>Note:</strong> This offer is valid only for registered users.
+        </div>
+
+        </div>
+  <%-include('../partials/footer')%>
+</body>
+</html>

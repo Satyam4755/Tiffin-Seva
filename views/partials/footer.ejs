@@ -1,0 +1,51 @@
+
+<style>
+    /* public/styles/footer.css */
+footer {
+  background-color: #222;
+  color: #f1f1f1;
+  padding: 20px 0;
+  position: static;
+  width: 100%;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.footer-content {
+  max-width: auto;
+  padding: 0 20px;
+}
+
+.footer-links {
+  margin-top: 10px;
+}
+
+.footer-links a {
+  color: #ff385c;
+  margin: 0 12px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+</style>
+
+<!-- views/partials/footer.ejs -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>&copy; <%= new Date().getFullYear() %> Tiffin Seva all rights reserved.</p>
+    <div class="footer-links">
+        <a href="/"><i class="fas fa-home"></i> Home</a>
+        <span style="margin: 0 10px; color: #aaa;">|</span>
+        <span style="font-weight: 500;">Contact us:</span>
+        <a href="tel:9621965441" style="color: #4fd1c5; font-weight: 600; text-decoration: underline; margin-left: 6px;">
+            <i class="fas fa-phone-alt"></i> 9621965441
+        </a>
+    </div>
+    <!-- Add Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  </div>
+</footer>

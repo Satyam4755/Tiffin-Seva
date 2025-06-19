@@ -1,0 +1,242 @@
+<%-include('../partials/head')%>
+<%-include('../partials/background')%>
+<style>
+    body {
+        background: linear-gradient(to bottom, #fffde7, #fff9c4);
+        color: #333;
+    }
+    header, nav {
+        margin-bottom: 2rem;
+    }
+
+    h1, h2 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #ff5a5f;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+        margin-bottom: 1rem;
+    }
+
+    #addVenders {
+        background: linear-gradient(45deg, #ff5a5f, #ff7e7e);
+        position: absolute;
+        right: 5%;
+        top: 85px;
+        z-index: 2;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease-in-out;
+    }
+
+    #addVenders:hover {
+        background: linear-gradient(45deg, #e0484d, #ff5a5f);
+        transform: scale(1.1);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 1rem;
+        gap: 1.5rem;
+    }
+
+    .card {
+        background: linear-gradient(to bottom, #ffffff, #f7f7f7);
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 280px;
+        padding: 1rem;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .card img {
+        width: 100%;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        margin-top: 20px;
+        transition: transform 0.3s;
+    }
+
+    .card:hover img {
+        transform: scale(1.05);
+    }
+
+    .card h3 {
+        margin: 5px 0;
+        font-size: 1.3rem;
+        color: #ff5a5f;
+    }
+
+    .card p {
+        margin: 4px 0;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .card form,
+    .card a {
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    .card button {
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .card button:hover {
+        transform: scale(1.2);
+    }
+
+    .description-scroll {
+        height: 40px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .card p strong {
+        color: #333;
+    }
+
+    .card p .stars {
+        color: #ffcc00;
+        font-size: 1.1rem;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    .img1 {
+    position: absolute;
+    top: 15%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
+    transition: transform 0.4s ease;
+    z-index: -1;
+    }
+    .img2 {
+    position: absolute;
+    top: 40%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+}
+    .img3 {
+    position: absolute;
+    top: 95%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50% 100% 50% 100% / 40% 60% 40% 60%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+    }
+    .img4{
+    position: absolute;
+    bottom: -90%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50% 100% 50% 100% / 40% 60% 40% 60%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+    }
+    .mainDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<%-include('../partials/nav')%>
+
+<div class="mainDabba">
+<div class="top-bar">
+    <a href="/vender/addVenderShip">
+        <button id="addVenders">🌸 Add New vender</button>
+    </a>
+</div>
+
+
+
+
+
+<img src="/2.jpeg" class="img1" alt="image">
+
+<img src="/IMG_3134.jpg" class="img2" alt="image">
+
+<div class="cards-container">
+    <% venders.forEach(vender => { %>
+        <div class="card">
+            <div style="position: absolute; top: 10px; right: 10px;">
+                <a href="/vender/edit_vender/<%=vender._id%>?editing=true" title="Edit">
+                    <button type="button">✍️</button>
+                </a>
+                <form action="/vender/delete_vender/<%=vender._id%>" method="post" style="display:inline;">
+                    <input type="hidden" name="id" value="<%=vender._id%>">
+                    <button type="submit" title="Delete">🗑️</button>
+                </form>
+            </div> 
+            <img src="<%= vender.image %>" alt="vender Image">
+            <h3><%= vender.Name %></h3>
+            <p><strong>PricePerday:</strong> ₹<%= vender.PricePerday %></p>
+            <p><strong>PricePerMonth:</strong> ₹<%= vender.PricePerMonth %></p>
+            <p><strong>Location:</strong> <%= vender.Location %></p>
+            <p><strong>Ratings:</strong>
+                <span class="stars">
+                    <% for(let i = 1; i <= vender.Rating; i++) { %>⭐<% } %>
+                </span>
+            </p>
+            <p class="description-scroll"><strong>Description:</strong> <%= vender.Description %></p>
+        </div>
+    <% }) %>
+</div>
+</div>
+  <%-include('../partials/footer')%>
+</body>
+</html>

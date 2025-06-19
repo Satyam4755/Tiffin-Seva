@@ -1,0 +1,105 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+<%- include('../partials/nav') %>
+
+<style>
+  body {
+    background-color: #fefefe;
+    font-family: 'Segoe UI', sans-serif;
+    padding-bottom: 50px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #d81b60;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    margin: 40px 0 20px 0;
+    animation: bounce 7.5s infinite;
+    font-size: 28px;
+  }
+
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 20px;
+  }
+
+  .card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .content h3 {
+    font-size: 20px;
+    color: #2d3436;
+    margin-bottom: 10px;
+  }
+
+  .content p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+    margin: 5px 0;
+  }
+
+  .content strong {
+    color: #444;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 15px;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  .badaDabba{
+        margin-bottom: 26%;
+    }
+</style>
+<div class="badaDabba">
+<h2>Hello <%= user.firstName %>
+            <%= user.lastName %>! Today's Meal Message!! 🌸</h2>
+<hr>
+
+<div class="cards-container">
+  <% messages.forEach(message => { %>
+    <div class="card">
+      <div class="content">
+      
+        <p><strong>Message:</strong>
+          <%= message.message %>
+        </p>
+      
+        <!-- ✅ Show actual host/vendor name -->
+        <p><strong>From:</strong>
+          <%= message.hostVendorName %>
+        </p>
+      
+        <!-- ✅ Show listing info -->
+        <p><strong>Vendor:</strong>
+          <%= message.vendorId.Name %>
+        </p>
+      </div>
+      <hr>
+    </div>
+  <% }) %>
+</div>
+</div>
+  <%-include('../partials/footer')%>
+</body>
+</html>

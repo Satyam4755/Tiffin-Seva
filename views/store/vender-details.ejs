@@ -1,0 +1,538 @@
+<%- include('../partials/head') %>
+
+<%-include('../partials/background')%>
+<style>
+    .red{
+        color: red;
+    }
+    .green{
+        color: green;
+    }
+    .vender-details-container {
+        z-index: 3;
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 18px;
+        border-radius: 14px;
+        background: white;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
+
+    .vender-image {
+        width: 100%;
+        aspect-ratio: 9/6;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 20px;
+    }
+
+    .vender-content {
+        padding: 16px 8px;
+    }
+
+    .vender-content h2 {
+        font-size: 22px;
+        margin-bottom: 8px;
+        color: #2d3748;
+        text-align: center;
+    }
+
+    .vender-content p {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #444;
+    }
+
+    .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .rating-badge {
+        display: inline-block;
+        background: #ffeaa7;
+        color: #d35400;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .description-box {
+        margin-top: 16px;
+        background: #f4f4f4;
+        padding: 12px;
+        border-left: 4px solid #6c5ce7;
+        border-radius: 8px;
+        font-style: italic;
+        font-size: 14px;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btn {
+        background: #6c5ce7;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 18px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        background: #5942d0;
+    }
+
+    .fav-btn img {
+        width: 30px;
+        height: 30px;
+        transition: transform 0.3s ease;
+    }
+
+    .fav-btn img:hover {
+        transform: scale(1.2) rotate(10deg);
+        filter: brightness(1.2);
+    }
+
+    #favImg1 {
+        width: 30px;
+        height: 30px;
+        filter: grayscale(10)
+    }
+
+    #favImg2 {
+        width: 30px;
+        height: 30px;
+    }
+
+    #favImg1:hover {
+        filter: grayscale(0)
+    }
+
+    #favImg2:hover {
+        filter: grayscale(10)
+    }
+
+    .back-btn {
+        background-color: #ff4d6d;
+        margin: 25px auto 0;
+        display: block;
+        border-radius:8px;
+        max-width: 30%;
+        text-align: center;
+    }
+    .back-btn:hover {
+        background-color: #e63946;
+    }
+    .reviews-box-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: right 0.3s ease, background-color 0.3s ease;
+}
+
+
+.Rbtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 50%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.Rbtn img {
+    width: 60px;
+    height: 60px;
+    rotate: 20deg;
+    object-fit: contain;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+}
+
+.Rbtn img:hover {
+    transform: scale(1.1) rotate(-20deg);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+
+.review_list{
+    height: 35vh;
+    overflow: scroll;
+}
+    .reviews-panel {
+    position: absolute;
+    top: 10%;
+    right: 6%;
+    /* left: 68%; */
+    width: 300px;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+    animation: slideIn 0.3s ease;
+    }
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+#rating{
+    width: 50%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+    .hidden {
+    display: none;
+    }
+    /* for review form */
+    .add_btn {
+  background-color: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.add_btn:hover {
+  background-color: #5942d0;
+}
+    .review-form-popup {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f0f0ff;
+  border: 2px solid #6c5ce7;
+  border-radius: 10px;
+  animation: fadeIn 0.3s ease;
+}
+
+.review-form-popup textarea {
+  width: 90%;
+  height: 80px;
+  resize: none;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.submit_btn {
+  background-color: #6c5ce7;
+  width: 33%;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  /* font-weight: bold; */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit_btn:hover {
+  background-color: #5942d0;
+}
+
+
+    .img1 {
+    position: absolute;
+    top: 15%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
+    transition: transform 0.4s ease;
+    z-index: -1;
+    }
+    .img2 {
+    position: absolute;
+    top: 40%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+}
+@media (min-width:1500px) {
+    .reviews-panel{
+        left: 65%;
+    }
+    
+}
+
+    @media (max-width: 720px) {
+        .vender-details-container {
+            margin: 20px 10px;
+            padding: 14px;
+            left: 5%;
+            right: 5%;
+        }
+        .reviews-panel{
+            width: 60%;
+            left: 15%;
+            /* right: 20px; */
+            top: 8%;
+            .review_list{
+                font-size: 80%;
+            }
+        }
+        .review_list{
+            height: 20vh;
+        }
+
+        .action-buttons {
+            flex-direction: row;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        .vender-content h2 {
+            font-size: 20px;
+        }
+        .blured {
+            filter: blur(4px);
+            pointer-events: none;
+        }
+    }
+
+    .menu-link {
+        display: inline-flex;
+        align-items: center;
+        background: #fff0f6;
+        color: #d72660;
+        border: 1px solid #d72660;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-left: 8px;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(215, 38, 96, 0.07);
+    }
+
+    .menu-link:hover {
+        background: #d72660;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(215, 38, 96, 0.15);
+    }
+
+    .menu-icon {
+        margin-right: 6px;
+        font-size: 16px;
+    }
+    .mainDabba{
+        margin-bottom: 15%;
+    }
+</style>
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
+
+
+<div class="mainDabba">
+
+<img src="/IMG_3134.jpg" class="img1" alt="image">
+
+<img src="/IMG_3108.jpg" class="img2" alt="image">
+<div class="vender-details-container">
+    <div class="vender-image-wrapper">
+        <img class="vender-image" src="<%= vender.image %>" alt="vender Image">
+    </div>
+
+    <div class="vender-content">
+        <h2><%= vender.Name %></h2>
+        <p><span class="label">Location:</span> <%= vender.Location %></p>
+        <p><span class="label">PricePerday:</span> <%= vender.PricePerday %></p>
+        <p><span class="label">PricePerMonth:</span> <%= vender.PricePerMonth %></p>
+        <p><span class="label">Rating:</span>
+            <span class="rating-badge">
+                <% for (let i = 1; i <= vender.Rating; i++) { %>⭐<% } %>
+                (<%= vender.Rating %>/5)
+            </span>
+        </p> 
+        <p>
+            <span class="label">Total Customers Served:</span>
+            <strong class="<%= numberOfOrders > 0 ? 'green' : 'red' %>" style="font-size: 16px;">
+                <%= numberOfOrders %>
+            </strong>
+        </p>
+        <% if (vender.Menuimage) { %>
+            <a 
+            href="<%= vender.Menuimage.replace('/upload/', '/upload/fl_attachment/') %>" 
+            download="menu-image.png" 
+            class="menu-link"
+            title="Download Menu Image"
+            >
+            <span class="menu-icon">📥</span> Download Menu Image
+            </a>
+        <% } else { %>
+            <p style="color: #b2bec3; font-style: italic; margin: 8px 0 0 0;">No menu image available.</p>
+        <% } %>
+        <div class="description-box">
+            <%= vender.Description %>
+        </div>
+
+        <div class="action-buttons">
+            <% if (showOptions) { %>
+                <a href="/user/booking/<%= vender._id %>">
+                    <button class="btn">Reserve Now</button>
+                </a>
+                    <form action="/user/favourite_list" method="post" class="fav-btn">
+                        <input type="hidden" name="venderId" value="<%= vender._id %>">
+                        <% if(opacity[vender._id] == 10) { %>
+                            <button type="submit" style="background: none; border: none;cursor: pointer;">
+                                <img id="favImg2" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
+                            </button>
+                        <% } else { %>
+                            <button type="submit" style="background: none; border: none;cursor: pointer;">
+                                <img id="favImg1" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
+                            </button>
+                        <% } %>
+                    </form>
+                    <!-- Reviews ke liye -->
+<div class="reviews-box-trigger">
+    <button class="Rbtn" onclick="toggleReviews()">
+        <img src="/star.png" alt="img">
+    </button>
+</div>
+            <% } else if (!isLogedIn) { %>
+                <a href="/logIn">
+                    <button class="btn">Login to Reserve</button>
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Reviews ka dabba -->
+<div id="reviewsPanel" class="reviews-panel hidden">
+    <button class="done" style="background-color: #6c5ce7;border: none; color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer;" onclick="removePanel()">
+        Done
+    </button>
+  <h3 style="text-align:center; color:#6c5ce7;">Reviews</h3>
+  <div class="review_list">
+    <% if (reviews && reviews.length > 0) { %>
+      <% reviews.forEach(review => { %>
+        <div class="review-item" style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+          <p><strong><%= review.user.firstName || 'Anonymous' %> <%= review.user.lastName %>:</strong></p>
+          <p><%= review.comment %></p>
+        <p>
+            Rating:
+            <% for (let i = 0; i < review.rating; i++) { %>
+                ⭐
+            <% } %>
+            (<%= review.rating %>/5)
+        </p>
+        </div>
+      <% }); %>
+    <% } else { %>
+        <p style="text-align:center; color:#555;">No reviews yet!</p>
+    <% } %>
+  </div>
+
+  <!-- Add Yours button -->
+  <%
+  let userReview = null;
+  if (reviews && reviews.length > 0) {
+    userReview = reviews.find(review => review.user._id.toString() === user._id.toString());
+  }
+%>
+
+<% if (userReview) { %>
+  <form action="/user/delete-review/<%= vender._id %>" method="POST" style="text-align:center; margin-top: 10px;">
+    <input type="hidden" name="reviewId" value="<%= userReview._id %>">
+    <button type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your Review</button>
+  </form>
+<% } else { %>
+  <button class="add_btn" onclick="toggleReviewForm()">Add Yours!</button>
+<% } %>
+
+  <!-- Hidden review form popup -->
+  <div id="reviewFormPopup" class="review-form-popup hidden">
+    <form action="/user/vender-list/<%= vender._id %>" method="POST"> 
+      <textarea
+        id="reviewText"
+        name="Review"
+        placeholder="Write your review here..."
+        required
+      ></textarea>
+      <input id="rating" type="number" name="Rating" placeholder="⭐ Rating (1-5)" min="1" max="5" required>
+      <button type="submit" class="submit_btn">Submit</button>
+    </form>
+  </div>
+</div>
+<script>
+    function toggleReviews() {
+        const panel = document.getElementById('reviewsPanel');
+        const vender_detailsContainer = document.querySelector('.vender-details-container');
+        vender_detailsContainer.classList.add('blured')
+        panel.classList.toggle('hidden');
+    }
+    function toggleReviewForm() {
+    const popup = document.getElementById("reviewFormPopup");
+    popup.classList.toggle("hidden");
+  }
+    function removePanel() {
+    const panel = document.getElementById('reviewsPanel');
+    const vender_detailsContainer = document.querySelector('.vender-details-container');
+    
+    panel.classList.add('hidden');
+    vender_detailsContainer.classList.remove('blured'); // ✅ Remove blur
+}
+</script>
+
+<a href="/" style="
+        text-decoration: none ;">
+    <button class="btn back-btn">Go Back To vender</button>
+</a>
+</div>
+  <%-include('../partials/footer')%>
+</body>
+</html> 

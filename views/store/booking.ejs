@@ -1,0 +1,520 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+<style> 
+  .headings {
+    margin: 10px auto 20px auto;
+    text-align: center;
+    background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 40%;
+    max-height: 7%;
+  }
+
+  .headings h1 {
+    font-size: 2em;
+    color: #2c3e50;
+    margin: 0;
+  }
+
+  .headings h2 {
+    font-size: 1.2em;
+    color: #7f8c8d;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+
+  .mainDabba {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 30px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto 60px auto;
+    animation: fadeIn 1s ease;
+  }
+
+  .cards-container,
+  .booking-cards-container {
+    flex: 1 1 320px;
+    max-width: 420px;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+  }
+
+  .card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .card:hover img {
+    transform: scale(1.05);
+  }
+
+  .content {
+    padding: 15px;
+  }
+
+  .content h3 {
+    color: #ff4e74;
+    margin-bottom: 8px;
+    font-size: 1.3em;
+  }
+
+  .content p {
+    margin: 5px 0;
+    color: #555;
+    font-size: 0.95em;
+  }
+  .img1 {
+    position: absolute;
+    top: 15%;
+    right: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
+    transition: transform 0.4s ease;
+    z-index: -1;
+    }
+    .img2 {
+    position: absolute;
+    top: 40%;
+    left: 2.5%;
+    width: 25vw;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
+    transition: transform 0.3s ease;
+    z-index: -1;
+}
+
+  form {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 1s ease;
+  }
+
+  form h2 {
+    text-align: center;
+    color: #ff4e74;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+  }
+
+  label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 6px;
+    color: #333;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 14px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+    font-size: 0.95em;
+  }
+
+  input:focus, select:focus {
+    border-color: #ff4e74;
+    outline: none;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff4e74;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  button:hover {
+    background-color: #e53963;
+    transform: scale(1.05);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .mainDabba {
+      flex-direction: column;
+      padding: 15px;
+    }
+
+    .headings {
+      padding: 15px 20px;
+    }
+
+    .cards-container, .booking-cards-container {
+      max-width: 100%;
+    }
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Custom Radio Tiles */
+.radio-tile-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.radio-tile {
+  flex: 1 1 45%;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s ease;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+.radio-tile:hover {
+  border-color: #ff4e74;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.radio-tile input[type="radio"] {
+  display: none;
+}
+
+.radio-tile.selected {
+  border-color: #ff4e74;
+  background-color: #ffe6ec;
+  color: #d6336c;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.month-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.month-btn {
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #eee;
+  border: 2px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.month-btn:hover {
+  background-color: #ffe6ec;
+  border-color: #ff4e74;
+}
+
+.month-btn.selected {
+  background-color: #ffe6ec;
+  border-color: #ff4e74;
+  color: #d6336c;
+}
+.badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<%- include('../partials/nav') %>
+
+
+
+<div class="badaDabba">
+
+<img src="/IMG_3134.jpg" class="img1" alt="image">
+
+<img src="/IMG_3108.jpg" class="img2" alt="image">
+
+<div class="mainDabba">
+  <div class="cards-container">
+    <div class="card">
+      <a id="link" href="/user/vender-list/<%=vender._id %>" style="text-decoration: none; color: black;">
+        <img src="<%= vender.image %>" alt="vender Image">
+        <div class="content">
+          <h3><%= vender.Name %></h3>
+          <p><strong>PricePerday:</strong> ₹<%= vender.PricePerday %></p>
+          <p><strong>PricePerMonth:</strong> ₹<%= vender.PricePerMonth %></p>
+          <p><strong>Location:</strong> <%= vender.Location %></p>
+          <p><strong>Ratings:</strong>
+            <% for(let i = 1; i <= vender.Rating; i++) { %> ⭐ <% } %>
+          </p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="booking-cards-container">
+    <form action="/user/submit_booking/<%=vender._id%>" method="post">
+      <%-include('../partials/errorHandel')%>
+      <h2>Vender Booking</h2>
+
+      <input type="hidden" name="venderId" value="<%= vender._id %>">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" placeholder="Enter your phone number (10 digits)" pattern="[0-9]{10}" required>
+
+
+      <!-- address -->
+      <p id="addressWarning" style="color: red; display: none; font-size: 14px;">
+            ⚠️ Address must contain the vendor's location.
+      </p>
+       <label for="address">Address</label>
+       <input type="text" name="address" id="address" placeholder="Enter your address" required>
+       <!-- script for checking the address -->
+        <script>
+          const vendorLocation = "<%= vender.Location.toLowerCase() %>"; // or vender.location if it's lowercase already
+          const addressInput = document.getElementById('address');
+          const warning = document.getElementById('addressWarning');
+
+          addressInput.addEventListener('input', () => {
+            const userAddress = addressInput.value.toLowerCase();
+
+            if (!userAddress.includes(vendorLocation)) {
+              warning.style.display = 'block';
+            } else {
+              warning.style.display = 'none';
+            }
+          });
+
+          // Optional: Prevent form submission if the address is invalid
+          const form = document.querySelector('form');
+          form.addEventListener('submit', (e) => {
+            const userAddress = addressInput.value.toLowerCase();
+            if (!userAddress.includes(vendorLocation)) {
+              e.preventDefault();
+              warning.style.display = 'block';
+              alert("Please include the vendor's area in your address before submitting.");
+            }
+          });
+        </script>
+
+      <div class="radio-tile-group">
+        <label class="radio-tile" id="perDayTile">
+          <input type="radio" id="perday" name="subscription_model" value="Per Day" onclick="toggleTimeOptions()">
+          Per Day
+        </label>
+        <div id="timeOptions" style="display: none;">
+          <div class="radio-tile-group">
+            <label class="radio-tile" id="oneTimeTile">
+              <input type="radio" name="time_type" value="one" checked>
+              One Time
+            </label>
+            <label class="radio-tile" id="twoTimeTile">
+              <input type="radio" name="time_type" value="two">
+              Two Time
+            </label>
+          </div>
+        </div>
+        <label class="radio-tile" id="perMonthTile">
+          <input type="radio" id="permonth" name="subscription_model" value="Per Month" onclick="toggleTimeOptions()">
+          Per Month
+        </label>
+      </div>
+
+      <!-- Show this for Per Day -->
+<div id="dateInputs">
+  <label for="startingDate">Starting Date</label>
+  
+  <input type="date" id="startingDate" name="startingDate" min="<%= new Date().toISOString().split('T')[0] %>">
+
+  <label for="endingDate">Ending Date</label>
+  <input type="date" id="endingDate" name="endingDate">
+</div>
+
+<!-- Show this for Per Month -->
+<div id="monthGrid" style="display: none;">
+  <label>Select Number of Months</label>
+  <div class="month-buttons">
+    <% for (let i = 1; i <= 12; i++) { %>
+      <button type="button" class="month-btn" data-months="<%= i %>"><%= i %></button>
+    <% } %>
+  </div>
+</div>
+<input type="hidden" id="selectedMonths" name="selectedMonths">
+<p id="calculatedEndDate" style="color: green; font-weight: bold; display: none;"></p>
+
+      <label for="payment">Payment Method</label>
+      <select id="payment" name="payment" required>
+        <option value="">Select Payment Method</option>
+        <option value="credit_card">Credit Card</option>
+        <option value="debit_card">Debit Card</option>
+        <option value="paypal">PayPal</option>
+        <option value="cash">Cash</option>
+      </select>
+
+      <input type="hidden" id="perdayValue" name="perdayValue" value="<%=vender.PricePerday%>">
+      <input type="hidden" id="permonthValue" name="permonthValue" value="<%=vender.PricePerMonth%>">
+      <input type="hidden" name="totalAmount" id="totalAmountInput">
+
+      <h3 style="color: #d6336c; text-align: center;">Total Amount: ₹<span id="totalAmount">0</span></h3>
+
+      
+      <button class="submit" type="submit">Book Now</button>
+    </form>
+  </div>
+</div>
+</div>
+<script>
+  const totalElement = document.getElementById('totalAmount');
+  const subscriptionRadios = document.getElementsByName('subscription_model');
+  const startInput = document.getElementById('startingDate');
+  const endInput = document.getElementById('endingDate');
+  const totalAmount=document.getElementById('totalAmountInput')
+
+  function toggleTimeOptions() {
+  const isPerDaySelected = document.getElementById('perday').checked;
+  const isPerMonthSelected = document.getElementById('permonth').checked;
+
+  // Show/hide respective UI blocks
+  document.getElementById('timeOptions').style.display = isPerDaySelected ? 'block' : 'none';
+  document.getElementById('dateInputs').style.display = isPerDaySelected ? 'block' : 'none';
+  document.getElementById('monthGrid').style.display = isPerMonthSelected ? 'block' : 'none';
+
+  // Recalculate total on toggle
+  calculateTotal();
+}
+
+  function calculateTotal() {
+  const perDay = Number(document.getElementById('perdayValue').value);
+  const perMonth = Number(document.getElementById('permonthValue').value);
+  const selectedModel = Array.from(subscriptionRadios).find(radio => radio.checked)?.value;
+  const startDate = new Date(startInput.value);
+  const endDate = new Date(endInput.value);
+  const selectedMonths = Number(document.getElementById('selectedMonths').value);
+  let total = 0;
+
+  if (selectedModel === 'Per Day') {
+    if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) {
+      totalElement.textContent = 0;
+      totalAmount.value = 0;
+      return;
+    }
+
+    const diffTime = endDate.getTime() - startDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))+1;
+    const timeType = document.querySelector('input[name="time_type"]:checked')?.value;
+    const multiplier = timeType === 'two' ? 2 : 1;
+    total = diffDays * perDay * multiplier;
+
+  } else if (selectedModel === 'Per Month') {
+    if (!selectedMonths) {
+      totalElement.textContent = 0;
+      totalAmount.value = 0;
+      return;
+    }
+    total = selectedMonths * perMonth;
+  }
+
+  totalElement.textContent = total;
+  totalAmount.value = total;
+}
+document.querySelectorAll('.month-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Remove selection from all
+    document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('selected'));
+
+    // Add selection to clicked
+    btn.classList.add('selected');
+
+    const selected = parseInt(btn.getAttribute('data-months'));
+    document.getElementById('selectedMonths').value = selected;
+
+    // ✅ Calculate ending date as current date + 30*selected days
+    const startDate = new Date();
+    const totalDays = selected * 30;
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + totalDays);
+
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const endString = endDate.toLocaleDateString(undefined, options);
+    const startString = startDate.toLocaleDateString(undefined, options);
+
+    const output = `📅 Subscription starts on <b>${startString}</b> and ends on <b>${endString}</b> (Total ${totalDays} days)`;
+    const display = document.getElementById('calculatedEndDate');
+    display.innerHTML = output;
+    display.style.display = 'block';
+
+    calculateTotal();
+  });
+});
+
+  function updateTileSelection() {
+    // Subscription model
+    document.getElementById('perDayTile').classList.toggle('selected', document.getElementById('perday').checked);
+    document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth').checked);
+
+    // Time type
+    const timeType = document.querySelector('input[name="time_type"]:checked')?.value;
+    document.getElementById('oneTimeTile').classList.toggle('selected', timeType === 'one');
+    document.getElementById('twoTimeTile').classList.toggle('selected', timeType === 'two');
+  }
+
+  // Event Listeners
+  document.querySelectorAll('input[name="subscription_model"]').forEach(input => {
+    input.addEventListener('change', () => {
+      toggleTimeOptions();
+      updateTileSelection();
+    });
+  });
+
+  document.querySelectorAll('input[name="time_type"]').forEach(input => {
+    input.addEventListener('change', () => {
+      updateTileSelection();
+      calculateTotal();
+    });
+  });
+
+  startInput.addEventListener('change', calculateTotal);
+  endInput.addEventListener('change', calculateTotal);
+</script>
+
+  <%-include('../partials/footer')%>
+</body>
+</html>

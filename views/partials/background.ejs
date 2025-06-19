@@ -1,0 +1,31 @@
+<style>
+    
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(115deg, #fad0c4, #fcb69f);
+    background-size: cover;
+    animation: gradientShift 10s ease infinite, colorChange 15s infinite alternate;
+    margin: 0;
+    padding: 0;
+    height: auto;
+    overflow: scroll;
+}
+
+
+/* Make main content take up remaining space */
+.container {
+  flex: 1;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+</style>

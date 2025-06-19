@@ -1,0 +1,152 @@
+<%-include('../partials/head')%>
+<style>
+    .form-container {
+        background: linear-gradient(135deg, #ffe6f7, #e0f7fa);
+        padding: 2.5rem;
+        border-radius: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 350px;
+        margin: 30px auto;
+        border: 1px solid #f8d7ff;
+        position: relative;
+    }
+
+    .form-container h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #ff69b4;
+        font-family:  'Georgia', serif;
+        font-size: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-container .input-group {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .form-container .input-group input {
+        width: 100%;
+        padding: 14px 12px;
+        border: 2px solid #ffb6c1;
+        border-radius: 1rem;
+        outline: none;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        background: #fff0f5;
+    }
+
+    .form-container .input-group input:focus {
+        border-color: #ff69b4;
+        box-shadow: 0 0 10px #ff69b4;
+        background: #ffffff;
+    }
+
+    .form-container .input-group label {
+        position: absolute;
+        top: 50%;
+        left: 14px;
+        transform: translateY(-50%);
+        color: #ffb6c1;
+        font-size: 1rem;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        background: #fff0f5;
+        padding: 0 6px;
+        border-radius: 0.25rem;
+    }
+
+    .form-container .input-group input:focus + label,
+    .form-container .input-group input:valid + label {
+        top: -12px;
+        font-size: 0.8rem;
+        color: #ff69b4;
+        background: #ffffff;
+    }
+
+    .form-container button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #ff69b4, #ff1493);
+        color: #fff;
+        border: none;
+        border-radius: 1rem;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+        font-family:  'Georgia', serif;
+        text-transform: uppercase;
+    }
+
+    .form-container button:hover {
+        background: linear-gradient(135deg, #ff1493, #ff69b4);
+        transform: scale(1.05);
+    }
+
+    #signup {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    #signup a {
+        color: #ff69b4;
+        text-decoration: none;
+        font-size: 1rem;
+        font-family:  'Georgia', serif;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        display: inline-block;
+    }
+
+    #signup a:hover {
+        background-color: #ff69b4;
+        color: #fff;
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            width: 70%;
+            margin: 5.5%;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-container h2 {
+            font-size: 1.5rem;
+        }
+
+        .form-container button {
+            font-size: 1rem;
+        }
+
+        #signup a {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+<body>
+    <div class="form-container">
+            <h2>!Delete Account⁉️</h2>
+            <form action="/delete_user" method="POST">
+            <%-include('../partials/errorHandel')%>
+                <div class="input-group">
+                    <input type="email" id="email" name="email" required value="<%= user.email ? user.email : '' %>">
+                    <label for="email">Email</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" required />
+                    <label for="password">Password</label>
+                </div>
+                <button type="submit">Delete</button>
+            </form>
+    </div>
+  <%-include('../partials/footer')%>
+</body>
+</html>
