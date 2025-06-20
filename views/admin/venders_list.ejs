@@ -229,7 +229,8 @@
             <p><strong>Location:</strong> <%= vender.Location %></p>
             <p><strong>Ratings:</strong>
                 <span class="stars">
-                    <% for(let i = 1; i <= vender.Rating; i++) { %>⭐<% } %>
+                    <% for (let i = 1; i <= Math.floor(vender.averageRating); i++) { %>⭐<% } %>
+  (<%= vender.averageRating %>/5)
                 </span>
             </p>
             <p class="description-scroll"><strong>Description:</strong> <%= vender.Description %></p>
