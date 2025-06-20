@@ -82,7 +82,7 @@ exports.homePage = async (req, res, next) => {
   res.render('./store/vender', {
     ifLucknow: ifLucknow,
     venders: registervenders,
-    title: "Tiffin Seva",
+    title: "vender Page",
     opacity: opacity,
     currentPage: 'home',
     isLogedIn: req.isLogedIn,
@@ -97,8 +97,10 @@ exports.homePage = async (req, res, next) => {
 // vender DETAILS
 exports.venderDetails = async (req, res, next) => {
     const venderId = req.params.venderId;
-    const vender = await venders.findById(venderId)
-  .populate('reviews.user'); 
+    const vender = await venders.findById(venderId).populate('vender')
+    const venderUser = vender?.vender
+    
+    const numberOfOrders = venderUser? venderUser.orders : 0;
     let showOptions = false;
 
     if (!vender) {
@@ -106,13 +108,13 @@ exports.venderDetails = async (req, res, next) => {
     }
 
     let opacity = {};
-    let numberOfOrders = 0;
+    // let numberOfOrders = 0;
 
     if (req.isLogedIn && req.session.user) {
         const user = await User.findById(req.session.user._id);
 
         if (user.userType === 'guest') {
-            showOptions = true;
+            showOptions = true; 
 
             const isFavourite = user.favourites.map(id => id.toString()).includes(vender._id.toString());
             opacity[vender._id.toString()] = isFavourite ? 10 : 0;
@@ -123,13 +125,6 @@ exports.venderDetails = async (req, res, next) => {
         opacity[vender._id.toString()] = 0;
     }
 
-    // ✅ Count number of orders for this specific vender
-    numberOfOrders = await Order.aggregate([
-        { $match: { vender: vender._id } },
-        { $count: "orderCount" }
-    ]);
-
-    numberOfOrders = numberOfOrders.length > 0 ? numberOfOrders[0].orderCount : 0;
 
     res.render('./store/vender-details', {
         vender: vender,
@@ -234,6 +229,7 @@ exports.Postbooking = [
       const guestUser = await User.findById(req.session.user._id);
       const Selectedvender = await venders.findById(venderId).populate('vender');
       const venderh = Selectedvender?.vender;
+      let numberOfOrders = venderh?.orders || 0;
 
       if (!venderh) {
         req.flash('error', 'Vendor not found');
@@ -285,6 +281,8 @@ exports.Postbooking = [
       });
 
       await newOrder.save();
+      numberOfOrders += 1;
+      await User.findByIdAndUpdate(venderh._id, { orders: numberOfOrders });
 
       // ✅ Add to user's booked vendors if not already added
       if (!guestUser.booked.includes(venderId)) {
@@ -346,7 +344,8 @@ exports.booked = async (req, res, next) => {
       title: "Booked Vendor List",
       currentPage: 'reserve',
       isLogedIn: req.isLogedIn,
-      user: req.session.user
+      user: req.session.user,
+      messages: req.flash(),
     });
 
   } catch (err) {
