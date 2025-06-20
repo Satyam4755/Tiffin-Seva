@@ -38,7 +38,6 @@ const userSchema=mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'vender'
     }],
-    orders:Number,
 })
 
 module.exports=mongoose.model('User',userSchema,'user')//---->model name, schema name, collection name;
