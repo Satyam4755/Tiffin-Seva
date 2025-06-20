@@ -8,8 +8,8 @@ const Message = require('../models/message');
 const Order = require('../models/orders');
 
 // for twillio
-const twilio = require('twilio');
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+// const twilio = require('twilio');
+// const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 // add vender
 exports.addVender = (req, res, next) => {
     res.render('./admin/editvenders', { 
@@ -59,7 +59,7 @@ exports.vendersList = async (req, res, next) => {
 };
 
 exports.postaddVender = async (req, res) => {
-    const { id, Name, PricePerday, PricePerMonth, Location, Description, Rating } = req.body;
+    const { id, Name, PricePerday, PricePerMonth, Location, Description } = req.body;
     const files = req.files;
 
     if (!files || !files.image || !files.Menuimage) {
@@ -89,7 +89,6 @@ exports.postaddVender = async (req, res) => {
             PricePerMonth,
             Location,
             Description,
-            Rating,
             vender: req.session.user._id
         });
         console.log("✅ Menu Image Cloudinary URL:", menuImageResult.secure_url);
@@ -108,7 +107,7 @@ exports.postaddVender = async (req, res) => {
 // Post edit vender
 
 exports.Posteditvender = async (req, res) => {
-    const { Name, PricePerday,PricePerMonth, Location, Description, Rating, id: venderId } = req.body;
+    const { Name, PricePerday,PricePerMonth, Location, Description, id: venderId } = req.body;
     const files = req.files;
 
     try {
@@ -161,7 +160,6 @@ exports.Posteditvender = async (req, res) => {
         vender.PricePerMonth = PricePerMonth;
         vender.Location = Location;
         vender.Description = Description;
-        vender.Rating = Rating;
 
         await vender.save();
         // ✅ Redirect to /venders_list after successful addition
