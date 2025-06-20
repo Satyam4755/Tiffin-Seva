@@ -181,7 +181,7 @@
                   <form action="/vender/customerChoiceBulk/<%= listing.vendor?._id %>" method="POST">
                     <input type="text" name="regular" placeholder="Enter regular meal" required>
                     <input type="text" name="optional" placeholder="Enter optional meal" required>
-                    <button type="submit">Send to All</button>
+                    <button onclick="loading()" type="submit">Send to All</button>
                   </form>
                 </div>
         <% } %>
