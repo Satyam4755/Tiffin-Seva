@@ -145,6 +145,12 @@
         margin-bottom: 15%;
     }
 </style>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
 <%-include('../partials/nav')%>
 <h2 style=" color: #d81b60; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); margin-bottom: 30px; animation: bounce 7.5s infinite;">
     🌸 Your Booked Vender's Meal 🌸
