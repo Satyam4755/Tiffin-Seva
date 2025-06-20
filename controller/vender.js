@@ -47,15 +47,37 @@ exports.editvender = (req, res, next) => {
 
 // admin vender list
 exports.vendersList = async (req, res, next) => {
-    const venderId = req.session.user._id;
+  const venderId = req.session.user._id;
+
+  try {
     const vendervenders = await venders.find({ vender: venderId }).populate('vender');
+
+    // ✅ Calculate average rating for each vendor
+    for (const vender of vendervenders) {
+      if (vender.reviews && vender.reviews.length > 0) {
+        const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+        if (validRatings.length > 0) {
+          const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+          vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+        } else {
+          vender.averageRating = 0;
+        }
+      } else {
+        vender.averageRating = 0;
+      }
+    }
+
     res.render('./admin/venders_list', {
-        venders: vendervenders,
-        title: "Admin venderList Page",
-        currentPage: 'adminvender',
-        isLogedIn: req.isLogedIn,
-        user: req.session.user
+      venders: vendervenders,
+      title: "Admin venderList Page",
+      currentPage: 'adminvender',
+      isLogedIn: req.isLogedIn,
+      user: req.session.user
     });
+  } catch (err) {
+    console.error("Error loading vendor list:", err);
+    res.redirect('/dashboard');
+  }
 };
 
 exports.postaddVender = async (req, res) => {
