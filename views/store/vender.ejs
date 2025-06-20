@@ -538,7 +538,8 @@
                                                 <%= vender.Location %>
                                             </p>
                                             <p><strong>Ratings:</strong>
-                                                <% for(let i=1; i<=vender.Rating; i++) { %>⭐<% } %>
+                                                <% for (let i=1; i <=Math.round(vender.averageRating); i++) { %>⭐<% } %>
+                                                        (<%= vender.averageRating %>/5)
                                             </p>
                                             <% if (showOptions) { %>
                                                 <form action="/user/favourite_list" method="post" class="fav-btn">
