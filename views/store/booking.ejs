@@ -368,12 +368,20 @@
       <!-- Show this for Per Day -->
 <div id="dateInputs">
   <label for="startingDate">Starting Date</label>
-  
   <input type="date" id="startingDate" name="startingDate" min="<%= new Date().toISOString().split('T')[0] %>">
 
   <label for="endingDate">Ending Date</label>
   <input type="date" id="endingDate" name="endingDate">
 </div>
+
+<script>
+  const startingDateInput = document.getElementById('startingDate');
+  const endingDateInput = document.getElementById('endingDate');
+
+  startingDateInput.addEventListener('change', function () {
+    endingDateInput.min = this.value;
+  });
+</script>
 
 <!-- Show this for Per Month -->
 <div id="monthGrid" style="display: none;">
