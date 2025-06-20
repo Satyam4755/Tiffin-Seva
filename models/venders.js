@@ -29,10 +29,6 @@ const venderSchema = mongoose.Schema({
     required: true
   },
   Description: String,
-  Rating: {
-    type: Number,
-    required: true
-  },
   rules: String,
 
   vender: {
