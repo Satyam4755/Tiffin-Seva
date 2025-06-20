@@ -544,13 +544,13 @@
                                                 <form action="/user/favourite_list" method="post" class="fav-btn">
                                                     <input type="hidden" name="venderId" value="<%= vender._id %>">
                                                     <% if(opacity[vender._id]==10) { %>
-                                                        <button type="submit" style="background: none; border: none;">
+                                                        <button onclick="loading()" type="submit" style="background: none; border: none;">
                                                             <img id="favImg2"
                                                                 src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
                                                                 alt="Favourite">
                                                         </button>
                                                         <% } else { %>
-                                                            <button type="submit"
+                                                            <button onclick="loading()" type="submit"
                                                                 style="background: none; border: none;">
                                                                 <img id="favImg1"
                                                                     src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
