@@ -425,11 +425,11 @@
                     <form action="/user/favourite_list" method="post" class="fav-btn">
                         <input type="hidden" name="venderId" value="<%= vender._id %>">
                         <% if(opacity[vender._id] == 10) { %>
-                            <button type="submit" style="background: none; border: none;cursor: pointer;">
+                            <button onclick="loading()" type="submit" style="background: none; border: none;cursor: pointer;">
                                 <img id="favImg2" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
                             </button>
                         <% } else { %>
-                            <button type="submit" style="background: none; border: none;cursor: pointer;">
+                            <button onclick="loading()" type="submit" style="background: none; border: none;cursor: pointer;">
                                 <img id="favImg1" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
                             </button>
                         <% } %>
@@ -488,7 +488,7 @@
 <% if (userReview) { %>
   <form action="/user/delete-review/<%= vender._id %>" method="POST" style="text-align:center; margin-top: 10px;">
     <input type="hidden" name="reviewId" value="<%= userReview._id %>">
-    <button type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your Review</button>
+    <button onclick="loading()" type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your Review</button>
   </form>
 <% } else { %>
   <button class="add_btn" onclick="toggleReviewForm()">Add Yours!</button>
@@ -504,7 +504,7 @@
         required
       ></textarea>
       <input id="rating" type="number" name="Rating" placeholder="⭐ Rating (1-5)" min="1" max="5" required>
-      <button type="submit" class="submit_btn">Submit</button>
+      <button type="submit" class="submit_btn" onclick="loading()">Submit</button>
     </form>
   </div>
 </div>
