@@ -202,7 +202,7 @@
                     </a>
                     <form action="/user/unfavourite/<%=vender._id%>" method="post">
                         <input type="hidden" name="id" value="<%=vender._id%>">
-                        <button style="background: none; border: none; cursor: pointer;">
+                        <button onclick="loading()" style="background: none; border: none; cursor: pointer;">
                             <img id="favImg" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
                         </button>
                     </form>
