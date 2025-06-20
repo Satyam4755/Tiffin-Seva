@@ -391,10 +391,10 @@
         <p><span class="label">PricePerMonth:</span> <%= vender.PricePerMonth %></p>
         <p><span class="label">Rating:</span>
             <span class="rating-badge">
-                <% for (let i = 1; i <= vender.Rating; i++) { %>⭐<% } %>
-                (<%= vender.Rating %>/5)
+                <% for (let i=1; i <=Math.round(averageRating); i++) { %>⭐<% } %>
+                        (<%= averageRating %>/5)
             </span>
-        </p> 
+        </p>
         <p>
             <span class="label">Total Customers Served:</span>
             <strong class="<%= numberOfOrders > 0 ? 'green' : 'red' %>" style="font-size: 16px;">
@@ -462,7 +462,7 @@
       <% reviews.forEach(review => { %>
         <div class="review-item" style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
           <p><strong><%= review.user.firstName || 'Anonymous' %> <%= review.user.lastName %>:</strong></p>
-          <p><%= review.comment %></p>
+          <p><%= review.comment %></p> 
         <p>
             Rating:
             <% for (let i = 0; i < review.rating; i++) { %>
