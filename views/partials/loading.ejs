@@ -109,6 +109,23 @@
   const form = document.querySelector('form');
   const loadingOverlay = document.getElementById('loadingOverlay');
 
+  function loading(){
+    // Show loading overlay
+    loadingOverlay.style = `
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    `;
+
+    // Disable scrolling and interaction
+    document.body.style.overflow = 'hidden';
+    document.body.style.pointerEvents = 'none';
+  }
+
   form.addEventListener('submit', () => {
     // Show loading overlay
     loadingOverlay.style = `
