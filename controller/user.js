@@ -149,7 +149,8 @@ exports.favouriteList = async (req, res, next) => {
         title: "favourite list",
         currentPage: 'favourite',
         isLogedIn: req.isLogedIn,
-        user: req.session.user
+        user: req.session.user,
+        messages: req.flash(),
     });
 };
 
@@ -179,6 +180,7 @@ exports.postUnfavourite = async (req, res, next) => {
 
     user.favourites.pull(venderId);
     await user.save();
+    req.flash('success', 'Vendor removed from favourites successfully!');
     res.redirect('/user/favourite_list');
 };
 
