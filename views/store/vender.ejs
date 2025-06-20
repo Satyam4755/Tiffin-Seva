@@ -67,9 +67,10 @@
     right: 60px;
     background: white;
     border: 1px solid #ccc;
-    border-radius: 10px;
+    border-radius: 15px;
     margin-top: 6px;
     max-height: 180px;
+    max-width: 66%;
     overflow-y: auto;
     z-index: 99;
     display: none;
@@ -481,12 +482,11 @@
 <% } %>
 <%if(showOptions) {%>
     <form action="/" class="search-bar-form" method="get" style="position: relative;">
-        <input type="text" name="location" placeholder="Search for location" id="search-bar" autocomplete="off"
-            value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" onfocus="showDropdown()"
-            oninput="filterDropdown(this.value)" />
+        <input type="text" name="location" placeholder="Search for area in LUCKNOW" id="search-bar" autocomplete="off"
+            value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" oninput="filterDropdown(this.value)" />
 
         <div id="location-dropdown"
-            style="position: absolute; top: 40px; left: 0; right: 0; z-index: 10; background: white; border: 1px solid #ccc; border-radius: 4px; display: none;">
+            style="position: absolute; top: 40px; left: 25px; right: 0; z-index: 10; background: white; border: 1px solid #ccc;display: none;">
             <% availableLocations.forEach(loc=> { %>
                 <div class="dropdown-item" onclick="selectLocation('<%= loc %>')">
                     <%= loc %>
