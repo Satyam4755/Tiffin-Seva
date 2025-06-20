@@ -61,118 +61,143 @@ exports.PostLogout = (req, res, next) => {
 }
 // we can make middleware in array format also....
 exports.postSignUpPage = [
-    check('firstName')
-        .notEmpty().withMessage("First name should not be empty")
-        .trim().isLength({ min: 2 }).withMessage("Name should be greater than 1 character")
-        .matches(/^[a-zA-Z]+$/).withMessage("Should be correct name"),
+  // ✅ Validations
+  check('firstName')
+    .notEmpty().withMessage("First name should not be empty")
+    .trim().isLength({ min: 2 }).withMessage("Name should be greater than 1 character")
+    .matches(/^[a-zA-Z]+$/).withMessage("Should be correct name"),
 
-    check('lastName')
-        .matches(/^[a-zA-Z]*$/).withMessage("Should be correct name"),
+  check('lastName')
+    .matches(/^[a-zA-Z]*$/).withMessage("Should be correct name"),
 
-    check('dob')
-        .notEmpty().withMessage("Date of birth is required")
-        .isISO8601().toDate().withMessage("Invalid date format")
-        .custom((dob) => {
-            const minAge = 13;
-            const today = new Date();
-            const birthDate = new Date(dob);
-            const age = today.getFullYear() - birthDate.getFullYear();
-            if (age < minAge || birthDate > today) {
-                throw new Error(`You must be at least ${minAge} years old`);
-            }
-            return true;
-        }),
-    check('email')
-        .isEmail().withMessage("Email should be in email format")
-        .normalizeEmail(),
+  check('dob')
+    .notEmpty().withMessage("Date of birth is required")
+    .isISO8601().toDate().withMessage("Invalid date format")
+    .custom((dob) => {
+      const minAge = 13;
+      const today = new Date();
+      const birthDate = new Date(dob);
+      const age = today.getFullYear() - birthDate.getFullYear();
+      if (age < minAge || birthDate > today) {
+        throw new Error(`You must be at least ${minAge} years old`);
+      }
+      return true;
+    }),
 
-    check('password')
-        .isLength({ min: 6 }).withMessage("The password must be at least 6 characters")
-        .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase character")
-        .matches(/[0-9]/).withMessage("Password must contain at least one number")
-        .trim(),
+  check('email')
+    .isEmail().withMessage("Email should be in email format")
+    .normalizeEmail(),
 
-    check('confirmPassword')
-        .trim()
-        .custom((value, { req }) => {
-            if (value !== req.body.password) {
-                throw new Error("Passwords do not match");
-            }
-            return true;
-        }),
+  check('password')
+    .isLength({ min: 6 }).withMessage("The password must be at least 6 characters")
+    .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase character")
+    .matches(/[0-9]/).withMessage("Password must contain at least one number")
+    .trim(),
 
-    check('userType')
-        .isIn(['guest', 'vender']).withMessage("Please select a valid user type"),
+  check('confirmPassword')
+    .trim()
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords do not match");
+      }
+      return true;
+    }),
 
-    check('terms')
-        .custom(value => {
-            if (value !== 'on') {
-                throw new Error("Please accept the terms and conditions");
-            }
-            return true;
-        }),
+  check('userType')
+    .isIn(['guest', 'vender']).withMessage("Please select a valid user type"),
 
-    async (req, res) => {
-        const { firstName, lastName, dob, email, password, userType } = req.body;
-        const editing = req.query.editing === 'true';
-        const errors = validationResult(req);
+  check('terms')
+    .custom(value => {
+      if (value !== 'on') {
+        throw new Error("Please accept the terms and conditions");
+      }
+      return true;
+    }),
 
-        if (!errors.isEmpty()) {
-            return res.status(422).render('store/signup', {
-                title: "Sign-Up",
-                isLogedIn: false,
-                errorMessage: errors.array().map(err => err.msg),
-                oldInput: { firstName, lastName, email, password, userType },
-                editing,
-                user: {}
-            });
-        }
+  // ✅ Handler
+  async (req, res) => {
+    const { firstName, lastName, dob, email, password, userType } = req.body;
+    const dobString = new Date(dob).toISOString().split('T')[0];
+    const editing = req.query.editing === 'true';
+    const errors = validationResult(req);
 
-        try {
-            const files = req.files;
-            const profilePictureBuffer = files.profilePicture[0].buffer;
-
-            const profilePictureResult = await fileUploadInCloudinary(profilePictureBuffer);
-
-            if (!profilePictureResult?.secure_url) {
-                throw new Error("Cloudinary upload failed");
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 8);
-
-            const newUser = new User({
-                profilePicture: profilePictureResult.secure_url,
-                profilePicturePublicId: profilePictureResult.public_id,
-                firstName,
-                lastName,
-                dob, // ✅ Include dob here
-                email,
-                password: hashedPassword,
-                userType,
-            });
-
-            const user = await newUser.save();
-
-            // ✅ Auto-login after signup
-            req.session.isLogedIn = true;
-            req.session.user = user;
-            await req.session.save();
-
-            res.redirect('/');
-        } catch (err) {
-            console.log("Signup Error:", err.message);
-            return res.status(422).render('store/signup', {
-                title: "Sign-Up",
-                isLogedIn: false,
-                errorMessage: [err.message],
-                oldInput: { firstName, lastName, dob, email, password, userType },
-                editing,
-                user: {}
-            });
-        }
+    if (!errors.isEmpty()) {
+      return res.status(422).render('store/signup', {
+        title: "Sign-Up",
+        isLogedIn: false,
+        errorMessage: errors.array().map(err => err.msg),
+        oldInput: {
+          firstName,
+          lastName,
+          dob: dobString,
+          email,
+          password,
+          userType
+        },
+        editing,
+        user: {}
+      });
     }
+
+    try {
+      const files = req.files;
+      let profilePictureUrl = '';
+      let profilePicturePublicId = '';
+
+      // ✅ Upload only if user provided profile image
+      if (files?.profilePicture && files.profilePicture.length > 0) {
+        const profilePictureBuffer = files.profilePicture[0].buffer;
+
+        const profilePictureResult = await fileUploadInCloudinary(profilePictureBuffer);
+
+        if (!profilePictureResult?.secure_url) {
+          throw new Error("Cloudinary upload failed");
+        }
+
+        profilePictureUrl = profilePictureResult.secure_url;
+        profilePicturePublicId = profilePictureResult.public_id;
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 8);
+
+      const newUser = new User({
+        profilePicture: profilePictureUrl,
+        profilePicturePublicId: profilePicturePublicId,
+        firstName,
+        lastName,
+        dob: dobString,
+        email,
+        password: hashedPassword,
+        userType,
+      });
+
+      const user = await newUser.save();
+
+      req.session.isLogedIn = true;
+      req.session.user = user;
+      await req.session.save();
+
+      res.redirect('/');
+    } catch (err) {
+      console.log("Signup Error:", err.message);
+      return res.status(422).render('store/signup', {
+        title: "Sign-Up",
+        isLogedIn: false,
+        errorMessage: [err.message],
+        oldInput: {
+          firstName,
+          lastName,
+          dob: dobString,
+          email,
+          password,
+          userType
+        },
+        editing,
+        user: {}
+      });
+    }
+  }
 ];
-// ************************isme dikkat hai bhaiiii
 
 
 
@@ -249,9 +274,24 @@ exports.postEditPage = async (req, res) => {
 
 exports.getSignUpPage = (req, res, next) => {
     const editing = req.query.editing === 'true';
-    const { firstName, lastName, email, password, userType } = req.body;
-    res.render('./store/signup', { title: "Sign-UP Page", isLogedIn: req.isLogedIn, oldInput: { firstName, lastName, email, password, userType }, editing: editing })
-}
+    const { firstName, lastName, dob, email, password, userType } = req.body;
+
+    const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
+
+    res.render('./store/signup', {
+        title: "Sign-UP Page",
+        isLogedIn: req.isLogedIn,
+        oldInput: {
+            firstName,
+            lastName,
+            dob: dobString, // ✅ clean and correct
+            email,
+            password,
+            userType
+        },
+        editing
+    });
+};
 
 exports.deleteUserPage = async (req, res) => {
     const userId = req.params.id;
