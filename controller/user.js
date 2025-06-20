@@ -7,87 +7,93 @@ const Message = require('../models/message');
 const Order = require('../models/orders');
 // home PAGE
 exports.homePage = async (req, res, next) => {
-    let opacity = {};
-    const locationQuery = req.query.location || '';
-    let registervenders = [];
-    let user = null;
-    let showOptions = false;
-    let ifLucknow=false;
-    let birthdayMessage = null;
+  let opacity = {};
+  const locationQuery = req.query.location || '';
+  let registervenders = [];
+  let user = null;
+  let showOptions = false;
+  let ifLucknow = false;
+  let birthdayMessage = null;
 
-    if (req.isLogedIn && req.session.user) {
-        user = await User.findById(req.session.user._id);
+  if (req.isLogedIn && req.session.user) {
+    user = await User.findById(req.session.user._id);
 
-        // for wishing birthday
+    // 🎂 Birthday wish logic
+    if (user && user.dob) {
+      const today = new Date();
+      const dob = new Date(user.dob);
+      const isBirthday = today.getDate() === dob.getDate() && today.getMonth() === dob.getMonth();
 
-        if (user && user.dob) {
-          const today = new Date();
-          const dob = new Date(user.dob);
+      if (isBirthday && !req.session.birthdayWished) {
+        birthdayMessage = `🎉 Happy Birthday, ${user.firstName}! 🎂`;
+        req.session.birthdayWished = true;
+      }
 
-          const isBirthday =
-            today.getDate() === dob.getDate() &&
-            today.getMonth() === dob.getMonth();
-
-          // Send once: Check session flag
-          if (isBirthday && !req.session.birthdayWished) {
-            birthdayMessage = `🎉 Happy Birthday, ${user.firstName}! 🎂`;
-            req.session.birthdayWished = true; // Mark as wished
-          }
-
-          // Reset the flag the next day
-          if (
-            (!isBirthday && req.session.birthdayWished) ||
-            (dob.getDate() !== today.getDate() || dob.getMonth() !== today.getMonth())
-          ) {
-            req.session.birthdayWished = false;
-          }
-        }
-
-        if (user.userType === 'guest') {
-            showOptions = true;
-
-            // 👇 Only guests can filter by location
-          if (locationQuery.trim().toLowerCase() === 'lucknow') {
-            ifLucknow = true;
-            registervenders = [];
-          } else if (locationQuery.trim()) {
-            registervenders = await venders.find({
-              Location: { $regex: locationQuery, $options: 'i' }
-            });
-          } else {
-            registervenders = await venders.find();
-          }
-
-            const favIds = user.favourites.map(fav => fav.toString());
-            registervenders.forEach(vender => {
-                opacity[vender._id.toString()] = favIds.includes(vender._id.toString()) ? 10 : 0;
-            });
-        } else {
-            // Logged-in but not guest (e.g., vendor)
-            registervenders = await venders.find();
-            registervenders.forEach(vender => {
-                opacity[vender._id.toString()] = 0;
-            });
-        }
-    } else {
-        // Not logged-in user
-        registervenders = await venders.find();
-        registervenders.forEach(vender => {
-            opacity[vender._id.toString()] = 0;
-        });
+      if (
+        (!isBirthday && req.session.birthdayWished) ||
+        (dob.getDate() !== today.getDate() || dob.getMonth() !== today.getMonth())
+      ) {
+        req.session.birthdayWished = false;
+      }
     }
+
+    if (user.userType === 'guest') {
+      showOptions = true;
+
+      if (locationQuery.trim().toLowerCase() === 'lucknow') {
+        ifLucknow = true;
+        registervenders = [];
+      } else if (locationQuery.trim()) {
+        registervenders = await venders.find({
+          Location: { $regex: locationQuery, $options: 'i' }
+        });
+      } else {
+        registervenders = await venders.find();
+      }
+
+      const favIds = user.favourites.map(fav => fav.toString());
+      registervenders.forEach(vender => {
+        opacity[vender._id.toString()] = favIds.includes(vender._id.toString()) ? 10 : 0;
+      });
+    } else {
+      registervenders = await venders.find();
+      registervenders.forEach(vender => {
+        opacity[vender._id.toString()] = 0;
+      });
+    }
+  } else {
+    registervenders = await venders.find();
+    registervenders.forEach(vender => {
+      opacity[vender._id.toString()] = 0;
+    });
+  }
+
+  // ✅ Add average rating to each vendor
+  for (const vender of registervenders) {
+    if (vender.reviews && vender.reviews.length > 0) {
+      const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+      if (validRatings.length > 0) {
+        const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+        vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+      } else {
+        vender.averageRating = 0;
+      }
+    } else {
+      vender.averageRating = 0;
+    }
+  }
 
   const uniqueLocations = await venders.distinct("Location");
 
   res.render('./store/vender', {
-    ifLucknow: ifLucknow,
+    ifLucknow,
     venders: registervenders,
     title: "vender Page",
-    opacity: opacity,
+    opacity,
     currentPage: 'home',
     isLogedIn: req.isLogedIn,
     user: user || null,
-    showOptions: showOptions,
+    showOptions,
     searchQuery: (user && user.userType === 'guest') ? locationQuery : '',
     availableLocations: uniqueLocations,
     birthdayMessage
@@ -96,46 +102,52 @@ exports.homePage = async (req, res, next) => {
 
 // vender DETAILS
 exports.venderDetails = async (req, res, next) => {
-    const venderId = req.params.venderId;
-    const vender = await venders.findById(venderId).populate('vender')
+  const venderId = req.params.venderId;
 
-    const numberOfOrders = vender ? vender.orders : 0;
-    let showOptions = false;
+  const vender = await venders.findById(venderId)
+    .populate('vender')
+    .populate('reviews.user');
 
-    if (!vender) {
-        return res.redirect('/user/vender-list');
-    }
+  if (!vender) return res.redirect('/user/vender-list');
 
-    let opacity = {};
-    // let numberOfOrders = 0;
+  // ✅ Calculate average rating from reviews
+  let averageRating = 0;
+  const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+  if (validRatings.length > 0) {
+    const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+    averageRating = parseFloat((total / validRatings.length).toFixed(1));
+  }
 
-    if (req.isLogedIn && req.session.user) {
-        const user = await User.findById(req.session.user._id);
+  const numberOfOrders = vender.orders || 0;
+  let showOptions = false;
+  let opacity = {};
 
-        if (user.userType === 'guest') {
-            showOptions = true; 
+  if (req.isLogedIn && req.session.user) {
+    const user = await User.findById(req.session.user._id);
 
-            const isFavourite = user.favourites.map(id => id.toString()).includes(vender._id.toString());
-            opacity[vender._id.toString()] = isFavourite ? 10 : 0;
-        } else {
-            opacity[vender._id.toString()] = 0;
-        }
+    if (user.userType === 'guest') {
+      showOptions = true;
+      const isFavourite = user.favourites.map(id => id.toString()).includes(vender._id.toString());
+      opacity[vender._id.toString()] = isFavourite ? 10 : 0;
     } else {
-        opacity[vender._id.toString()] = 0;
+      opacity[vender._id.toString()] = 0;
     }
+  } else {
+    opacity[vender._id.toString()] = 0;
+  }
 
-
-    res.render('./store/vender-details', {
-        vender: vender,
-        title: "vender Details",
-        opacity: opacity,
-        isLogedIn: req.isLogedIn,
-        user: req.session.user || null,
-        showOptions: showOptions,
-        numberOfOrders: numberOfOrders, // 👈 pass to EJS
-        messages:req.flash(),
-        reviews: vender.reviews || [],
-      });
+  res.render('./store/vender-details', {
+    vender,
+    title: "vender Details",
+    opacity,
+    isLogedIn: req.isLogedIn,
+    user: req.session.user || null,
+    showOptions,
+    numberOfOrders,
+    messages: req.flash(),
+    reviews: vender.reviews || [],
+    averageRating, // ✅ Pass to EJS
+  });
 };
 
 // FAVOURITE LIST
