@@ -12,6 +12,7 @@
         background: #fff;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         position: sticky;
+        width: 100%;
         top: 0;
         z-index: 1000;
         font-family: 'Arial', sans-serif;
@@ -255,7 +256,7 @@
             <% if (isLogedIn && user) { %>
                 <div class="user-menu-wrapper">
                     <div class="user-menu" id="user-menu-btn">
-                        <img src="<%= user.profilePicture %>" alt="User Image">
+                        <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image">
                         <span>
                             <%= user.firstName %>
                         </span>
