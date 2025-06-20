@@ -308,13 +308,7 @@
     });
 </script>
 
-
-<!-- script for search bar dropdown -->
- <script>
-  function showDropdown() {
-    document.getElementById('location-dropdown').style.display = 'block';
-  }
-
+<script>
   function hideDropdown() {
     setTimeout(() => {
       document.getElementById('location-dropdown').style.display = 'none';
@@ -327,15 +321,26 @@
   }
 
   function filterDropdown(query) {
+    const dropdown = document.getElementById('location-dropdown');
     const items = document.querySelectorAll('#location-dropdown .dropdown-item');
     query = query.toLowerCase();
+
+    if (query.length < 1) {
+      dropdown.style.display = 'none';
+      return;
+    }
+
+    let anyVisible = false;
     items.forEach(item => {
       if (item.textContent.toLowerCase().includes(query)) {
         item.style.display = 'block';
+        anyVisible = true;
       } else {
         item.style.display = 'none';
       }
     });
+
+    dropdown.style.display = anyVisible ? 'block' : 'none';
   }
 
   document.addEventListener('click', (e) => {
