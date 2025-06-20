@@ -273,8 +273,8 @@ button:hover {
           accept="image/*"
           aria-describedby="profilePicture-desc"
         />
-        <label for="profilePicture">Profile Picture</label>
-        <small id="profilePicture-desc" class="sr-only">
+        <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
+        <small style="color:darkblue ;" id="profilePicture-desc" class="sr-only">
           Upload your profile picture (optional)
         </small>
       </div>
@@ -411,7 +411,9 @@ button:hover {
     </div>
     <% } else { %>
     <div style="text-align:center; margin-top:1rem;">
-      <a href="/" aria-label="Back to home">Back</a>
+      <a href="/" aria-label="Back to home" style="display:inline-block; padding:8px 20px; background:linear-gradient(135deg,#f8bbd0,#e91e63); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:1rem; box-shadow:0 2px 8px rgba(233,30,99,0.08); transition:background 0.3s, color 0.3s, transform 0.2s;">
+        Back
+      </a>
     </div>
     <% } %>
   </div>
