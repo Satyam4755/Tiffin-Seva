@@ -157,7 +157,7 @@
         </div>
 
         <div class="form-group">
-            <input type="text" name="Location" value="<%= editing ? vender.Location : '' %>" placeholder="📍 Location" required>
+            <input type="text" name="Location" value="<%= editing ? vender.Location : '' %>" placeholder="📍Area, where you can deliver" required>
         </div>
 
         <div class="form-group">
@@ -172,7 +172,7 @@
             <input type="file" name="Menuimage" accept="image/jpg,image/jpeg,image/png">
         </div>
 
-        <button type="submit"><%= editing ? "✨ Update vender" : "🏡 Add vender" %></button>
+        <button onclick="loading()" type="submit"><%= editing ? "✨ Update vender" : "🏡 Add vender" %></button>
     </form>
 
 </div>
