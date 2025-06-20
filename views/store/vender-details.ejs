@@ -398,7 +398,7 @@
         <p>
             <span class="label">Total Customers Served:</span>
             <strong class="<%= numberOfOrders > 0 ? 'green' : 'red' %>" style="font-size: 16px;">
-                <%= numberOfOrders %>
+                <%= numberOfOrders ? numberOfOrders : 0 %>
             </strong>
         </p>
         <% if (vender.Menuimage) { %>
