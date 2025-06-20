@@ -52,7 +52,8 @@ const venderSchema = mongoose.Schema({
       type: String,
       required: true
     },
-  }]
+  }],
+    orders:Number,
 });
 
 module.exports = mongoose.model('vender', venderSchema, 'venders');
