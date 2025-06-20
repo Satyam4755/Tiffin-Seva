@@ -203,42 +203,48 @@ exports.getEditPage = async (req, res) => {
 
 // POST updated profile
 exports.postEditPage = async (req, res) => {
-        const { firstName, lastName,dob, email,id:id } = req.body;
-    const files = req.files;
-    try {
-        const user = await User.findById(id);
+  const { firstName, lastName, dob, email, id } = req.body;
+  const files = req.files;
 
-        // ✅ IMAGE update
-        if (files?.profilePicture) {
-            if (user.profilePicturePublicId) {
-                await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => {
-                    console.warn("Error deleting old image:", err.message);
-                });
-            }
-
-            const imageBuffer = files.profilePicture[0].buffer;
-            const imageResult = await fileUploadInCloudinary(imageBuffer);
-
-            if (!imageResult?.secure_url) {
-                throw new Error("Image upload failed");
-            }
-
-            user.profilePicture = imageResult.secure_url;
-            user.profilePicturePublicId = imageResult.public_id;
-        }
-
-        // ✅ Update other fields
-        user.firstName = firstName;
-        user.lastName = lastName;
-        user.dob=dob,
-        user.email = email;
-
-        await user.save();
-
-        res.redirect('/');
-    } catch (err) {
-        res.status(500).send('Error updating user');
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      console.error("❌ User not found");
+      return res.status(404).send("User not found");
     }
+
+    // ✅ IMAGE update
+    if (files?.profilePicture) {
+      if (user.profilePicturePublicId) {
+        await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => {
+          console.warn("Error deleting old image:", err.message);
+        });
+      }
+
+      const imageBuffer = files.profilePicture[0].buffer;
+      const imageResult = await fileUploadInCloudinary(imageBuffer);
+
+      if (!imageResult?.secure_url) {
+        throw new Error("Image upload failed");
+      }
+
+      user.profilePicture = imageResult.secure_url;
+      user.profilePicturePublicId = imageResult.public_id;
+    }
+
+    // ✅ Update other fields
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.dob = dob;
+    user.email = email;
+
+    await user.save();
+
+    res.redirect('/');
+  } catch (err) {
+  console.error('❌ Error updating user:', err);
+  res.status(500).send('Error updating user: ' + err.message);
+}
 };
 
 exports.getSignUpPage = (req, res, next) => {
