@@ -1,424 +1,346 @@
-<%- include('../partials/head') %>
+<!-- HEADER NAVBAR WITH AIRBNB THEME -->
 <style>
-  body {
-  background: linear-gradient(135deg, #fce4ec, #f8bbd0);
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.form-container {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  width: 500px;
-  margin: 20px auto;
-  border: 2px solid #f8bbd0;
-}
-
-.form-container h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #e91e63;
-  font-size: 1.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-.input-group {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-/* Inputs and selects styling */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-select {
-  width: 92.5%;
-  padding: 12px 15px;
-  border: 2px solid #f8bbd0;
-  border-radius: 1rem;
-  outline: none;
-  font-size: 1rem;
-  background: #fce4ec;
-  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-select:focus {
-  border-color: #e91e63;
-  box-shadow: 0 0 10px #e91e63;
-  background: #fff;
-}
-
-/* File input styling */
-input[type="file"] {
-  width: 100%;
-  padding: 8px 10px;
-  border: 2px solid #f8bbd0;
-  border-radius: 1rem;
-  background: #fce4ec;
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-input[type="file"]:focus {
-  border-color: #e91e63;
-  box-shadow: 0 0 10px #e91e63;
-  background: #fff;
-}
-
-/* Floating labels */
-label {
-  position: absolute;
-  top: 50%;
-  left: 15px;
-  transform: translateY(-50%);
-  color: #aaa;
-  font-size: 1rem;
-  pointer-events: none;
-  background: #fce4ec;
-  padding: 0 5px;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-input[type="text"]:focus + label,
-input[type="text"]:valid + label,
-input[type="email"]:focus + label,
-input[type="email"]:valid + label,
-input[type="password"]:focus + label,
-input[type="password"]:valid + label,
-select:focus + label {
-  top: -10px;
-  font-size: 0.85rem;
-  color: #e91e63;
-  background: #fff;
-}
-
-/* For file input, position label normally (above) */
-input[type="file"] + label {
-  position: static;
-  transform: none;
-  color: #555;
-  font-size: 1rem;
-  padding: 0 0 5px 0;
-  margin-bottom: 5px;
-  background: transparent;
-  border-radius: 0;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #e91e63, #f06292);
-  color: #fff;
-  border: none;
-  border-radius: 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  text-transform: uppercase;
-}
-
-button:hover {
-  background: linear-gradient(135deg, #f06292, #e91e63);
-  transform: scale(1.05);
-}
-
-/* ✅ Fixed Checkbox Group */
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-  color: #555;
-  padding-left: 5px;
-  width: 100%;
-}
-
-.checkbox-group input[type="checkbox"] {
-  transform: scale(1.2);
-  accent-color: #e91e63;
+    #location-dropdown .dropdown-item {
+  padding: 8px 12px;
   cursor: pointer;
 }
 
-.checkbox-group label {
-  position: static;
-  transform: none;
-  font-size: 0.95rem;
-  background: none;
-  color: #555;
-  padding: 0;
-  margin: 0;
+#location-dropdown .dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+    header {
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .navbar {
+        max-width: 1200px;
+        margin: auto;
+        padding: 1rem 2rem;
+        padding-left: 2%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    #logo {
+        font-weight: bold;
+        font-size: 1.5rem;
+        text-decoration: none;
+    }
+
+    #logo {
+        color: #ff385c;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 1.2rem;
+        align-items: center;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: #222;
+        padding: 8px 14px;
+        border-radius: 20px;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.selected {
+        background: #f7f7f7;
+        color: #ff385c;
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .user-menu:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .hamburger {
+        display: none;
+        cursor: pointer;
+    }
+
+    .hamburger img {
+        width: 26px;
+        height: 26px;
+    }
+    .homeImg{
+        width: 160px;
+        height: 45px; 
+        display: block; 
+        margin-right: 
+        8px; 
+        border-radius: 10px; 
+        background-color: #22222200;
+    }
+    .homeImg:hover {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+
+
+
+
+    @media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 1rem;
+        width: 220px; /* increased width for form space */
+        flex-direction: column;
+        backdrop-filter: blur(6px);
+        background: rgba(255, 255, 255, 0.672);
+        padding: 0.6rem 0.8rem;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        animation: fadeDown 0.25s ease-out;
+        z-index: 999;
+        gap: 0.5rem;
+    }
+
+    .nav-links a {
+        padding: 8px 10px;
+        font-size: 0.95rem;
+        color: #333;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .nav-links a:hover {
+        background-color: #fce8ec;
+        color: #ff385c;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    @keyframes fadeDown {
+        0% {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    
+
+    
+}
+.user-menu-wrapper {
+    position: relative;
 }
 
-.checkbox-group a {
-  color: #e91e63;
-  text-decoration: underline;
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    position: relative;
 }
 
-.login-link {
-  text-align: center;
-  margin-top: 1rem;
+.user-menu img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.login-link a {
-  color: #e91e63;
-  text-decoration: none;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 160px;
+    z-index: 1000;
+    animation: fadeDown 0.25s ease-out;
 }
 
-.login-link a:hover {
-  color: #fff;
-  background-color: #e91e63;
-  padding: 6px 12px;
-  border-radius: 12px;
-}
-
-/* 📱 Responsive Design */
-@media (max-width: 768px) {
-  .form-container {
-    width: 90%;
-    padding: 1.5rem;
-    border-radius: 1.5rem;
-  }
-
-  .form-container h2 {
-    font-size: 1.6rem;
-  }
-
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  select {
+.user-dropdown a {
+    display: block;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #333;
     font-size: 0.95rem;
-    padding: 10px;
-  }
-
-  label {
-    font-size: 0.85rem;
-  }
-
-  button {
-    font-size: 0.95rem;
-    padding: 10px;
-  }
-
-  .login-link a {
-    font-size: 0.9rem;
-  }
-
-  .checkbox-group {
-    font-size: 0.85rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-    padding-left: 0;
-  }
-
-  .checkbox-group label {
-    font-size: 0.85rem;
-  }
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-@media (max-width: 480px) {
-  .form-container {
-    padding: 1rem;
-  }
-
-  .form-container h2 {
-    font-size: 1.4rem;
-  }
-
-  button {
-    font-size: 0.9rem;
-  }
-
-  .login-link a {
-    font-size: 0.85rem;
-  }
+.user-dropdown a:hover {
+    background: #fce8ec;
+    color: #ff385c;
+}
+.user-dropdown.active {
+    display: block;
+}
+.user-menu span {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
 
-<body>
-  <div class="form-container" role="main" aria-labelledby="form-title">
-    <h2 id="form-title"><%= editing ? 'Edit Profile' : 'Sign Up' %></h2>
- 
-    <form
-      action="<%= editing ? '/edit_details' : '/signUP' %>"
-      method="post"
-      enctype="multipart/form-data"
-      novalidate
-    >
-      <input type="hidden" name="id" value="<%= editing ? user._id : '' %>" />
-      <%- include('../partials/errorHandel') %>
+<header>
+    <nav class="navbar">
+        <!-- Brand Logo -->
+        <a href="/" id="logo" class="<%= currentPage === 'home' ? 'selected' : '' %>" style="display: flex; align-items: center; height: 48px;">
+            <img class="homeImg" src="/home.jpeg" alt="">
+        </a>
 
-      <!-- Profile Picture -->
-      <div class="input-group">
-        <input
-          type="file"
-          id="profilePicture"
-          name="profilePicture"
-          accept="image/*"
-          aria-describedby="profilePicture-desc"
-        />
-        <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
-        <small style="color:darkblue ;" id="profilePicture-desc" class="sr-only">
-          Upload your profile picture (optional)
-        </small>
-      </div>
-      <h3>Are you Customer or Vendor?</h3>
-      <!-- User Type -->
-      <div class="input-group">
-        <% if (!editing) { %>
-        <select
-          id="userType"
-          name="userType"
-          required
-          aria-required="true"
-          aria-label="User Type"
-        >
-          <option value="" disabled <%= !oldInput || !oldInput.userType ? 'selected' : '' %>>
-            Select User Type
-          </option>
-          <option value="guest" <%= oldInput && oldInput.userType === 'guest' ? 'selected' : '' %>>
-            Customer
-          </option>
-          <option value="vender" <%= oldInput && oldInput.userType === 'vender' ? 'selected' : '' %>>
-            vendor
-          </option>
-        </select>
-        <label for="userType">Select User Type</label>
-        <% } else { %>
-        <select id="userType" name="userType" disabled aria-disabled="true">
-          <option value="<%= user.userType %>" selected>
-            <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
-          </option>
-        </select>
-        <label for="userType">User Type</label>
-        <% } %>
-      </div>
+        <!-- Navigation Links (including Logout now) -->
+        <div class="nav-links" id="nav-links"> 
+            <% if (isLogedIn) { %>
+                <% if (user && user.userType==='guest' ) { %>
 
-      <!-- First Name -->
-      <div class="input-group">
-        <input
-          type="text"
-          id="firstName"
-          name="firstName"
-          value="<%= editing ? user.firstName : (oldInput ? oldInput.firstName : '') %>"
-          required
-          autocomplete="given-name"
-        />
-        <label for="firstName">First Name</label>
-      </div>
+                    <a href="/user/favourite_list" class="<%= currentPage === 'favourite' ? 'selected' : '' %>">Favorites</a>
+                    <a href="/user/booked" class="<%= currentPage === 'reserve' ? 'selected' : '' %>">My Meals</a>
+                    <a href="/user/options" class="<%= currentPage === 'options' ? 'selected' : '' %>">Check Options</a>
 
-      <!-- Last Name -->
-      <div class="input-group">
-        <input
-          type="text"
-          id="lastName"
-          name="lastName"
-          value="<%= editing ? user.lastName : (oldInput ? oldInput.lastName : '') %>"
-          required
-          autocomplete="family-name"
-        />
-        <label for="lastName">Last Name</label>
-      </div>
+                    <a href="/user/message" class="<%= currentPage === 'message' ? 'selected' : '' %>">Message</a>
+                <% } else if (user && user.userType==='vender') { %>
+                    <a href="/vender/addVenderShip" class="<%= currentPage === 'admin' ? 'selected' : '' %>">Add Your vender details</a>
+                    <a href="/vender/venders_list" class="<%= currentPage === 'adminvender' ? 'selected' : '' %>">My venderships</a>
+                    <a href="/vender/orders" class="<%= currentPage === 'orders' ? 'selected' : '' %>">Orders</a>
+                    <a href="/vender/customerChoice" class="<%= currentPage === 'customerChoice' ? 'selected' : '' %>">Modifications</a>
+                    <a href="/vender/send_message" class="<%= currentPage === 'send_message' ? 'selected' : '' %>">Send Message</a>
+                <% } %>
+            <% } else { %>
+                <a href="/logIn" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Log In</a>
+            <% } %>
+        </div>
 
-      <!-- DOB -->
-      <div class="input-group">
-        D.O.B
-        <input type="date" id="dob" name="dob"
-          value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput ? oldInput.dob : '') %>" required
-          autocomplete="bday"
-          style="color: #555; background: #fce4ec; border: 2px solid #f8bbd0; border-radius: 1rem; padding: 12px 15px; width: 92.5%; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;" 
-        />
-      </div>
+        <!-- Right Side (username + hamburger) -->
+        <div class="nav-right">
+            <% if (isLogedIn && user) { %>
+                <div class="user-menu-wrapper">
+                    <div class="user-menu" id="user-menu-btn">
+                        <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image">
+                        <span>
+                            <%= user.firstName %>
+                        </span>
+                        <i class="fas fa-caret-down"></i>
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div style="display: flex; flex-direction: column; align-items: center; padding: 16px 0;padding-bottom: 0;">
+                            <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #eee; display:block;">
+                        </div>
 
-      <!-- Email -->
-      <div class="input-group">
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value="<%= editing ? user.email : (oldInput ? oldInput.email : '') %>"
-          required
-          autocomplete="email"
-        />
-        <label for="email">Email</label>
-      </div>
+                    <a href="/login" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Logout</a>
+                        <a href="/edit_details/<%=user._id%>?editing=true">Edit Profile</a>
+                        <a href="/delete_user/<%=user._id%>">Delete Account</a>
+                    </div>
+                </div>
+            <% } %>
+            <div class="hamburger" id="hamburger-btn">
+                <img src="/png-transparent-hamburger-button-computer-icons-drop-down-list-fast-food-menu-rectangle-share-icon-pancake-thumbnail.png" alt="Menu">
+            </div>
+        </div>
+    </nav>
+</header>
 
-      <!-- Password -->
-      <div class="input-group">
-        <input
-          type="password"
-          id="password"
-          name="password"
-          minlength="6"
-          required
-          autocomplete="<%= editing ? 'new-password' : 'new-password' %>"
-          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>"
-        />
-        <label for="password">Password</label>
-      </div>
+<!-- FontAwesome for icons -->
+<script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
 
-      <!-- Confirm Password -->
-      <div class="input-group">
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          minlength="6"
-          required
-          autocomplete="<%= editing ? 'new-password' : 'new-password' %>"
-          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>"
-        />
-        <label for="confirmPassword">Confirm Password</label>
-      </div>
+<!-- JavaScript to toggle dropdown menu -->
+<script>
+    const hamburger = document.getElementById('hamburger-btn');
+    const navLinks = document.getElementById('nav-links');
+
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+    });
+</script>
+<script>
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+
+    userMenuBtn?.addEventListener('click', () => {
+        userDropdown.classList.toggle('active');
+    });
+
+    // Optional: Click outside to close dropdown
+    document.addEventListener('click', function (e) {
+        if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.remove('active');
+        }
+    });
+</script>
 
 
-      <!-- Terms Checkbox -->
-      <% if (!editing) { %>
-      <div class="checkbox-group">
-        <input type="checkbox" id="terms" name="terms" required aria-required="true" />
-        <label for="terms">
-          I agree to the <a href="#">terms and conditions</a>
-        </label>
-      </div>
-      <% } %>
+<!-- script for search bar dropdown -->
+ <script>
+  function showDropdown() {
+    document.getElementById('location-dropdown').style.display = 'block';
+  }
 
-      <!-- Submit Button -->
-      <button type="submit">
-        <%= editing ? 'Update Profile' : 'Create Account' %>
-      </button>
-    </form>
+  function hideDropdown() {
+    setTimeout(() => {
+      document.getElementById('location-dropdown').style.display = 'none';
+    }, 200); // slight delay for click to register
+  }
 
-    <% if (!editing) { %>
-    <div class="login-link" aria-label="Login link">
-      Already have an account?
-      <a href="/login"><strong>Log In</strong></a>
-    </div>
-    <% } else { %>
-    <div style="text-align:center; margin-top:1rem;">
-      <a href="/" aria-label="Back to home" style="display:inline-block; padding:8px 20px; background:linear-gradient(135deg,#f8bbd0,#e91e63); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:1rem; box-shadow:0 2px 8px rgba(233,30,99,0.08); transition:background 0.3s, color 0.3s, transform 0.2s;">
-        Back
-      </a>
-    </div>
-    <% } %>
-  </div>
+  function selectLocation(value) {
+    document.getElementById('search-bar').value = value;
+    document.getElementById('location-dropdown').style.display = 'none';
+  }
 
+  function filterDropdown(query) {
+    const items = document.querySelectorAll('#location-dropdown .dropdown-item');
+    query = query.toLowerCase();
+    items.forEach(item => {
+      if (item.textContent.toLowerCase().includes(query)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
 
-  <%-include('../partials/loading')%>
-</body>
-</html>
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-bar-form')) {
+      hideDropdown();
+    }
+  });
+</script>
