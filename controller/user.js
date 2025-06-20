@@ -98,9 +98,8 @@ exports.homePage = async (req, res, next) => {
 exports.venderDetails = async (req, res, next) => {
     const venderId = req.params.venderId;
     const vender = await venders.findById(venderId).populate('vender')
-    const venderUser = vender?.vender
-    
-    const numberOfOrders = venderUser? venderUser.orders : 0;
+
+    const numberOfOrders = vender ? vender.orders : 0;
     let showOptions = false;
 
     if (!vender) {
@@ -231,7 +230,7 @@ exports.Postbooking = [
       const guestUser = await User.findById(req.session.user._id);
       const Selectedvender = await venders.findById(venderId).populate('vender');
       const venderh = Selectedvender?.vender;
-      let numberOfOrders = venderh?.orders || 0;
+      let numberOfOrders = Selectedvender?.orders || 0;
 
       if (!venderh) {
         req.flash('error', 'Vendor not found');
@@ -284,7 +283,7 @@ exports.Postbooking = [
 
       await newOrder.save();
       numberOfOrders += 1;
-      await User.findByIdAndUpdate(venderh._id, { orders: numberOfOrders });
+      await venders.findByIdAndUpdate(venderId, { orders: numberOfOrders });
 
       // ✅ Add to user's booked vendors if not already added
       if (!guestUser.booked.includes(venderId)) {
