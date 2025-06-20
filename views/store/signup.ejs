@@ -339,14 +339,10 @@ button:hover {
       <!-- DOB -->
       <div class="input-group">
         D.O.B
-        <input
-          type="date"
-          id="dob"
-          name="dob"
-          value="<%= editing ? user.dob : (oldInput ? oldInput.dob : '') %>"
-          required
+        <input type="date" id="dob" name="dob"
+          value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput ? oldInput.dob : '') %>" required
           autocomplete="bday"
-          style="color: #555; background: #fce4ec; border: 2px solid #f8bbd0; border-radius: 1rem; padding: 12px 15px; width: 92.5%; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;"
+          style="color: #555; background: #fce4ec; border: 2px solid #f8bbd0; border-radius: 1rem; padding: 12px 15px; width: 92.5%; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;" 
         />
       </div>
 
