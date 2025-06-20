@@ -106,40 +106,41 @@
   </div>
 </div>
 <script>
-  const form = document.querySelector('form');
+  // Select all forms on the page
+  const allForms = document.querySelectorAll('form');
   const loadingOverlay = document.getElementById('loadingOverlay');
 
-  function loading(){
-    // Show loading overlay
-    loadingOverlay.style = `
-      display: flex;
-      position: fixed;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.8);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    `;
+  function showLoaderIfValid(form) {
+    if (!form.checkValidity()) {
+      form.reportValidity(); // shows native warning
+      return;
+    }
 
-    // Disable scrolling and interaction
+    // ✅ Show loading overlay
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.position = 'fixed';
+    loadingOverlay.style.inset = 0;
+    loadingOverlay.style.background = 'rgba(255, 255, 255, 0.8)';
+    loadingOverlay.style.zIndex = 9999;
+    loadingOverlay.style.justifyContent = 'center';
+    loadingOverlay.style.alignItems = 'center';
+
+    // ✅ Disable interaction
     document.body.style.overflow = 'hidden';
     document.body.style.pointerEvents = 'none';
   }
 
-  form.addEventListener('submit', () => {
-    // Show loading overlay
-    loadingOverlay.style = `
-      display: flex;
-      position: fixed;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.8);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    `;
-
-    // Disable scrolling and interaction
-    document.body.style.overflow = 'hidden';
-    document.body.style.pointerEvents = 'none';
+  // Attach listener to all forms
+  allForms.forEach(form => {
+    form.addEventListener('submit', (e) => {
+      if (!form.checkValidity()) return;
+      showLoaderIfValid(form);
+    });
   });
+
+  // 👇 If you're using buttons with onclick="loading()"
+  function loading() {
+    const form = event.target.closest('form');
+    if (form) showLoaderIfValid(form);
+  }
 </script>
