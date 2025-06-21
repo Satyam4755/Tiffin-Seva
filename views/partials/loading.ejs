@@ -143,4 +143,17 @@
     const form = event.target.closest('form');
     if (form) showLoaderIfValid(form);
   }
+
+  // When the user returns to this page (like pressing the back button)
+window.addEventListener('pageshow', (event) => {
+  // If coming from cache (persisted)
+  if (event.persisted) {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'none';
+
+    // Re-enable scroll and interaction
+    document.body.style.overflow = '';
+    document.body.style.pointerEvents = '';
+  }
+});
 </script>
