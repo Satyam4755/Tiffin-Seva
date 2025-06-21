@@ -38,6 +38,10 @@ const userSchema=mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'vender'
     }],
+    theme:{
+        type:Boolean,
+        default:'default'
+    },
 })
 
 module.exports=mongoose.model('User',userSchema,'user')//---->model name, schema name, collection name;
