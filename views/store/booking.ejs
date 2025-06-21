@@ -288,8 +288,14 @@
           <p><strong>PricePerMonth:</strong> ₹<%= vender.PricePerMonth %></p>
           <p><strong>Location:</strong> <%= vender.Location %></p>
           <p><strong>Ratings:</strong>
-            <% for(let i = 1; i <= vender.Rating; i++) { %> ⭐ <% } %>
-          </p>
+                    <% const fullStars=Math.floor(vender.averageRating || 0);
+                    %>
+                
+                    <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
+                    <span style="margin-left: 5px; font-weight: 700;color: red; ">
+                        (<%= vender.averageRating || 0 %>/5)
+                    </span>
+                </p>
         </div>
       </a>
     </div>
@@ -421,84 +427,88 @@
   const subscriptionRadios = document.getElementsByName('subscription_model');
   const startInput = document.getElementById('startingDate');
   const endInput = document.getElementById('endingDate');
-  const totalAmount=document.getElementById('totalAmountInput')
+  const totalAmount = document.getElementById('totalAmountInput');
+  const display = document.getElementById('calculatedEndDate');
 
   function toggleTimeOptions() {
-  const isPerDaySelected = document.getElementById('perday').checked;
-  const isPerMonthSelected = document.getElementById('permonth').checked;
+    const isPerDaySelected = document.getElementById('perday').checked;
+    const isPerMonthSelected = document.getElementById('permonth').checked;
 
-  // Show/hide respective UI blocks
-  document.getElementById('timeOptions').style.display = isPerDaySelected ? 'block' : 'none';
-  document.getElementById('dateInputs').style.display = isPerDaySelected ? 'block' : 'none';
-  document.getElementById('monthGrid').style.display = isPerMonthSelected ? 'block' : 'none';
+    // Toggle blocks
+    document.getElementById('timeOptions').style.display = isPerDaySelected ? 'block' : 'none';
+    document.getElementById('dateInputs').style.display = isPerDaySelected ? 'block' : 'none';
+    document.getElementById('monthGrid').style.display = isPerMonthSelected ? 'block' : 'none';
 
-  // Recalculate total on toggle
-  calculateTotal();
-}
-
-  function calculateTotal() {
-  const perDay = Number(document.getElementById('perdayValue').value);
-  const perMonth = Number(document.getElementById('permonthValue').value);
-  const selectedModel = Array.from(subscriptionRadios).find(radio => radio.checked)?.value;
-  const startDate = new Date(startInput.value);
-  const endDate = new Date(endInput.value);
-  const selectedMonths = Number(document.getElementById('selectedMonths').value);
-  let total = 0;
-
-  if (selectedModel === 'Per Day') {
-    if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) {
-      totalElement.textContent = 0;
-      totalAmount.value = 0;
-      return;
-    }
-
-    const diffTime = endDate.getTime() - startDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))+1;
-    const timeType = document.querySelector('input[name="time_type"]:checked')?.value;
-    const multiplier = timeType === 'two' ? 2 : 1;
-    total = diffDays * perDay * multiplier;
-
-  } else if (selectedModel === 'Per Month') {
-    if (!selectedMonths) {
-      totalElement.textContent = 0;
-      totalAmount.value = 0;
-      return;
-    }
-    total = selectedMonths * perMonth;
-  }
-
-  totalElement.textContent = total;
-  totalAmount.value = total;
-}
-document.querySelectorAll('.month-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    // Remove selection from all
-    document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('selected'));
-
-    // Add selection to clicked
-    btn.classList.add('selected');
-
-    const selected = parseInt(btn.getAttribute('data-months'));
-    document.getElementById('selectedMonths').value = selected;
-
-    // ✅ Calculate ending date as current date + 30*selected days
-    const startDate = new Date();
-    const totalDays = selected * 30;
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + totalDays);
-
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const endString = endDate.toLocaleDateString(undefined, options);
-    const startString = startDate.toLocaleDateString(undefined, options);
-
-    const output = `📅 Subscription starts on <b>${startString}</b> and ends on <b>${endString}</b> (Total ${totalDays} days)`;
-    const display = document.getElementById('calculatedEndDate');
-    display.innerHTML = output;
-    display.style.display = 'block';
+    // ✅ Hide message if switching to Per Day
+    display.style.display = isPerMonthSelected ? 'block' : 'none';
 
     calculateTotal();
+  }
+
+  function calculateTotal() {
+    const perDay = Number(document.getElementById('perdayValue').value);
+    const perMonth = Number(document.getElementById('permonthValue').value);
+    const selectedModel = Array.from(subscriptionRadios).find(radio => radio.checked)?.value;
+    const startDate = new Date(startInput.value);
+    const endDate = new Date(endInput.value);
+    const selectedMonths = Number(document.getElementById('selectedMonths').value);
+    let total = 0;
+
+    if (selectedModel === 'Per Day') {
+      if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) {
+        totalElement.textContent = 0;
+        totalAmount.value = 0;
+        return;
+      }
+
+      const diffTime = endDate.getTime() - startDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      const timeType = document.querySelector('input[name="time_type"]:checked')?.value;
+      const multiplier = timeType === 'two' ? 2 : 1;
+      total = diffDays * perDay * multiplier;
+
+    } else if (selectedModel === 'Per Month') {
+      if (!selectedMonths) {
+        totalElement.textContent = 0;
+        totalAmount.value = 0;
+        return;
+      }
+      total = selectedMonths * perMonth;
+    }
+
+    totalElement.textContent = total;
+    totalAmount.value = total;
+  }
+
+  // Month button clicks
+  document.querySelectorAll('.month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove selection from all
+      document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('selected'));
+
+      // Add selection to clicked
+      btn.classList.add('selected');
+
+      const selected = parseInt(btn.getAttribute('data-months'));
+      document.getElementById('selectedMonths').value = selected;
+
+      // Calculate ending date
+      const startDate = new Date();
+      const totalDays = selected * 30;
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + totalDays);
+
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      const endString = endDate.toLocaleDateString(undefined, options);
+      const startString = startDate.toLocaleDateString(undefined, options);
+
+      const output = `📅 Subscription starts on <b>${startString}</b> and ends on <b>${endString}</b> (Total ${totalDays} days)`;
+      display.innerHTML = output;
+      display.style.display = 'block';
+
+      calculateTotal();
+    });
   });
-});
 
   function updateTileSelection() {
     // Subscription model
