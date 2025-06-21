@@ -221,9 +221,13 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-</style>
-<style>
-    .day-night-toggle {
+
+.hamburger img {
+    transition: transform 0.3s ease;
+  }
+
+  /* for theme */
+  .day-night-toggle {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -379,6 +383,21 @@
         </div>
     </nav>
 </header>
+<script>
+  let rotated = false;
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const listImage = hamburgerBtn.querySelector('img');
+
+  hamburgerBtn.addEventListener('click', () => {
+    rotated = !rotated;
+
+    if (rotated) {
+      listImage.style.transform = 'rotate(-90deg)';
+    } else {
+      listImage.style.transform = 'rotate(0deg)'; // back to normal
+    }
+  });
+</script>
 
 <!-- FontAwesome for icons -->
 <script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
