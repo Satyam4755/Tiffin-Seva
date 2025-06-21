@@ -97,8 +97,7 @@
   <% } else { %>
     <% vendorOptionsList.forEach((item) => { %>
       <div class="vendor-section">
-        <h3><%= item.vendorName || 'Your Vendor' %></h3>
-        <h5 style="color: #d6220a;"> For vendor:<%=item.vendor.Name%></h5>
+        <h3><%= item.vendor.Name || 'Your Vendor' %></h3>
 
         <% if (item.isSent) { %>
           <p style="color: green;">✅ You have already submitted your meal choice.</p>
