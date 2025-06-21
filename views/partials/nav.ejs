@@ -70,7 +70,7 @@
         align-items: center;
         gap: 0.5rem;
         padding: 6px 10px;
-        border: 1px solid #ccc;
+        border: 1px solid #080000;
         border-radius: 20px;
         cursor: pointer;
         transition: box-shadow 0.3s ease;
@@ -88,6 +88,7 @@
     .hamburger img {
         width: 26px;
         height: 26px;
+        background:#22222200;
     }
     .homeImg{
         width: 160px;
@@ -170,7 +171,7 @@
     align-items: center;
     gap: 0.4rem;
     padding: 6px 10px;
-    border: 1px solid #ccc;
+    border: 1px solid black;
     border-radius: 20px;
     cursor: pointer;
     transition: box-shadow 0.3s ease;
@@ -221,7 +222,67 @@
     white-space: nowrap;
 }
 </style>
+<style>
+    .day-night-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
+    .toggle-label {
+        position: relative;
+        width: 31%;
+        height: 40px;
+        background: linear-gradient(to right, #fdd835, #263238);
+        border-radius: 50px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: background 0.4s ease;
+    }
+
+    .toggle-label .label-text {
+        font-size: 14px;
+        color: white;
+        z-index: 2;
+        transition: opacity 0.3s ease;
+    }
+
+    .toggle-label .toggle-ball {
+        position: absolute;
+        width: 36px;
+        height: 36px;
+        background: white;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.4s ease;
+        z-index: 1;
+    }
+
+    #theme-toggle {
+        display: none;
+    }
+
+    #theme-toggle:checked+.toggle-label .toggle-ball {
+        transform: translateX(30px);
+    }
+
+    #theme-toggle:checked+.toggle-label {
+        background: linear-gradient(to right, #263238, #fdd835);
+    }
+
+    #theme-toggle:checked+.toggle-label .day {
+        opacity: 0.3;
+    }
+
+    #theme-toggle:not(:checked)+.toggle-label .night {
+        opacity: 0.3;
+    }
+</style>
 <header>
     <nav class="navbar">
         <!-- Brand Logo -->
@@ -263,10 +324,49 @@
                         <i class="fas fa-caret-down"></i>
                     </div>
                     <div class="user-dropdown" id="user-dropdown">
-                        <div style="display: flex; flex-direction: column; align-items: center; padding: 16px 0;padding-bottom: 0;">
+                        <div style="display: flex; flex-direction: column; align-items: center;padding-bottom: 0;">
                             <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #eee; display:block;">
                         </div>
 
+                        <div class="day-night-toggle" data-theme="<%= user.theme %>">
+                            <input type="checkbox" id="theme-toggle" <%=user.theme ? 'checked' : '' %> />
+                            <label for="theme-toggle" class="toggle-label">
+                                <span class="toggle-ball"></span>
+                                <span class="label-text day">🌞</span>
+                                <span class="label-text night">🌙</span>
+                            </label>
+                        
+                            <form id="theme-form" action="/" method="POST">
+                                <input type="hidden" id="theme-input" name="theme" value="<%= user.theme %>" />
+                            </form>
+                        </div>
+                        
+                        <script>
+                            const themeToggle = document.getElementById('theme-toggle');
+                            const themeInput = document.getElementById('theme-input');
+                            const themeForm = document.getElementById('theme-form');
+                            const themeWrapper = document.querySelector('.day-night-toggle');
+
+                            themeToggle.addEventListener('change', () => {
+                                const isNight = themeToggle.checked;
+                                themeInput.value = isNight;
+                                themeForm.submit();
+                            });
+
+                            // ✅ Get server-side theme from data attribute
+                            const isNightTheme = themeWrapper.dataset.theme === 'true';
+
+                            if (isNightTheme) {
+                                document.body.style.background = '#000001';
+                                const header = document.querySelector('header');
+                                if (header) header.style.background = 'peachpuff';
+                            } else {
+                                document.body.style.background = 'peachpuff';
+                                const header = document.querySelector('header');
+                                if (header) header.style.background = 'white';
+                            }
+                        </script>
+                        
                     <a href="/login" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Logout</a>
                         <a href="/edit_details/<%=user._id%>?editing=true">Edit Profile</a>
                         <a href="/delete_user/<%=user._id%>">Delete Account</a>
@@ -274,7 +374,7 @@
                 </div>
             <% } %>
             <div class="hamburger" id="hamburger-btn">
-                <img src="/png-transparent-hamburger-button-computer-icons-drop-down-list-fast-food-menu-rectangle-share-icon-pancake-thumbnail.png" alt="Menu">
+                <img src="/list.png" alt="Menu">
             </div>
         </div>
     </nav>
