@@ -172,10 +172,15 @@
                 <p><strong>PricePerday:</strong> ₹<%= vender.PricePerday %></p>
                 <p><strong>PricePerMonth:</strong> ₹<%= vender.PricePerMonth %></p>
                 <p><strong>Location:</strong> <%= vender.Location %></p>
-                <p><strong>Ratings:</strong> 
-                <% for(let i=1;i<=vender.Rating;i++){%>
-                    ⭐
-                <% } %></p>
+                <p><strong>Ratings:</strong>
+                    <% const fullStars=Math.floor(vender.averageRating || 0);
+                    %>
+                
+                    <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
+                    <span style="margin-left: 5px; font-weight: 700;color: red; ">
+                        (<%= vender.averageRating || 0 %>/5)
+                    </span>
+                </p>
                 <h3 class="booked">booked</h3>
 
                 <form id="Cancel" action="/user/cancel_booking/<%= vender._id %>" method="post" style="margin-top: 10px;">
