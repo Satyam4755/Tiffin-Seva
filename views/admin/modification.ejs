@@ -146,7 +146,7 @@
     <p>You have no listings yet!</p>
   <% } else { %>
     <% listingsData.forEach(listing=> { %>
-      <h2>🍱 Vendor Listing: <%= listing.vendor?.Name || 'Unknown' %>
+      <h2 style="color: rgb(176, 9, 53);">🍱 Vendor Listing: <%= listing.vendor?.Name || 'Unknown' %>
       </h2>
     
       <% if (listing.guests.length===0) { %>
@@ -177,7 +177,7 @@
         
               <% if (hasPendingGuests) { %>
                 <!-- Ask Options Button -->
-                 <h4 style="text-align:center; color: #d81b60; margin-top: 20px;">
+                 <h4 style="text-align:center; color: rgb(9, 132, 213); margin-top: 20px;">
                   There are some New Guests, want to ask them also?
                  </h4>
                 <button id="ask-option-btn" onclick="showForm('form-<%= listing.vendor._id %>')">Ask Options</button>
