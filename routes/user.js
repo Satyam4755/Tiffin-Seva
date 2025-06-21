@@ -15,7 +15,8 @@ const {
   postOption,
   getMessage,
   postvenderDetails,
-  postDeleteReview
+  postDeleteReview,
+  postHomePage
 } = require('../controller/user');
 
 // GET routes
@@ -36,5 +37,6 @@ userRouter.post('/user/cancel_booking/:venderId', postCancelBooking); // ✅ add
 userRouter.post('/user/options',postOption)
 userRouter.post('/user/vender-list/:venderId', postvenderDetails); 
 userRouter.post('/user/delete-review/:venderId', postDeleteReview);
+userRouter.post('/',postHomePage); // ✅ added
 
 module.exports = userRouter;
