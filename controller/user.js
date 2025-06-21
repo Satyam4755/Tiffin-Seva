@@ -692,3 +692,21 @@ exports.postDeleteReview = async (req, res, next) => {
     res.redirect('/user/vender-list/' + venderId);
   }
 };
+
+
+// ✅ Controller: postHomePage
+exports.postHomePage = async (req, res, next) => {
+  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+
+  const userId = req.session.user._id;
+  const themeValue = req.body.theme === 'true'; // convert to boolean
+
+  try {
+    await User.findByIdAndUpdate(userId, { theme: themeValue });
+    req.session.user.theme = themeValue; // update session also
+    res.redirect('/');
+  } catch (err) {
+    console.error('Theme update failed:', err);
+    res.status(500).send('Internal Server Error');
+  }
+};
