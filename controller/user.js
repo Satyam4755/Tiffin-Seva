@@ -20,9 +20,17 @@ exports.homePage = async (req, res, next) => {
 
     // 🎂 Birthday wish logic
     if (user && user.dob) {
-      const today = new Date();
-      const dob = new Date(user.dob);
-      const isBirthday = today.getDate() === dob.getDate() && today.getMonth() === dob.getMonth();
+      // Convert both today's date and dob to IST
+      function getISTDateOnly(date) {
+        return new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+      }
+
+      const todayIST = getISTDateOnly(new Date());
+      const dobIST = getISTDateOnly(new Date(user.dob));
+
+      // Compare only day & month
+      const isBirthday = todayIST.getDate() === dobIST.getDate() &&
+        todayIST.getMonth() === dobIST.getMonth();
 
       if (isBirthday && !req.session.birthdayWished) {
         birthdayMessage = `🎉 Happy Birthday, ${user.firstName}! 🎂`;
@@ -31,7 +39,7 @@ exports.homePage = async (req, res, next) => {
 
       if (
         (!isBirthday && req.session.birthdayWished) ||
-        (dob.getDate() !== today.getDate() || dob.getMonth() !== today.getMonth())
+        (dobIST.getDate() !== todayIST.getDate() || dobIST.getMonth() !== todayIST.getMonth())
       ) {
         req.session.birthdayWished = false;
       }
@@ -152,17 +160,34 @@ exports.venderDetails = async (req, res, next) => {
 
 // FAVOURITE LIST
 exports.favouriteList = async (req, res, next) => {
-    if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
-    const user = await User.findById(req.session.user._id).populate('favourites');
-    res.render('./store/favourite_list', {
-        venders: user.favourites,
-        title: "favourite list",
-        currentPage: 'favourite',
-        isLogedIn: req.isLogedIn,
-        user: req.session.user,
-        messages: req.flash(),
-    });
+  const user = await User.findById(req.session.user._id).populate('favourites');
+  const favouriteVendors = user.favourites;
+
+  // Add average rating to each favourite vendor
+  for (const vender of favouriteVendors) {
+    if (vender.reviews && vender.reviews.length > 0) {
+      const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+      if (validRatings.length > 0) {
+        const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+        vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+      } else {
+        vender.averageRating = 0;
+      }
+    } else {
+      vender.averageRating = 0;
+    }
+  }
+
+  res.render('./store/favourite_list', {
+    venders: favouriteVendors,
+    title: "favourite list",
+    currentPage: 'favourite',
+    isLogedIn: req.isLogedIn,
+    user: req.session.user,
+    messages: req.flash(),
+  });
 };
 
 // ADD / REMOVE FAVOURITE
@@ -196,21 +221,40 @@ exports.postUnfavourite = async (req, res, next) => {
 };
 
 // BOOKING PAGE
-exports.booking = (req, res, next) => {
-    const venderId = req.params.venderId;
-    venders.findById(venderId).then(vender => {
-        if (!vender) {
-            res.redirect('/user/vender-list');
-        } else {
-            res.render('./store/booking', {
-                vender: vender,
-                title: "booking",
-                isLogedIn: req.isLogedIn,
-                currentPage: '',
-                user: req.session.user || null,
-            });
-        }
+exports.booking = async (req, res, next) => {
+  const venderId = req.params.venderId;
+
+  try {
+    const vender = await venders.findById(venderId);
+    if (!vender) {
+      return res.redirect('/user/vender-list');
+    }
+
+    // Add average rating
+    if (vender.reviews && vender.reviews.length > 0) {
+      const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+      if (validRatings.length > 0) {
+        const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+        vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+      } else {
+        vender.averageRating = 0;
+      }
+    } else {
+      vender.averageRating = 0;
+    }
+
+    res.render('./store/booking', {
+      vender: vender,
+      title: "booking",
+      isLogedIn: req.isLogedIn,
+      currentPage: '',
+      user: req.session.user || null,
     });
+
+  } catch (err) {
+    console.error('Error loading booking page:', err);
+    res.redirect('/user/vender-list');
+  }
 };
 
 // POST BOOKING
@@ -333,7 +377,6 @@ exports.booked = async (req, res, next) => {
     const userId = req.session.user._id;
     const user = await User.findById(userId).populate('booked');
 
-    // Check all currently booked vendors for this user
     const validBookedVendors = [];
 
     for (const vendor of user.booked) {
@@ -343,9 +386,21 @@ exports.booked = async (req, res, next) => {
       });
 
       if (existingOrder) {
+        // Add average rating
+        if (vendor.reviews && vendor.reviews.length > 0) {
+          const validRatings = vendor.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+          if (validRatings.length > 0) {
+            const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+            vendor.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+          } else {
+            vendor.averageRating = 0;
+          }
+        } else {
+          vendor.averageRating = 0;
+        }
+
         validBookedVendors.push(vendor);
       } else {
-        // Remove vendor from user's booked list if no order exists
         await User.findByIdAndUpdate(userId, {
           $pull: { booked: vendor._id }
         });
