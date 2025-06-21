@@ -176,15 +176,25 @@
             <% const hasPendingGuests=listing.guests.some(g=> !g.optionSent); %>
         
               <% if (hasPendingGuests) { %>
-                <div id="customer-choice-form">
-                  <h4 style="text-align:center;">Send Meal Options to All Pending Guests</h4>
-                  <form action="/vender/customerChoiceBulk/<%= listing.vendor?._id %>" method="POST">
-                    <input type="text" name="regular" placeholder="Enter regular meal" required>
-                    <input type="text" name="optional" placeholder="Enter optional meal" required>
-                    <button onclick="loading()" type="submit">Send to All</button>
-                  </form>
+                <!-- Ask Options Button -->
+                 <h4 style="text-align:center; color: #d81b60; margin-top: 20px;">
+                  There are some New Guests, want to ask them also?
+                 </h4>
+                <button id="ask-option-btn" onclick="showForm('form-<%= listing.vendor._id %>')">Ask Options</button>
+              
+                <!-- Hidden Form initially -->
+                <div id="form-<%= listing.vendor._id %>" style="display: none;">
+                  <div id="customer-choice-form">
+                    <h4 style="text-align:center;">Send Meal Options to All Pending Guests</h4>
+                    <form action="/vender/customerChoiceBulk/<%= listing.vendor?._id %>" method="POST">
+                      <input type="text" name="regular" placeholder="Enter regular meal" required>
+                      <input type="text" name="optional" placeholder="Enter optional meal" required>
+                      <button onclick="loading()" type="submit">Send to All</button>
+                      <button onclick="back('form-<%= listing.vendor._id %>')">Cancle</button>
+                    </form>
+                  </div>
                 </div>
-        <% } %>
+              <% } %>
       <% } %>
       <hr>
     <% }) %>
@@ -193,5 +203,22 @@
 </div>
   <%-include('../partials/loading')%>
   <%-include('../partials/footer')%>
+  <script>
+    function back(id){
+      document.getElementById(id).style.display = 'none';
+      const button = document.querySelector(`#${id}`).previousElementSibling;
+      if (button && button.tagName === 'BUTTON') {
+        button.style.display = 'block';
+      }
+    }
+
+  function showForm(id) {
+    document.getElementById(id).style.display = 'block';
+    const button = document.querySelector(`#${id}`).previousElementSibling;
+    if (button && button.tagName === 'BUTTON') {
+      button.style.display = 'none';
+    }
+  }
+</script>
 </body>
 </html>
