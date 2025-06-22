@@ -40,7 +40,7 @@ const userSchema=mongoose.Schema({
     }],
     theme:{
         type:Boolean,
-        default:'default'
+        default:'false'
     },
 })
 
