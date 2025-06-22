@@ -5,7 +5,7 @@ const venderOptionSchema = mongoose.Schema({
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'vender', required: true },
   regular: String,
   optional: String,
-  createdAtV20: { type: Date, default: Date.now, expires: 72000 } // TTL of 20 hours
+  createdAtV20: { type: Date, default: Date.now, expires: 60*60*6 } // TTL of 6 hours
 });
 
 // ✅ Add compound unique index to prevent duplicate guest-vendor entries
