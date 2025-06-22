@@ -110,8 +110,10 @@ exports.homePage = async (req, res, next) => {
 
 // vender DETAILS
 exports.venderDetails = async (req, res, next) => {
-  const venderId = req.params.venderId;
 
+  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+  const venderId = req.params.venderId;
+ 
   const vender = await venders.findById(venderId)
     .populate('vender')
     .populate('reviews.user');
