@@ -68,6 +68,7 @@ exports.postSignUpPage = [
     .matches(/^[a-zA-Z]+$/).withMessage("Should be correct name"),
 
   check('lastName')
+  .trim()
     .matches(/^[a-zA-Z]*$/).withMessage("Should be correct name"),
 
   check('dob')
