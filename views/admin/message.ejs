@@ -1,3 +1,4 @@
+<!-- Updated EJS Code: -->
 <%- include('../partials/head') %>
 <%- include('../partials/background') %>
 
@@ -90,44 +91,68 @@
   </script>
 <% } %>
 <div class="badaDabba">
-<div class="container">
-  <h1>📢 Send Meal Message To Your Customers</h1>
+  <div class="container">
+    <h1>📢 Send Meal Message To Your Customers</h1>
 
-  <% if (!listingsData || listingsData.length === 0) { %>
-    <p style="text-align:center;">You have no vendor listings or orders.</p>
-  <% } else { %>
-    <% listingsData.forEach(listing => { %>
-      <div class="vendor-block">
-        <h2 style="color: #e65100;"><%= listing.vendor.Name || 'Vendor Listing' %></h2>
+    <% if (!listingsData || listingsData.length === 0) { %>
+      <p style="text-align:center;">You have no vendor listings or orders.</p>
+    <% } else { %>
+      <% listingsData.forEach(listing => { 
+     const firstWithMessage = listing.guests.find(g => g.messageSent && g.messageDetails);
+%>
+  <div class="vendor-block">
+    <h2 style="color: #e65100;"><%= listing.vendor.Name || 'Vendor Listing' %></h2>
 
-        <% if (listing.guests.length === 0) { %>
-          <p>No guests found for this listing.</p>
+    <% if (listing.guests.length === 0) { %>
+      <p>No guests found for this listing.</p>
 
-        <% } else { %>
-          <% const isMessageAlreadySent = listing.guests.some(g => g.messageSent); %>
-
-          <% if (isMessageAlreadySent) { %>
-            <% const firstWithMessage = listing.guests.find(g => g.messageSent && g.messageDetails); %>
-            <p class="sent-message">Message already sent ✅</p>
-            <% if (firstWithMessage) { %>
-              <p><strong>Message:</strong> <%= firstWithMessage.messageDetails.message %></p>
-            <% } %>
-
-          <% } else { %>
-            <!-- 📝 Show form ONCE for this vendor listing -->
-            <form action="/vender/send_message/<%= listing.vendor?._id %>" method="POST">
-              <div class="form-group">
-                <label for="message">Write Message:</label>
-                <textarea name="message" required></textarea>
-              </div>
-              <button onclick="loading()" type="submit">Send Message to All Guests</button>
-            </form>
-          <% } %>
+    <% } else { 
+         const isMessageAlreadySent = listing.guests.some(g => g.messageSent);
+    %>
+      <% if (isMessageAlreadySent && !editing) { %>
+        <p class="sent-message">Message already sent ✅</p>
+        <% if (firstWithMessage) { %>
+          <p><strong>Message:</strong> <%= firstWithMessage.messageDetails.message %></p>
         <% } %>
-      </div>
-    <% }); %>
-  <% } %>
+        <a href="/vender/send_message/<%= listing.vendor._id %>?editing=true">
+          <button type="button" class="edit-button">✍️ Edit</button>
+          <style>
+            .edit-button {
+              background: linear-gradient(90deg, #ff9800 0%, #ff7043 100%);
+              color: #fff;
+              border: none;
+              padding: 8px 22px;
+              font-size: 15px;
+              border-radius: 22px;
+              cursor: pointer;
+              font-weight: 600;
+              box-shadow: 0 2px 8px rgba(255, 112, 67, 0.15);
+              transition: background 0.3s, transform 0.2s;
+              margin-top: 10px;
+              margin-bottom: 5px;
+              outline: none;
+            }
+            .edit-button:hover {
+              background: linear-gradient(90deg, #ff7043 0%, #ff9800 100%);
+              transform: translateY(-2px) scale(1.04);
+              box-shadow: 0 4px 16px rgba(255, 112, 67, 0.22);
+            }
+          </style>
+        </a>
+      <% } else { %>
+        <form action="/vender/send_message/<%= listing.vendor?._id %>" method="POST">
+          <div class="form-group">
+            <label for="message">Write Message:</label>
+            <textarea name="message" required><%= (firstWithMessage?.messageDetails?.message) || '' %></textarea>
+          </div>
+          <button onclick="loading()" type="submit">Send Message to All Guests</button>
+        </form>
+      <% } %>
+    <% } %>
+  </div>
+<% }); %>
+    <% } %>
+  </div>
 </div>
-</div>
-  <%-include('../partials/loading')%>
+<%- include('../partials/loading') %>
 <%- include('../partials/footer') %>
