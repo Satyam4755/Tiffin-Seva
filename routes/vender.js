@@ -28,7 +28,7 @@ venderRouter.get('/edit_vender/:venderId', editvender);
 venderRouter.get('/customerChoice',getOptions);
 
 // routes for sending message
-venderRouter.get('/send_message', getSendMessage);
+venderRouter.get('/send_message/:venderId', getSendMessage);
 
 // ---------------- POST ROUTES ---------------- //
 // ⚠️ Add multer upload middleware to handle 'image' and 'Menuimage'
