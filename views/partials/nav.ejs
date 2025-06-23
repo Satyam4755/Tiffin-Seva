@@ -309,7 +309,7 @@
                     <a href="/vender/venders_list" class="<%= currentPage === 'adminvender' ? 'selected' : '' %>">My venderships</a>
                     <a href="/vender/orders" class="<%= currentPage === 'orders' ? 'selected' : '' %>">Orders</a>
                     <a href="/vender/customerChoice" class="<%= currentPage === 'customerChoice' ? 'selected' : '' %>">Modifications</a>
-                    <a href="/vender/send_message" class="<%= currentPage === 'send_message' ? 'selected' : '' %>">Send Message</a>
+                    <a href="/vender/send_message/<%=user._id%>" class="<%= currentPage === 'send_message' ? 'selected' : '' %>">Send Message</a>
                 <% } %>
             <% } else { %>
                 <a href="/logIn" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Log In</a>
