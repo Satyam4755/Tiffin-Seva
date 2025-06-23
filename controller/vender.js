@@ -10,7 +10,7 @@ const Order = require('../models/orders');
 // for twillio
 // const twilio = require('twilio');
 // const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-// add vender
+// add vender 
 exports.addVender = (req, res, next) => {
     res.render('./admin/editvenders', { 
         editing: false,
@@ -401,9 +401,10 @@ exports.postOptionsBulk = async (req, res, next) => {
 exports.getSendMessage = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
+  const editing = req.query.editing === 'true';
+
   try {
     const vendorListings = await venders.find({ vender: req.session.user._id }).populate('vender');
-
 
     const listingsData = [];
 
@@ -416,7 +417,6 @@ exports.getSendMessage = async (req, res, next) => {
 
       for (const order of orders) {
         const guest = order.guest;
-
         const existingMessage = await Message.findOne({
           guest: guest._id,
           vendorId: listing._id,
@@ -443,6 +443,7 @@ exports.getSendMessage = async (req, res, next) => {
       messages: req.flash(),
       currentPage: 'send_message',
       listingsData,
+      editing,
     });
 
   } catch (err) {
@@ -461,6 +462,7 @@ exports.postSendMessage = async (req, res, next) => {
   try {
 
     const vendor = await venders.findById(vendorId);
+    const userVender= await User.findById(req.session.user._id);
     if (!vendor || vendor.length === 0) {
       req.flash('error', 'Vendor listing not found');
       return res.redirect('/vender/send_message');
@@ -478,7 +480,7 @@ exports.postSendMessage = async (req, res, next) => {
     }
 
     req.flash('success', 'Message sent successfully!');
-    res.redirect('/vender/send_message');
+    res.redirect('/vender/send_message/' + userVender._id);
   } catch (err) {
     console.error('Error sending message:', err);
     req.flash('error', 'Something went wrong.');
