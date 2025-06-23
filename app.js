@@ -82,7 +82,7 @@ mongoose.connect(dbPath).then(async () => {
         // Step 2: Recreate index with updated TTL
         await mongoose.connection.db.collection('venderOptions').createIndex(
             { createdAtV20: 1 },
-            { expireAfterSeconds: 72000 }
+            { expireAfterSeconds: 60*60*6} // 6 hours in seconds
         );
         console.log('New TTL index created on venderOptions collection.');
     } catch (err) {
@@ -97,7 +97,7 @@ mongoose.connect(dbPath).then(async () => {
         // Step 2: Recreate index with updated TTL
         await mongoose.connection.db.collection('guestOptions').createIndex(
             { createdAtU20: 1 },
-            { expireAfterSeconds: 72000 }
+            { expireAfterSeconds: 60*60*6 } // 6 hours in seconds
         );
         console.log('New TTL index created on guestOptions collection.');
     } catch (err) {
@@ -112,7 +112,7 @@ mongoose.connect(dbPath).then(async () => {
         // Step 2: Recreate index with updated TTL
         await mongoose.connection.db.collection('messages').createIndex(
             { createdAt30: 1 },
-            { expireAfterSeconds: 72000 }
+            { expireAfterSeconds: 60*60*6 } // 6 hours in seconds
         );
         console.log('New TTL index created on messages collection.');
     } catch (err) {
