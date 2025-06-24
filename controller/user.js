@@ -15,12 +15,22 @@ exports.homePage = async (req, res, next) => {
   let ifLucknow = false;
   let birthdayMessage = null;
 
+  if (locationQuery.trim().toLowerCase() === 'lucknow') {
+    ifLucknow = true;
+    registervenders = []; 
+  } else if (locationQuery.trim()) {
+    registervenders = await venders.find({
+      Location: { $regex: locationQuery, $options: 'i' }
+    });
+  } else {
+    registervenders = await venders.find();
+  }
+
   if (req.isLogedIn && req.session.user) {
     user = await User.findById(req.session.user._id);
 
-    // 🎂 Birthday wish logic
+    // 🎂 Birthday ke liye
     if (user && user.dob) {
-      // Convert both today's date and dob to IST
       function getISTDateOnly(date) {
         return new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
       }
@@ -28,7 +38,6 @@ exports.homePage = async (req, res, next) => {
       const todayIST = getISTDateOnly(new Date());
       const dobIST = getISTDateOnly(new Date(user.dob));
 
-      // Compare only day & month
       const isBirthday = todayIST.getDate() === dobIST.getDate() &&
         todayIST.getMonth() === dobIST.getMonth();
 
@@ -47,36 +56,22 @@ exports.homePage = async (req, res, next) => {
 
     if (user.userType === 'guest') {
       showOptions = true;
-
-      if (locationQuery.trim().toLowerCase() === 'lucknow') {
-        ifLucknow = true;
-        registervenders = [];
-      } else if (locationQuery.trim()) {
-        registervenders = await venders.find({
-          Location: { $regex: locationQuery, $options: 'i' }
-        });
-      } else {
-        registervenders = await venders.find();
-      }
-
       const favIds = user.favourites.map(fav => fav.toString());
       registervenders.forEach(vender => {
         opacity[vender._id.toString()] = favIds.includes(vender._id.toString()) ? 10 : 0;
       });
     } else {
-      registervenders = await venders.find();
       registervenders.forEach(vender => {
         opacity[vender._id.toString()] = 0;
       });
     }
   } else {
-    registervenders = await venders.find();
     registervenders.forEach(vender => {
       opacity[vender._id.toString()] = 0;
     });
   }
 
-  // ✅ Add average rating to each vendor
+  // ⭐ Average Rating logic
   for (const vender of registervenders) {
     if (vender.reviews && vender.reviews.length > 0) {
       const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
@@ -102,7 +97,7 @@ exports.homePage = async (req, res, next) => {
     isLogedIn: req.isLogedIn,
     user: user || null,
     showOptions,
-    searchQuery: (user && user.userType === 'guest') ? locationQuery : '',
+    searchQuery: locationQuery,
     availableLocations: uniqueLocations,
     birthdayMessage
   });
