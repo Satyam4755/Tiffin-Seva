@@ -173,7 +173,7 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    width: 420px;
+    width: 480px;
     max-width: 95vw;
     background: #fff;
     border-radius: 18px;
@@ -201,6 +201,19 @@ body {
     box-shadow: 0 1px 4px rgba(44,62,80,0.07);
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3); /* slight dark overlay */
+  z-index: 98; /* Just below the review panel */
+  pointer-events: all;
+}
+.hidden {
+  display: none;
+}
 .organizer-box,
 .attendees-section {
   background: #fafafa;
@@ -412,6 +425,40 @@ body {
     </div>
 </div>
 
+
+<% if (vender.vender) { %>
+      <div class="organizer-box">
+        <h3 style="color: #d63384;">👑 Vendor</h3>
+        <div class="organizer-profile">
+          <img src="<%= vender.vender.profilePicture || '/user.jpeg' %>" class="organizer-img" />
+          <div class="organizer-info">
+            <p><strong><%= vender.vender.firstName %> <%= vender.vender.lastName %></strong></p>
+            <p><strong>Email:</strong> <%= vender.vender.email %></p>
+            <p><strong><%= vender.vender.userType %></strong></p>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+<% if (guestUsers && guestUsers.length > 0) { %>
+  <div class="attendees-section">
+    <h3 style="color: #6c5ce7;">👥 Customers (<%= guestUsers.length %>)</h3>
+    <div class="attendee-grid">
+      <% guestUsers.forEach(guest => { %>
+        <div class="attendee-card">
+          <img src="<%= guest.profilePicture || '/user.jpeg' %>" class="attendee-img" />
+          <p><%= guest.firstName %> <%= guest.lastName || '' %></p>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
+
+<a href="/" style="text-decoration: none;">
+    <button class="btn back-btn">Go Back To vender</button>
+</a>
+</div>
+<div id="overlay" class="overlay hidden"></div>
 <!-- Reviews ka dabba -->
 <div id="reviewsPanel" class="reviews-panel hidden">
     <button class="done" onclick="removePanel()">Done</button>
@@ -465,56 +512,32 @@ body {
     </div>
 </div>
 
-<% if (vender.vender) { %>
-      <div class="organizer-box">
-        <h3 style="color: #d63384;">👑 Vendor</h3>
-        <div class="organizer-profile">
-          <img src="<%= vender.vender.profilePicture || '/user.jpeg' %>" class="organizer-img" />
-          <div class="organizer-info">
-            <p><strong><%= vender.vender.firstName %> <%= vender.vender.lastName %></strong></p>
-            <p><strong>Email:</strong> <%= vender.vender.email %></p>
-            <p><strong><%= vender.vender.userType %></strong></p>
-          </div>
-        </div>
-      </div>
-    <% } %>
-
-<% if (guestUsers && guestUsers.length > 0) { %>
-  <div class="attendees-section">
-    <h3 style="color: #6c5ce7;">👥 Customers (<%= guestUsers.length %>)</h3>
-    <div class="attendee-grid">
-      <% guestUsers.forEach(guest => { %>
-        <div class="attendee-card">
-          <img src="<%= guest.profilePicture || '/user.jpeg' %>" class="attendee-img" />
-          <p><%= guest.firstName %> <%= guest.lastName || '' %></p>
-        </div>
-      <% }) %>
-    </div>
-  </div>
-<% } %>
 <script>
-function toggleReviews() {
-    const panel = document.getElementById('reviewsPanel');
-    const vender_detailsContainer = document.querySelector('.vender-details-container');
-    vender_detailsContainer.classList.add('blured');
-    panel.classList.toggle('hidden');
+    function toggleReviews() {
+  const panel = document.getElementById('reviewsPanel');
+  const overlay = document.getElementById('overlay');
+  const vender_detailsContainer = document.querySelector('.vender-details-container');
+
+  vender_detailsContainer.classList.add('blured');
+  panel.classList.remove('hidden');
+  overlay.classList.remove('hidden');
 }
 function toggleReviewForm() {
     const popup = document.getElementById("reviewFormPopup");
     popup.classList.toggle("hidden");
 }
 function removePanel() {
-    const panel = document.getElementById('reviewsPanel');
-    const vender_detailsContainer = document.querySelector('.vender-details-container');
-    panel.classList.add('hidden');
-    vender_detailsContainer.classList.remove('blured');
+  const panel = document.getElementById('reviewsPanel');
+  const overlay = document.getElementById('overlay');
+  const vender_detailsContainer = document.querySelector('.vender-details-container');
+
+  panel.classList.add('hidden');
+  overlay.classList.add('hidden');
+  vender_detailsContainer.classList.remove('blured');
 }
+
 </script>
 
-<a href="/" style="text-decoration: none;">
-    <button class="btn back-btn">Go Back To vender</button>
-</a>
-</div>
 <%-include('../partials/loading')%>
 <%-include('../partials/footer')%>
 </body>
