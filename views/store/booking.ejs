@@ -323,17 +323,28 @@
        <!-- script for checking the address -->
         <script>
           const vendorLocationRaw = "<%= vender.Location %>";
+
+          // Convert to lowercase and split using any non-alphanumeric separator
           const locationAreas = vendorLocationRaw
-            .split('/')
-            .map(loc => loc.trim().toLowerCase());
+            .toLowerCase()
+            .split(/[^a-zA-Z0-9]+/) // split on anything that's not a letter or number
+            .map(loc => loc.trim())
+            .filter(loc => loc.length > 0);
 
           const addressInput = document.getElementById('address');
           const warning = document.getElementById('addressWarning');
 
-          function checkAddressMatch() {
-            const userAddress = addressInput.value.toLowerCase();
-            const isValid = locationAreas.some(loc => userAddress.includes(loc));
+          function cleanInput(text) {
+            return text
+              .toLowerCase()
+              .replace(/[^a-zA-Z0-9\s]/g, '') // remove punctuation except spaces
+              .replace(/\s+/g, ' ')           // normalize multiple spaces
+              .trim();
+          }
 
+          function checkAddressMatch() {
+            const userAddress = cleanInput(addressInput.value);
+            const isValid = locationAreas.some(loc => userAddress.includes(loc));
             warning.style.display = isValid ? 'none' : 'block';
             return isValid;
           }
@@ -344,7 +355,7 @@
           form.addEventListener('submit', (e) => {
             if (!checkAddressMatch()) {
               e.preventDefault();
-              alert("Please include the vendor's area in your address before submitting.");
+              alert("⚠️ Please include the vendor's area in your address before submitting.");
             }
           });
         </script>
