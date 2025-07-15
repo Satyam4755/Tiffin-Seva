@@ -322,27 +322,28 @@
        <input type="text" name="address" id="address" placeholder="Enter your address" required>
        <!-- script for checking the address -->
         <script>
-          const vendorLocation = "<%= vender.Location.toLowerCase() %>"; // or vender.location if it's lowercase already
+          const vendorLocationRaw = "<%= vender.Location %>";
+          const locationAreas = vendorLocationRaw
+            .split('/')
+            .map(loc => loc.trim().toLowerCase());
+
           const addressInput = document.getElementById('address');
           const warning = document.getElementById('addressWarning');
 
-          addressInput.addEventListener('input', () => {
+          function checkAddressMatch() {
             const userAddress = addressInput.value.toLowerCase();
+            const isValid = locationAreas.some(loc => userAddress.includes(loc));
 
-            if (!userAddress.includes(vendorLocation)) {
-              warning.style.display = 'block';
-            } else {
-              warning.style.display = 'none';
-            }
-          });
+            warning.style.display = isValid ? 'none' : 'block';
+            return isValid;
+          }
 
-          // Optional: Prevent form submission if the address is invalid
+          addressInput.addEventListener('input', checkAddressMatch);
+
           const form = document.querySelector('form');
           form.addEventListener('submit', (e) => {
-            const userAddress = addressInput.value.toLowerCase();
-            if (!userAddress.includes(vendorLocation)) {
+            if (!checkAddressMatch()) {
               e.preventDefault();
-              warning.style.display = 'block';
               alert("Please include the vendor's area in your address before submitting.");
             }
           });
