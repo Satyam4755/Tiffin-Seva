@@ -105,10 +105,9 @@ exports.homePage = async (req, res, next) => {
 
 // vender DETAILS
 exports.venderDetails = async (req, res, next) => {
-
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
   const venderId = req.params.venderId;
- 
+
   const vender = await venders.findById(venderId)
     .populate('vender')
     .populate('reviews.user');
@@ -141,6 +140,10 @@ exports.venderDetails = async (req, res, next) => {
     opacity[vender._id.toString()] = 0;
   }
 
+  // ✅ Get all users who booked this vendor
+  const guestOrders = await Order.find({ vender: venderId }).populate('guest');
+  const guestUsers = guestOrders.map(order => order.guest); // Extract users
+
   res.render('./store/vender-details', {
     vender,
     title: "vender Details",
@@ -151,7 +154,8 @@ exports.venderDetails = async (req, res, next) => {
     numberOfOrders,
     messages: req.flash(),
     reviews: vender.reviews || [],
-    averageRating, // ✅ Pass to EJS
+    averageRating,
+    guestUsers // ✅ Pass to EJS
   });
 };
 
@@ -290,9 +294,18 @@ exports.Postbooking = [
         return res.redirect('back');
       }
 
-      // ✅ Address verification logic
-      const vendorLocation = Selectedvender.Location;
-      if (!address.toLowerCase().includes(vendorLocation.toLowerCase())) {
+      // ✅ Address verification logic (handles multiple areas like "bbd / matiyari / goel")
+      const vendorLocation = Selectedvender.Location || '';
+      const locationKeywords = vendorLocation
+        .toLowerCase()
+        .split(/[^a-zA-Z0-9]+/) // split by any non-alphanumeric character
+        .map(loc => loc.trim())
+        .filter(loc => loc.length > 0);
+
+      const userAddress = address.toLowerCase();
+      const isMatch = locationKeywords.some(loc => userAddress.includes(loc));
+
+      if (!isMatch) {
         req.flash(
           'Sorry',
           `This vendor is only available for addresses under: "${vendorLocation}"`
@@ -301,8 +314,9 @@ exports.Postbooking = [
       }
 
       // ✅ Calculate expireAt properly
+      let expireAt;
       if (subscription_model === 'Per Month') {
-        const parsedStart = new Date(); // Default to today
+        const parsedStart = new Date();
         const totalDays = Number(selectedMonths) * 30;
         const expiryDate = new Date(parsedStart);
         expiryDate.setDate(parsedStart.getDate() + totalDays);
@@ -310,7 +324,7 @@ exports.Postbooking = [
       } else if (subscription_model === 'Per Day') {
         const parsedEnd = new Date(endingDate);
         if (!isNaN(parsedEnd)) {
-          parsedEnd.setDate(parsedEnd.getDate() + 1); // buffer for 1 day
+          parsedEnd.setDate(parsedEnd.getDate() + 1); // 1 day buffer
           expireAt = parsedEnd;
         } else {
           throw new Error('Invalid endingDate for Per Day');
@@ -325,7 +339,11 @@ exports.Postbooking = [
         phone,
         address,
         subscription_model,
-        startingDate: subscription_model === 'Per Month' ? new Date() : subscription_model === 'Per Day' ? new Date(startingDate) : undefined,
+        startingDate: subscription_model === 'Per Month'
+          ? new Date()
+          : subscription_model === 'Per Day'
+            ? new Date(startingDate)
+            : undefined,
         endingDate: subscription_model === 'Per Day' ? new Date(endingDate) : undefined,
         payment,
         totalAmount,
@@ -338,8 +356,9 @@ exports.Postbooking = [
       numberOfOrders += 1;
       await venders.findByIdAndUpdate(venderId, { orders: numberOfOrders });
 
-      // ✅ Add to user's booked vendors if not already added
-      if (!guestUser.booked.includes(venderId)) {
+      // ✅ Add to user's booked list if not already included
+      if (!guestUser.booked.some(id => id.toString() === venderId)) {
+        console.log('👀 Booked Before:', guestUser.booked);
         guestUser.booked.push(venderId);
         await guestUser.save();
         console.log(`✅ Vendor ${venderId} added to booked list of user ${guestUser._id}`);
