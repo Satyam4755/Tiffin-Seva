@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const user = require('./user');
+// const user = require('./user');
 
 const venderSchema = mongoose.Schema({
   imagePublicId: {
@@ -32,6 +32,10 @@ const venderSchema = mongoose.Schema({
   rules: String,
 
   vender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  user:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
