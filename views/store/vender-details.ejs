@@ -1,371 +1,335 @@
 <%- include('../partials/head') %>
-
 <%-include('../partials/background')%>
 <style>
-    .red{
-        color: red;
-    }
-    .green{
-        color: green;
-    }
-    .vender-details-container {
-        z-index: 3;
-        max-width: 500px;
-        margin: 40px auto;
-        padding: 18px;
-        border-radius: 14px;
-        background: white;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-        animation: fadeIn 0.5s ease;
-    }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    margin: 0;
+    padding: 0;
+}
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(15px);
-        }
+.mainDabba {
+    max-width: 900px;
+    margin: 40px auto;
+    background: blanchedalmond;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(44, 62, 80, 0.15);
+    padding: 32px 24px 24px 24px;
+    position: relative;
+    justify-items: center;
+}
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+.img1, .img2 {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin: 0 8px 16px 0;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.09);
+    z-index: -2;
+}
 
+.vender-details-container {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    margin-top: 16px;
+    transition: filter 0.3s;
+}
 
+.vender-details-container.blured {
+    filter: blur(3px) brightness(0.9);
+}
 
-    .vender-image {
-        width: 100%;
-        aspect-ratio: 9/6;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 20px;
-    }
-
-    .vender-content {
-        padding: 16px 8px;
-    }
-
-    .vender-content h2 {
-        font-size: 22px;
-        margin-bottom: 8px;
-        color: #2d3748;
-        text-align: center;
-    }
-
-    .vender-content p {
-        margin: 6px 0;
-        font-size: 14px;
-        color: #444;
-    }
-
-    .label {
-        font-weight: 600;
-        color: #555;
-    }
-
-    .rating-badge {
-        display: inline-block;
-        background: #ffeaa7;
-        color: #d35400;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-weight: bold;
-        font-size: 13px;
-    }
-
-    .description-box {
-        margin-top: 16px;
-        background: #f4f4f4;
-        padding: 12px;
-        border-left: 4px solid #6c5ce7;
-        border-radius: 8px;
-        font-style: italic;
-        font-size: 14px;
-    }
-
-    .action-buttons {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 20px;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .btn {
-        background: #6c5ce7;
-        color: white;
-        border: none;
-        border-radius: 7px;
-        padding: 8px 18px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-        background: #5942d0;
-    }
-
-    .fav-btn img {
-        width: 30px;
-        height: 30px;
-        transition: transform 0.3s ease;
-    }
-
-    .fav-btn img:hover {
-        transform: scale(1.2) rotate(10deg);
-        filter: brightness(1.2);
-    }
-
-    #favImg1 {
-        width: 30px;
-        height: 30px;
-        filter: grayscale(10)
-    }
-
-    #favImg2 {
-        width: 30px;
-        height: 30px;
-    }
-
-    #favImg1:hover {
-        filter: grayscale(0)
-    }
-
-    #favImg2:hover {
-        filter: grayscale(10)
-    }
-
-    .back-btn {
-        background-color: #ff4d6d;
-        margin: 25px auto 0;
-        display: block;
-        border-radius:8px;
-        max-width: 30%;
-        text-align: center;
-    }
-    .back-btn:hover {
-        background-color: #e63946;
-    }
-    .reviews-box-trigger {
+.vender-image-wrapper {
+    flex: 0 0 160px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
-    transition: right 0.3s ease, background-color 0.3s ease;
 }
 
+.vender-image {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #6c5ce7;
+    box-shadow: 0 4px 16px rgba(44,62,80,0.12);
+}
 
+.vender-content {
+    flex: 1;
+}
+
+.vender-content h2 {
+    font-size: 2rem;
+    color: #6c5ce7;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.label {
+    font-weight: 600;
+    color: #636e72;
+}
+
+.rating-badge {
+    background: #ffeaa7;
+    color: #fdcb6e;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 1.1em;
+    margin-left: 6px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.green { color: #00b894; }
+.red { color: #d63031; }
+
+.menu-link {
+    display: inline-flex;
+    align-items: center;
+    background: #6c5ce7;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    margin: 10px 0;
+    transition: background 0.2s;
+}
+.menu-link:hover {
+    background: #341f97;
+}
+.menu-icon {
+    margin-right: 6px;
+    font-size: 1.2em;
+}
+
+.description-box {
+    background: #f1f2f6;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 14px 0;
+    color: #636e72;
+    font-size: 1.05em;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.btn {
+    background: linear-gradient(90deg, #6c5ce7 0%, #00b894 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.09);
+    transition: background 0.2s, transform 0.2s;
+}
+.btn:hover {
+    background: linear-gradient(90deg, #341f97 0%, #00b894 100%);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.fav-btn img {
+    width: 32px;
+    height: 32px;
+    transition: transform 0.2s;
+}
+.fav-btn img:hover {
+    transform: scale(1.15);
+}
+
+.reviews-box-trigger {
+    margin-left: 10px;
+}
 .Rbtn {
     background: none;
     border: none;
     cursor: pointer;
-    width: 50%;
-    height: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 0;
 }
-
 .Rbtn img {
-    width: 60px;
-    height: 60px;
-    rotate: 20deg;
-    object-fit: contain;
-    transition: transform 0.3s ease, filter 0.3s ease;
-    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+    width: 32px;
+    height: 32px;
+    transition: transform 0.2s;
 }
-
 .Rbtn img:hover {
-    transform: scale(1.1) rotate(-20deg);
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transform: scale(1.2) rotate(-10deg);
 }
 
-
-.review_list{
-    height: 35vh;
-    overflow: scroll;
+.reviews-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 420px;
+    max-width: 95vw;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+    padding: 28px 22px 18px 22px;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    transition: opacity 0.3s;
 }
-    .reviews-panel {
-    position: absolute;
-    top: 10%;
-    right: 6%;
-    /* left: 68%; */
-    width: 300px;
-    padding: 16px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    z-index: 5;
-    animation: slideIn 0.3s ease;
-    }
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-#rating{
-    width: 50%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-    .hidden {
+.reviews-panel.hidden {
     display: none;
-    }
-    /* for review form */
-    .add_btn {
-  background-color: #6c5ce7;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-.add_btn:hover {
-  background-color: #5942d0;
-}
-    .review-form-popup {
-  margin-top: 15px;
-  padding: 10px;
-  background: #f0f0ff;
-  border: 2px solid #6c5ce7;
-  border-radius: 10px;
-  animation: fadeIn 0.3s ease;
 }
 
+.review_list {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.review-item {
+    background: #f1f2f6;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+}
+
+.organizer-box,
+.attendees-section {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+  border-left: 4px solid #00c9a7;
+  width: fit-content;
+  max-width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.organizer-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.organizer-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #d63384;
+}
+
+.organizer-info p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.attendee-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.attendee-card {
+  text-align: center;
+  width: 75px;
+  p{
+    margin-top: 0;
+  }
+}
+
+.attendee-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  /* margin-bottom: 6px; */
+}
+
+.add_btn, .submit_btn, .done {
+    background: linear-gradient(90deg, #6c5ce7 0%, #00b894 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.2s;
+}
+.add_btn:hover, .submit_btn:hover, .done:hover {
+    background: linear-gradient(90deg, #341f97 0%, #00b894 100%);
+    transform: scale(1.04);
+}
+
+.review-form-popup {
+    position: fixed;
+    top: 55%;
+    left: 50%;
+    width: 340px;
+    max-width: 90vw;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+    padding: 22px 18px 18px 18px;
+    transform: translate(-50%, -50%);
+    z-index: 1100;
+}
+.review-form-popup.hidden {
+    display: none;
+}
 .review-form-popup textarea {
-  width: 90%;
-  height: 80px;
-  resize: none;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  margin-bottom: 10px;
+    width: 100%;
+    min-height: 60px;
+    border-radius: 8px;
+    border: 1px solid #b2bec3;
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    resize: vertical;
+}
+.review-form-popup input[type="number"] {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #b2bec3;
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 1em;
 }
 
-.submit_btn {
-  background-color: #6c5ce7;
-  width: 33%;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  /* font-weight: bold; */
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.back-btn {
+    margin-top: 24px;
+    background: linear-gradient(90deg, #00b894 0%, #6c5ce7 100%);
 }
 
-.submit_btn:hover {
-  background-color: #5942d0;
+@media (max-width: 700px) {
+    .mainDabba {
+        padding: 12px 4px;
+    }
+    .vender-details-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .vender-image-wrapper {
+        justify-content: flex-start;
+    }
+    .reviews-panel, .review-form-popup {
+        width: 98vw;
+        padding: 12px 4px;
+    }
 }
-
-
-    .img1 {
-    position: absolute;
-    top: 15%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
-    transition: transform 0.4s ease;
-    z-index: -1;
-    }
-    .img2 {
-    position: absolute;
-    top: 40%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
-    transition: transform 0.3s ease;
-    z-index: -1;
-}
-@media (min-width:1500px) {
-    .reviews-panel{
-        left: 65%;
-    }
-    
-}
-
-    @media (max-width: 720px) {
-        .vender-details-container {
-            margin: 20px 10px;
-            padding: 14px;
-            left: 5%;
-            right: 5%;
-        }
-        .reviews-panel{
-            width: 60%;
-            left: 15%;
-            /* right: 20px; */
-            top: 8%;
-            .review_list{
-                font-size: 80%;
-            }
-        }
-        .review_list{
-            height: 20vh;
-        }
-
-        .action-buttons {
-            flex-direction: row;
-        }
-
-        .btn {
-            width: 100%;
-            text-align: center;
-        }
-
-        .vender-content h2 {
-            font-size: 20px;
-        }
-        .blured {
-            filter: blur(4px);
-            pointer-events: none;
-        }
-    }
-
-    .menu-link {
-        display: inline-flex;
-        align-items: center;
-        background: #fff0f6;
-        color: #d72660;
-        border: 1px solid #d72660;
-        border-radius: 20px;
-        padding: 6px 14px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        margin-left: 8px;
-        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-        box-shadow: 0 2px 8px rgba(215, 38, 96, 0.07);
-    }
-
-    .menu-link:hover {
-        background: #d72660;
-        color: #fff;
-        box-shadow: 0 4px 16px rgba(215, 38, 96, 0.15);
-    }
-
-    .menu-icon {
-        margin-right: 6px;
-        font-size: 16px;
-    }
-    .mainDabba{
-        margin-bottom: 15%;
-    }
 </style>
 <% if (messages.success && messages.success.length > 0) { %>
   <script>
@@ -373,26 +337,25 @@
   </script>
 <% } %>
 
-
 <div class="mainDabba">
 
 <img src="/IMG_3134.jpg" class="img1" alt="image">
-
 <img src="/IMG_3108.jpg" class="img2" alt="image">
+
 <div class="vender-details-container">
     <div class="vender-image-wrapper">
         <img class="vender-image" src="<%= vender.image %>" alt="vender Image">
     </div>
-
     <div class="vender-content">
         <h2><%= vender.Name %></h2>
         <p><span class="label">Location:</span> <%= vender.Location %></p>
         <p><span class="label">PricePerday:</span> <%= vender.PricePerday %></p>
         <p><span class="label">PricePerMonth:</span> <%= vender.PricePerMonth %></p>
-        <p><span class="label">Rating:</span>
-            <span class="rating-badge">
+        <p>
+            <span class="label">Rating:</span>
+            <span class="rating-badge" id="starRating" style="cursor:pointer;" onclick="toggleReviews()">
                 <% for (let i=1; i <=Math.round(averageRating); i++) { %>⭐<% } %>
-                        (<%= averageRating %>/5)
+                (<%= averageRating %>/5)
             </span>
         </p>
         <p>
@@ -422,24 +385,24 @@
                 <a href="/user/booking/<%= vender._id %>">
                     <button class="btn">Reserve Now</button>
                 </a>
-                    <form action="/user/favourite_list" method="post" class="fav-btn">
-                        <input type="hidden" name="venderId" value="<%= vender._id %>">
-                        <% if(opacity[vender._id] == 10) { %>
-                            <button onclick="loading()" type="submit" style="background: none; border: none;cursor: pointer;">
-                                <img id="favImg2" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
-                            </button>
-                        <% } else { %>
-                            <button onclick="loading()" type="submit" style="background: none; border: none;cursor: pointer;">
-                                <img id="favImg1" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
-                            </button>
-                        <% } %>
-                    </form>
-                    <!-- Reviews ke liye -->
-<div class="reviews-box-trigger">
-    <button class="Rbtn" onclick="toggleReviews()">
-        <img src="/star.png" alt="img">
-    </button>
-</div>
+                <form action="/user/favourite_list" method="post" class="fav-btn">
+                    <input type="hidden" name="venderId" value="<%= vender._id %>">
+                    <% if(opacity[vender._id] == 10) { %>
+                        <button onclick="loading()" type="submit" style="background: none; border: none;cursor: pointer;">
+                            <img id="favImg2" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
+                        </button>
+                    <% } else { %>
+                        <button onclick="loading()" type="submit" style="background: none; border: none;cursor: pointer;">
+                            <img id="favImg1" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
+                        </button>
+                    <% } %>
+                </form>
+                <!-- Reviews ke liye -->
+                <div class="reviews-box-trigger">
+                    <button class="Rbtn" onclick="toggleReviews()">
+                        <img src="/star.png" alt="img">
+                    </button>
+                </div>
             <% } else if (!isLogedIn) { %>
                 <a href="/logIn">
                     <button class="btn">Login to Reserve</button>
@@ -449,91 +412,110 @@
     </div>
 </div>
 
-
-
 <!-- Reviews ka dabba -->
 <div id="reviewsPanel" class="reviews-panel hidden">
-    <button class="done" style="background-color: #6c5ce7;border: none; color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer;" onclick="removePanel()">
-        Done
-    </button>
-  <h3 style="text-align:center; color:#6c5ce7;">Reviews</h3>
-  <div class="review_list">
-    <% if (reviews && reviews.length > 0) { %>
-      <% reviews.forEach(review => { %>
-        <div class="review-item" style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-          <p><strong><%= review.user.firstName || 'Anonymous' %> <%= review.user.lastName %>:</strong></p>
-          <p><%= review.comment %></p> 
-        <p>
-            Rating:
-            <% for (let i = 0; i < review.rating; i++) { %>
-                ⭐
-            <% } %>
-            (<%= review.rating %>/5)
-        </p>
-        </div>
-      <% }); %>
-    <% } else { %>
-        <p style="text-align:center; color:#555;">No reviews yet!</p>
-    <% } %>
-  </div>
-
-  <!-- Add Yours button -->
-  <%
-  let userReview = null;
-  if (reviews && reviews.length > 0) {
-    userReview = reviews.find(review => review.user._id.toString() === user._id.toString());
-  }
-%>
-
-<% if (userReview) { %>
-  <form action="/user/delete-review/<%= vender._id %>" method="POST" style="text-align:center; margin-top: 10px;">
-    <input type="hidden" name="reviewId" value="<%= userReview._id %>">
-    <button onclick="loading()" type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your Review</button>
-  </form>
-<% } else { %>
-  <button class="add_btn" onclick="toggleReviewForm()">Add Yours!</button>
-<% } %>
-
-  <!-- Hidden review form popup -->
-  <div id="reviewFormPopup" class="review-form-popup hidden">
-    <form action="/user/vender-list/<%= vender._id %>" method="POST"> 
-      <textarea
-        id="reviewText"
-        name="Review"
-        placeholder="Write your review here..."
-        required
-      ></textarea>
-      <input id="rating" type="number" name="Rating" placeholder="⭐ Rating (1-5)" min="1" max="5" required>
-      <button type="submit" class="submit_btn" onclick="loading()">Submit</button>
-    </form>
-  </div>
-</div>
-<script>
-    function toggleReviews() {
-        const panel = document.getElementById('reviewsPanel');
-        const vender_detailsContainer = document.querySelector('.vender-details-container');
-        vender_detailsContainer.classList.add('blured')
-        panel.classList.toggle('hidden');
+    <button class="done" onclick="removePanel()">Done</button>
+    <h3 style="text-align:center; color:#6c5ce7;">Reviews</h3>
+    <div class="review_list">
+        <% if (reviews && reviews.length > 0) { %>
+            <% reviews.forEach(review => { %>
+                <div class="review-item">
+                    <p><strong><%= review.user.firstName || 'Anonymous' %> <%= review.user.lastName %>:</strong></p>
+                    <p><%= review.comment %></p> 
+                    <p>
+                        Rating:
+                        <% for (let i = 0; i < review.rating; i++) { %>
+                            ⭐
+                        <% } %>
+                        (<%= review.rating %>/5)
+                    </p>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p style="text-align:center; color:#555;">No reviews yet!</p>
+        <% } %>
+    </div>
+    <!-- Add Yours button -->
+    <%
+    let userReview = null;
+    if (reviews && reviews.length > 0) {
+        userReview = reviews.find(review => review.user._id.toString() === user._id.toString());
     }
-    function toggleReviewForm() {
-    const popup = document.getElementById("reviewFormPopup");
-    popup.classList.toggle("hidden");
-  }
-    function removePanel() {
+    %>
+    <% if (userReview) { %>
+        <form action="/user/delete-review/<%= vender._id %>" method="POST" style="text-align:center; margin-top: 10px;">
+            <input type="hidden" name="reviewId" value="<%= userReview._id %>">
+            <button onclick="loading()" type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your Review</button>
+        </form>
+    <% } else { %>
+        <button class="add_btn" onclick="toggleReviewForm()">Add Yours!</button>
+    <% } %>
+    <!-- Hidden review form popup -->
+    <div id="reviewFormPopup" class="review-form-popup hidden">
+        <form action="/user/vender-list/<%= vender._id %>" method="POST"> 
+            <textarea
+                id="reviewText"
+                name="Review"
+                placeholder="Write your review here..."
+                required
+            ></textarea>
+            <input id="rating" type="number" name="Rating" placeholder="⭐ Rating (1-5)" min="1" max="5" required>
+            <button type="submit" class="submit_btn" onclick="loading()">Submit</button>
+        </form>
+    </div>
+</div>
+
+<% if (vender.vender) { %>
+      <div class="organizer-box">
+        <h3 style="color: #d63384;">👑 Vendor</h3>
+        <div class="organizer-profile">
+          <img src="<%= vender.vender.profilePicture || '/user.jpeg' %>" class="organizer-img" />
+          <div class="organizer-info">
+            <p><strong><%= vender.vender.firstName %> <%= vender.vender.lastName %></strong></p>
+            <p><strong>Email:</strong> <%= vender.vender.email %></p>
+            <p><strong><%= vender.vender.userType %></strong></p>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+<% if (guestUsers && guestUsers.length > 0) { %>
+  <div class="attendees-section">
+    <h3 style="color: #6c5ce7;">👥 Customers (<%= guestUsers.length %>)</h3>
+    <div class="attendee-grid">
+      <% guestUsers.forEach(guest => { %>
+        <div class="attendee-card">
+          <img src="<%= guest.profilePicture || '/user.jpeg' %>" class="attendee-img" />
+          <p><%= guest.firstName %> <%= guest.lastName || '' %></p>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
+<script>
+function toggleReviews() {
     const panel = document.getElementById('reviewsPanel');
     const vender_detailsContainer = document.querySelector('.vender-details-container');
-    
+    vender_detailsContainer.classList.add('blured');
+    panel.classList.toggle('hidden');
+}
+function toggleReviewForm() {
+    const popup = document.getElementById("reviewFormPopup");
+    popup.classList.toggle("hidden");
+}
+function removePanel() {
+    const panel = document.getElementById('reviewsPanel');
+    const vender_detailsContainer = document.querySelector('.vender-details-container');
     panel.classList.add('hidden');
-    vender_detailsContainer.classList.remove('blured'); // ✅ Remove blur
+    vender_detailsContainer.classList.remove('blured');
 }
 </script>
 
-<a href="/" style="
-        text-decoration: none ;">
+<a href="/" style="text-decoration: none;">
     <button class="btn back-btn">Go Back To vender</button>
 </a>
 </div>
-  <%-include('../partials/loading')%>
-  <%-include('../partials/footer')%>
+<%-include('../partials/loading')%>
+<%-include('../partials/footer')%>
 </body>
-</html> 
+</html>
