@@ -324,27 +324,32 @@
         <script>
           const vendorLocationRaw = "<%= vender.Location %>";
 
-          // Convert to lowercase and split using any non-alphanumeric separator
+          // Convert to lowercase and split on anything that's not a word (letters or numbers)
           const locationAreas = vendorLocationRaw
             .toLowerCase()
-            .split(/[^a-zA-Z0-9]+/) // split on anything that's not a letter or number
+            .split(/[^a-zA-Z0-9]+/)
             .map(loc => loc.trim())
             .filter(loc => loc.length > 0);
 
           const addressInput = document.getElementById('address');
           const warning = document.getElementById('addressWarning');
 
+          // Clean user input using the same logic
           function cleanInput(text) {
             return text
               .toLowerCase()
-              .replace(/[^a-zA-Z0-9\s]/g, '') // remove punctuation except spaces
-              .replace(/\s+/g, ' ')           // normalize multiple spaces
-              .trim();
+              .split(/[^a-zA-Z0-9]+/)
+              .map(part => part.trim())
+              .filter(Boolean);
           }
 
           function checkAddressMatch() {
-            const userAddress = cleanInput(addressInput.value);
-            const isValid = locationAreas.some(loc => userAddress.includes(loc));
+            const userAddressParts = cleanInput(addressInput.value);
+
+            const isValid = locationAreas.some(loc =>
+              userAddressParts.includes(loc)
+            );
+
             warning.style.display = isValid ? 'none' : 'block';
             return isValid;
           }
