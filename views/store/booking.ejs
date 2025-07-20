@@ -225,6 +225,7 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
 }
 
+.radio-tile input[type="checkbox"],
 .radio-tile input[type="radio"] {
   display: none;
 }
@@ -370,15 +371,16 @@
           <input type="radio" id="perday" name="subscription_model" value="Per Day" onclick="toggleTimeOptions()">
           Per Day
         </label>
+        
         <div id="timeOptions" style="display: none;">
           <div class="radio-tile-group">
-            <label class="radio-tile" id="oneTimeTile">
-              <input type="radio" name="time_type" value="one" checked>
-              One Time
+            <label class="radio-tile" id="lunchTile">
+              <input type="checkbox" name="time_type" value="lunch" onchange="updateTileSelection(); calculateTotal();">
+              Lunch
             </label>
-            <label class="radio-tile" id="twoTimeTile">
-              <input type="radio" name="time_type" value="two">
-              Two Time
+            <label class="radio-tile" id="dinnerTile">
+              <input type="checkbox" name="time_type" value="dinner" onchange="updateTileSelection(); calculateTotal();">
+              Dinner
             </label>
           </div>
         </div>
@@ -447,28 +449,81 @@
   const totalAmount = document.getElementById('totalAmountInput');
   const display = document.getElementById('calculatedEndDate');
 
+  const showMessage = (msg) => {
+    alert(msg);  // 🔔 You can change to custom modal/snackbar if needed
+  };
+
+  function isWithinLunchTime() {
+    const now = new Date();
+    const hour = now.getHours();
+    return hour >= 9 && hour < 12;
+  }
+
+  function isWithinDinnerTime() {
+    const now = new Date();
+    const hour = now.getHours();
+    return hour >= 13 && hour < 18;
+  }
+
+  function validateTimeSelection(e) {
+  const now = new Date();
+  const hour = now.getHours();
+
+  const lunchInput = document.querySelector('input[value="lunch"]');
+  const dinnerInput = document.querySelector('input[value="dinner"]');
+
+  const isLunchSelected = lunchInput.checked;
+  const isDinnerSelected = dinnerInput.checked;
+
+  // Check availability
+  const lunchAvailable = hour >= 9 && hour < 12;
+  const dinnerAvailable = hour < 18; // ✅ Only max limit for dinner
+
+  // Validate Lunch
+  if (e.target.value === "lunch" && !lunchAvailable) {
+    lunchInput.checked = false;
+    showMessage("⏰ Time for ordering lunch is 9AM - 12PM");
+  }
+
+  // Validate Dinner
+  if (e.target.value === "dinner" && !dinnerAvailable) {
+    dinnerInput.checked = false;
+    showMessage("⏰ Time for ordering dinner is before 6PM");
+  }
+
+  // Check if both are selected but none available
+  const lunchFinal = lunchInput.checked && lunchAvailable;
+  const dinnerFinal = dinnerInput.checked && dinnerAvailable;
+
+  if (!lunchAvailable && !dinnerAvailable && (isLunchSelected || isDinnerSelected)) {
+    lunchInput.checked = false;
+    dinnerInput.checked = false;
+    showMessage("🚫 Today's time for ordering is reached out! Please order tomorrow.");
+  }
+
+  updateTileSelection();
+  calculateTotal();
+}
   function toggleTimeOptions() {
     const isPerDaySelected = document.getElementById('perday').checked;
-    const isPerMonthSelected = document.getElementById('permonth').checked;
+    const isPerMonthSelected = document.getElementById('permonth')?.checked;
 
-    // Toggle blocks
     document.getElementById('timeOptions').style.display = isPerDaySelected ? 'block' : 'none';
     document.getElementById('dateInputs').style.display = isPerDaySelected ? 'block' : 'none';
-    document.getElementById('monthGrid').style.display = isPerMonthSelected ? 'block' : 'none';
+    if (document.getElementById('monthGrid'))
+      document.getElementById('monthGrid').style.display = isPerMonthSelected ? 'block' : 'none';
 
-    // ✅ Hide message if switching to Per Day
     display.style.display = isPerMonthSelected ? 'block' : 'none';
-
     calculateTotal();
   }
 
   function calculateTotal() {
-    const perDay = Number(document.getElementById('perdayValue').value);
-    const perMonth = Number(document.getElementById('permonthValue').value);
+    const perDay = Number(document.getElementById('perdayValue')?.value || 0);
+    const perMonth = Number(document.getElementById('permonthValue')?.value || 0);
     const selectedModel = Array.from(subscriptionRadios).find(radio => radio.checked)?.value;
     const startDate = new Date(startInput.value);
     const endDate = new Date(endInput.value);
-    const selectedMonths = Number(document.getElementById('selectedMonths').value);
+    const selectedMonths = Number(document.getElementById('selectedMonths')?.value || 0);
     let total = 0;
 
     if (selectedModel === 'Per Day') {
@@ -480,10 +535,11 @@
 
       const diffTime = endDate.getTime() - startDate.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      const timeType = document.querySelector('input[name="time_type"]:checked')?.value;
-      const multiplier = timeType === 'two' ? 2 : 1;
-      total = diffDays * perDay * multiplier;
 
+      const selectedTimes = document.querySelectorAll('input[name="time_type"]:checked');
+      const multiplier = selectedTimes.length;
+
+      total = diffDays * perDay * multiplier;
     } else if (selectedModel === 'Per Month') {
       if (!selectedMonths) {
         totalElement.textContent = 0;
@@ -497,45 +553,16 @@
     totalAmount.value = total;
   }
 
-  // Month button clicks
-  document.querySelectorAll('.month-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Remove selection from all
-      document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('selected'));
-
-      // Add selection to clicked
-      btn.classList.add('selected');
-
-      const selected = parseInt(btn.getAttribute('data-months'));
-      document.getElementById('selectedMonths').value = selected;
-
-      // Calculate ending date
-      const startDate = new Date();
-      const totalDays = selected * 30;
-      const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + totalDays);
-
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      const endString = endDate.toLocaleDateString(undefined, options);
-      const startString = startDate.toLocaleDateString(undefined, options);
-
-      const output = `📅 Subscription starts on <b>${startString}</b> and ends on <b>${endString}</b> (Total ${totalDays} days)`;
-      display.innerHTML = output;
-      display.style.display = 'block';
-
-      calculateTotal();
-    });
-  });
-
   function updateTileSelection() {
-    // Subscription model
     document.getElementById('perDayTile').classList.toggle('selected', document.getElementById('perday').checked);
-    document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth').checked);
+    if (document.getElementById('perMonthTile'))
+      document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth')?.checked);
 
-    // Time type
-    const timeType = document.querySelector('input[name="time_type"]:checked')?.value;
-    document.getElementById('oneTimeTile').classList.toggle('selected', timeType === 'one');
-    document.getElementById('twoTimeTile').classList.toggle('selected', timeType === 'two');
+    const lunch = document.querySelector('input[value="lunch"]')?.checked;
+    const dinner = document.querySelector('input[value="dinner"]')?.checked;
+
+    document.getElementById('lunchTile').classList.toggle('selected', lunch);
+    document.getElementById('dinnerTile').classList.toggle('selected', dinner);
   }
 
   // Event Listeners
@@ -547,10 +574,7 @@
   });
 
   document.querySelectorAll('input[name="time_type"]').forEach(input => {
-    input.addEventListener('change', () => {
-      updateTileSelection();
-      calculateTotal();
-    });
+    input.addEventListener('change', validateTimeSelection);
   });
 
   startInput.addEventListener('change', calculateTotal);
