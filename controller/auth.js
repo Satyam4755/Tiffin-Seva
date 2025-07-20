@@ -204,27 +204,34 @@ exports.postSignUpPage = [
 
 // GET the edit profile form
 exports.getEditPage = async (req, res) => {
+  const editing = req.query.editing === 'true';
 
-    const editing = req.query.editing === 'true';
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).send('User not found');
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).send('User not found');
 
-        res.render('./store/signup', { 
-            user,
-            editing: editing, 
-            title: "Edit Profile", 
-            isLogedIn: req.isLogedIn, 
-            oldInput: { 
-                firstName: user.firstName, 
-                lastName: user.lastName, 
-                dob:user.dob,
-                email: user.email 
-            } 
-        });
-    } catch (err) {
-        res.status(500).send('Error fetching user'); 
-    }
+    // Count how many vendors exist
+    const vendorCount = await User.countDocuments({ userType: 'vender' });
+
+    res.render('./store/signup', {
+      user,
+      editing,
+      vendorExists: vendorCount > 0,
+      title: "Edit Profile",
+      isLogedIn: req.isLogedIn,
+      oldInput: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        dob: user.dob,
+        email: user.email,
+        userType: user.userType,
+      }
+    });
+
+  } catch (err) {
+    console.error('❌ Error fetching user or vendor count:', err);
+    res.status(500).send('Error fetching user');
+  }
 };
 
 // POST updated profile
@@ -273,25 +280,36 @@ exports.postEditPage = async (req, res) => {
 }
 };
 
-exports.getSignUpPage = (req, res, next) => {
-    const editing = req.query.editing === 'true';
-    const { firstName, lastName, dob, email, password, userType } = req.body;
+// GET the signup page
+exports.getSignUpPage = async (req, res, next) => {
+  const editing = req.query.editing === 'true';
+  const { firstName, lastName, dob, email, password, userType } = req.body;
 
-    const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
+  const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
+
+  try {
+    // ✅ Check if a vendor already exists
+    const vendorCount = await User.countDocuments({ userType: 'vender' });
 
     res.render('./store/signup', {
-        title: "Sign-UP Page",
-        isLogedIn: req.isLogedIn,
-        oldInput: {
-            firstName,
-            lastName,
-            dob: dobString, // ✅ clean and correct
-            email,
-            password,
-            userType
-        },
-        editing
+      title: "Sign-UP Page",
+      isLogedIn: req.isLogedIn,
+      editing,
+      vendorExists: vendorCount > 0, // ✅ important
+      oldInput: {
+        firstName,
+        lastName,
+        dob: dobString,
+        email,
+        password,
+        userType
+      }
     });
+
+  } catch (err) {
+    console.error('❌ Error checking vendor count for signup:', err);
+    res.status(500).send('Server error');
+  }
 };
 
 exports.deleteUserPage = async (req, res) => {
