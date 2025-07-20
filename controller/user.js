@@ -385,24 +385,24 @@ exports.submitBooking = (req, res, next) => {
 };
 
 // booked LIST
-
 exports.booked = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
   try {
     const userId = req.session.user._id;
-    const user = await User.findById(userId).populate('booked');
 
-    const validBookedVendors = [];
+    // Fetch all orders placed by the user
+    const orders = await Order.find({ guest: userId })
+      .populate('vender')
+      .sort({ createdAt: -1 });
 
-    for (const vendor of user.booked) {
-      const existingOrder = await Order.findOne({
-        guest: userId,
-        vender: vendor._id
-      });
+    // Filter out orders with deleted vendors
+    const validOrders = [];
 
-      if (existingOrder) {
-        // Add average rating
+    for (const order of orders) {
+      if (order.vender) {
+        // Calculate average rating
+        const vendor = order.vender;
         if (vendor.reviews && vendor.reviews.length > 0) {
           const validRatings = vendor.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
           if (validRatings.length > 0) {
@@ -415,16 +415,12 @@ exports.booked = async (req, res, next) => {
           vendor.averageRating = 0;
         }
 
-        validBookedVendors.push(vendor);
-      } else {
-        await User.findByIdAndUpdate(userId, {
-          $pull: { booked: vendor._id }
-        });
+        validOrders.push(order);
       }
     }
 
     res.render('./store/booked', {
-      venders: validBookedVendors,
+      orders: validOrders,
       title: "Booked Vendor List",
       currentPage: 'reserve',
       isLogedIn: req.isLogedIn,
@@ -433,7 +429,7 @@ exports.booked = async (req, res, next) => {
     });
 
   } catch (err) {
-    console.error('Error loading booked vendors:', err);
+    console.error('❌ Error loading booked orders:', err);
     req.flash('error', 'Could not load your booked vendors');
     res.redirect('back');
   }
