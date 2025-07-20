@@ -11,7 +11,7 @@ const OrderSchema = new mongoose.Schema({
   endingDate: Date,
   payment: String,
   totalAmount: Number,
-  time_type: String,
+  time_type: [String],
   number_of_months: Number,
   expireAt: {
     type: Date,
