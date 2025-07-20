@@ -59,7 +59,6 @@ exports.PostLogout = (req, res, next) => {
     })
 
 }
-// we can make middleware in array format also....
 exports.postSignUpPage = [
   // ✅ Validations
   check('firstName')
@@ -68,7 +67,7 @@ exports.postSignUpPage = [
     .matches(/^[a-zA-Z]+$/).withMessage("Should be correct name"),
 
   check('lastName')
-  .trim()
+    .trim()
     .matches(/^[a-zA-Z]*$/).withMessage("Should be correct name"),
 
   check('dob')
@@ -87,7 +86,7 @@ exports.postSignUpPage = [
 
   check('email')
     .isEmail().withMessage("Email should be in email format")
-    .normalizeEmail(),
+    .normalizeEmail({ all_lowercase: false }), // ✅ keeps dots
 
   check('password')
     .isLength({ min: 6 }).withMessage("The password must be at least 6 characters")
@@ -122,6 +121,9 @@ exports.postSignUpPage = [
     const editing = req.query.editing === 'true';
     const errors = validationResult(req);
 
+    const existingVendorCount = await User.countDocuments({ userType: 'vender' }); // ✅ moved up
+
+    // 🛑 If validation fails
     if (!errors.isEmpty()) {
       return res.status(422).render('store/signup', {
         title: "Sign-Up",
@@ -136,21 +138,41 @@ exports.postSignUpPage = [
           userType
         },
         editing,
-        user: {}
+        user: {},
+        vendorExists: existingVendorCount > 0 // ✅ add this
       });
     }
 
     try {
+      // ✅ Check if vendor already exists (only allow 1 vendor)
+      if (userType === 'vender' && existingVendorCount >= 1) {
+        return res.status(422).render('store/signup', {
+          title: "Sign-Up",
+          isLogedIn: false,
+          errorMessage: ['Vendor already exists. Only one vendor is allowed.'],
+          oldInput: {
+            firstName,
+            lastName,
+            dob: dobString,
+            email,
+            password,
+            userType
+          },
+          editing,
+          user: {},
+          vendorExists: true // ✅ add this
+        });
+      }
+
+      // ✅ Upload profile image if provided
       const files = req.files;
       let profilePictureUrl = '';
       let profilePicturePublicId = '';
 
-      // ✅ Upload only if user provided profile image
       if (files?.profilePicture && files.profilePicture.length > 0) {
         const profilePictureBuffer = files.profilePicture[0].buffer;
 
         const profilePictureResult = await fileUploadInCloudinary(profilePictureBuffer);
-
         if (!profilePictureResult?.secure_url) {
           throw new Error("Cloudinary upload failed");
         }
@@ -159,8 +181,10 @@ exports.postSignUpPage = [
         profilePicturePublicId = profilePictureResult.public_id;
       }
 
+      // ✅ Hash password
       const hashedPassword = await bcrypt.hash(password, 8);
 
+      // ✅ Save user
       const newUser = new User({
         profilePicture: profilePictureUrl,
         profilePicturePublicId: profilePicturePublicId,
@@ -174,11 +198,12 @@ exports.postSignUpPage = [
 
       const user = await newUser.save();
 
+      // ✅ Create session
       req.session.isLogedIn = true;
       req.session.user = user;
       await req.session.save();
 
-      res.redirect('/');
+      return res.redirect('/');
     } catch (err) {
       console.log("Signup Error:", err.message);
       return res.status(422).render('store/signup', {
@@ -194,7 +219,8 @@ exports.postSignUpPage = [
           userType
         },
         editing,
-        user: {}
+        user: {},
+        vendorExists: existingVendorCount > 0 // ✅ add this
       });
     }
   }
