@@ -335,75 +335,72 @@ exports.deleteUser = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
+
     if (!user) return res.status(404).send('User not found');
 
     const isMatched = await bcrypt.compare(password, user.password);
     if (!isMatched) {
       return res.status(401).render('./store/delete', {
         title: "Delete Page",
-        isLogedIn: false,
+        isLogedIn: req.isLogedIn,
         errorMessage: ['Incorrect password'],
         oldInput: { email },
         user: req.session.user
       });
     }
 
-    // 🔁 Get all vendors owned by the user
+    // 1. Fetch all vendors owned by user
     const userVenders = await vender.find({ vender: user._id });
 
-    // 🔁 Delete all related vendor-based data
-    for (const vender of userVenders) {
-      // Delete cloudinary images for each vendor
-      const cloudinaryDeletePromises = [];
-      if (vender.imagePublicId)
-        cloudinaryDeletePromises.push(cloudinary.uploader.destroy(vender.imagePublicId));
-      if (vender.MenuimagePublicId)
-        cloudinaryDeletePromises.push(cloudinary.uploader.destroy(vender.MenuimagePublicId));
-      await Promise.all(cloudinaryDeletePromises);
+    // 2. Delete Cloudinary images and related collections for each vendor
+    for (const v of userVenders) {
+      const promises = [];
 
-      // Delete related collections
-      await Orders.deleteMany({ vender: vender._id });
-      await venderOptions.deleteMany({ vendorId: vender._id });
-      await userOptions.deleteMany({ vendor: vender._id });
-      await message.deleteMany({ vendorId: vender._id });
+      if (v.imagePublicId) promises.push(cloudinary.uploader.destroy(v.imagePublicId));
+      if (v.MenuimagePublicId) promises.push(cloudinary.uploader.destroy(v.MenuimagePublicId));
+      await Promise.all(promises);
 
-      // Delete the vendor itself
-      await vender.findByIdAndDelete(vender._id);
+      await Orders.deleteMany({ vender: v._id });
+      await venderOptions.deleteMany({ vendorId: v._id });
+      await userOptions.deleteMany({ vendor: v._id });
+      await message.deleteMany({ vendorId: v._id });
+
+      await vender.findByIdAndDelete(v._id);
     }
 
-    // 🔁 Clean from other users' booked arrays
-    await User.updateMany(
-      { booked: user._id },
-      { $pull: { booked: user._id } }
-    );
+    // 3. Remove this user's ID from all users' `booked` arrays
+    await User.updateMany({}, { $pull: { booked: { $in: userVenders.map(v => v._id) } } });
 
-    // Delete user's own orders, messages, options
+    // 4. Delete all user-related records
     await Orders.deleteMany({ guest: user._id });
     await message.deleteMany({ guestId: user._id });
     await venderOptions.deleteMany({ guest: user._id });
     await userOptions.deleteMany({ guest: user._id });
 
-    // 🔁 Delete profile picture from Cloudinary
     if (user.profilePicturePublicId) {
       await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => {
         console.warn("Error deleting profile image:", err.message);
       });
     }
 
-    // 🔁 Delete the user itself
+    // 5. Delete the user
     await User.findByIdAndDelete(user._id);
 
-    // 🔁 Destroy session if the user is logged in
+    // 6. Clear session if needed
     if (req.session.user && req.session.user._id.toString() === user._id.toString()) {
-      req.session.destroy(() => {
-        res.redirect('/logIn');
+      req.session.destroy(err => {
+        if (err) {
+          console.error('❌ Session destruction error:', err);
+          return res.redirect('/');
+        }
+        return res.redirect('/logIn');
       });
     } else {
-      res.redirect('/');
+      return res.redirect('/');
     }
 
   } catch (err) {
-    console.error('Delete Error:', err);
-    res.status(500).send('Error deleting user');
+    console.error('❌ Delete Error:', err);
+    return res.status(500).send('Error deleting user');
   }
 };
