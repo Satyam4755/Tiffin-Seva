@@ -282,32 +282,28 @@ button:hover {
       <!-- User Type -->
       <div class="input-group">
         <% if (!editing) { %>
-        <select
-          id="userType"
-          name="userType"
-          required
-          aria-required="true"
-          aria-label="User Type"
-        >
-          <option value="" disabled <%= !oldInput || !oldInput.userType ? 'selected' : '' %>>
-            Select User Type
-          </option>
-          <option value="guest" <%= oldInput && oldInput.userType === 'guest' ? 'selected' : '' %>>
-            Customer
-          </option>
-          <option value="vender" <%= oldInput && oldInput.userType === 'vender' ? 'selected' : '' %>>
-            vendor
-          </option>
-        </select>
-        <label for="userType">Select User Type</label>
-        <% } else { %>
-        <select id="userType" name="userType" disabled aria-disabled="true">
-          <option value="<%= user.userType %>" selected>
-            <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
-          </option>
-        </select>
-        <label for="userType">User Type</label>
-        <% } %>
+          <select id="userType" name="userType" required aria-required="true" aria-label="User Type">
+            <option value="" disabled <%=!oldInput || !oldInput.userType ? 'selected' : '' %>>
+              Select User Type
+            </option>
+            <option value="guest" <%=oldInput && oldInput.userType==='guest' ? 'selected' : '' %>>
+              Customer
+            </option>
+            <% if (!vendorExists) { %>
+              <option value="vender" <%=oldInput && oldInput.userType==='vender' ? 'selected' : '' %>>
+                Vendor
+              </option>
+              <% } %>
+          </select>
+          <label for="userType">Select User Type</label>
+          <% } else { %>
+            <select id="userType" name="userType" disabled aria-disabled="true">
+              <option value="<%= user.userType %>" selected>
+                <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
+              </option>
+            </select>
+            <label for="userType">User Type</label>
+            <% } %>
       </div>
 
       <!-- First Name -->
