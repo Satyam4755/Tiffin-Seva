@@ -121,8 +121,6 @@ exports.postSignUpPage = [
     const editing = req.query.editing === 'true';
     const errors = validationResult(req);
 
-    const existingVendorCount = await User.countDocuments({ userType: 'vender' }); // ✅ moved up
-
     // 🛑 If validation fails
     if (!errors.isEmpty()) {
       return res.status(422).render('store/signup', {
@@ -138,32 +136,11 @@ exports.postSignUpPage = [
           userType
         },
         editing,
-        user: {},
-        vendorExists: existingVendorCount > 0 // ✅ add this
+        user: {}
       });
     }
 
     try {
-      // ✅ Check if vendor already exists (only allow 1 vendor)
-      if (userType === 'vender' && existingVendorCount >= 1) {
-        return res.status(422).render('store/signup', {
-          title: "Sign-Up",
-          isLogedIn: false,
-          errorMessage: ['Vendor already exists. Only one vendor is allowed.'],
-          oldInput: {
-            firstName,
-            lastName,
-            dob: dobString,
-            email,
-            password,
-            userType
-          },
-          editing,
-          user: {},
-          vendorExists: true // ✅ add this
-        });
-      }
-
       // ✅ Upload profile image if provided
       const files = req.files;
       let profilePictureUrl = '';
@@ -219,8 +196,7 @@ exports.postSignUpPage = [
           userType
         },
         editing,
-        user: {},
-        vendorExists: existingVendorCount > 0 // ✅ add this
+        user: {}
       });
     }
   }
