@@ -78,6 +78,11 @@
     font-size: 1.3em;
   }
 
+  .month-btn.selected {
+  background-color: #ffe6ec;
+  border-color: #ff4e74;
+  color: #d6336c;
+}
   .content p {
     margin: 5px 0;
     color: #555;
@@ -258,11 +263,7 @@
   border-color: #ff4e74;
 }
 
-.month-btn.selected {
-  background-color: #ffe6ec;
-  border-color: #ff4e74;
-  color: #d6336c;
-}
+
 .badaDabba{
         margin-bottom: 15%;
     }
@@ -579,6 +580,37 @@
 
   startInput.addEventListener('change', calculateTotal);
   endInput.addEventListener('change', calculateTotal);
+
+
+  // for the moths
+  const monthButtons = document.querySelectorAll(".month-btn");
+
+monthButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // remove previous selection
+    monthButtons.forEach(b => b.classList.remove("selected"));
+
+    // mark current button as selected
+    btn.classList.add("selected");
+
+    const months = parseInt(btn.getAttribute("data-months"));
+    document.getElementById("selectedMonths").value = months;
+
+    // Calculate meal time period
+    const start = new Date();
+    const end = new Date();
+    end.setDate(start.getDate() + (30 * months));
+
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    const msg = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
+
+    const display = document.getElementById("calculatedEndDate");
+    display.textContent = msg;
+    display.style.display = "block";
+
+    calculateTotal();
+  });
+});
 </script>
 
   <%-include('../partials/loading')%>
