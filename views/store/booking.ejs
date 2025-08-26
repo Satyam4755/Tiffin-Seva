@@ -466,7 +466,7 @@
     return hour >= 13 && hour < 18;
   }
 
-  function validateTimeSelection(e) {
+function validateTimeSelection(e) {
   const now = new Date();
   const hour = now.getHours();
 
@@ -476,36 +476,42 @@
   const isLunchSelected = lunchInput.checked;
   const isDinnerSelected = dinnerInput.checked;
 
-  // Check availability
-  const lunchAvailable = hour >= 9 && hour < 12;
-  const dinnerAvailable = hour < 18; // ✅ Only max limit for dinner
+  // Get selected starting date
+  const startDateValue = startInput.value ? new Date(startInput.value) : null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
 
-  // Validate Lunch
+  // ✅ If starting date is in the future, allow without restrictions
+  if (startDateValue && startDateValue > today) {
+    updateTileSelection();
+    calculateTotal();
+    return;
+  }
+
+  // Otherwise, apply today's time restrictions
+  const lunchAvailable = hour >= 9 && hour < 12;
+  const dinnerAvailable = hour < 18;
+
   if (e.target.value === "lunch" && !lunchAvailable) {
     lunchInput.checked = false;
-    showMessage("⏰ Time for ordering lunch is 9AM - 12PM");
+    showMessage("⏰ Time for ordering lunch is 9AM - 12PM today");
   }
 
-  // Validate Dinner
   if (e.target.value === "dinner" && !dinnerAvailable) {
     dinnerInput.checked = false;
-    showMessage("⏰ Time for ordering dinner is before 6PM");
+    showMessage("⏰ Time for ordering dinner is before 6PM today");
   }
-
-  // Check if both are selected but none available
-  const lunchFinal = lunchInput.checked && lunchAvailable;
-  const dinnerFinal = dinnerInput.checked && dinnerAvailable;
 
   if (!lunchAvailable && !dinnerAvailable && (isLunchSelected || isDinnerSelected)) {
     lunchInput.checked = false;
     dinnerInput.checked = false;
-    showMessage("🚫 Today's time for ordering is reached out! Please order tomorrow.");
+    showMessage("🚫 Today's time for ordering is over! Please select a future date.");
   }
 
   updateTileSelection();
   calculateTotal();
 }
-  function toggleTimeOptions() {
+function toggleTimeOptions() {
     const isPerDaySelected = document.getElementById('perday').checked;
     const isPerMonthSelected = document.getElementById('permonth')?.checked;
 
@@ -617,3 +623,4 @@ monthButtons.forEach(btn => {
   <%-include('../partials/footer')%>
 </body>
 </html>
+ 
