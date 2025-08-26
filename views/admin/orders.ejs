@@ -183,7 +183,7 @@
                   <td data-label="Subscription">
                     <%= order.subscription_model || 'Not Available' %>
                   </td>
-                  <td data-label="Start / End">
+                  <td data-label="Duration">
                     <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
                       <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
                     <% } else { %>
