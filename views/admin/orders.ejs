@@ -162,7 +162,6 @@
             <th>Payment</th>
             <th>Price</th>
             <th>Time Type</th>
-            <th>Email</th>
           </tr>
         </thead>
         <tbody>
@@ -223,9 +222,6 @@
                 <% } else { %>
                   N/A
                 <% } %>
-              </td>
-              <td data-label="Email">
-                <%= order.guest ? order.guest.email : 'Email not found' %>
               </td>
             </tr>
           <% }) %>
