@@ -146,81 +146,106 @@
 
   <% if (!isVender) { %>
     <p>You haven’t added any vendor yet. <a href="/vender/add_vender">Add one now</a>.</p>
-    <% } else if (orders.length===0) { %>
-      <p>No orders yet.</p>
-      <% } else { %>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Vendor</th>
-                <th>Guest Name</th>
-                <th>Address</th>
-                <th>Phone</th>
-                <th>Subscription</th>
-                <th>Duration</th>
-                <th>Payment</th>
-                <th>Price</th>
-                <th>Time Type</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% orders.forEach(order=> { %>
-                <tr>
-                  <td data-label="Vendor">
-                    <%= order.vender ? order.vender.Name : 'Deleted Vendor' %>
-                  </td>
-                  <td data-label="Guest Name">
-                    <%= order.name || 'Unknown Guest' %>
-                  </td>
-                  <td data-label="Location">
-                    <%= order.address ? order.address : 'Unknown Location' %>
-                  </td>
-                  <td data-label="Phone">
-                    <%= order.phone || 'N/A' %>
-                  </td>
-                  <td data-label="Subscription">
-                    <%= order.subscription_model || 'Not Available' %>
-                  </td>
-                  <td data-label="Duration">
-                    <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
-                      <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
-                    <% } else { %>
-                      <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
-                      <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
-                    <% } %>
-                  </td>
-                  <td data-label="Payment">
-                    <%= order.payment || 'N/A' %>
-                  </td>
-                  <td data-label="Price">
-                    ₹<%= order.totalAmount || 'N/A' %>
-                  </td>
-                  <td data-label="Time Type">
-                    <% if (order.subscription_model==='Per Month' ) { %>
-                      Lunch & Dinner
-                    <% } else if (Array.isArray(order.time_type)) { %>
-                        <%= order.time_type.map(type=> type.charAt(0).toUpperCase() + type.slice(1)).join(" & ") %>
-                    <% } else if (order.time_type==='lunch' || order.time_type==='dinner' ) { %>
-                    <%= order.time_type.charAt(0).toUpperCase() + order.time_type.slice(1) %>
-                    <% } else if (order.time_type==='two' ) { %>
-                                Lunch & Dinner
-                    <% } else if (order.time_type==='one' ) { %>
-                                  Lunch
-                    <% } else { %>
-                      N/A
-                    <% } %>
-                  </td>
-                  <td data-label="Email">
-                    <%= order.guest ? order.guest.email : 'Email not found' %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-    <% } %>
+  <% } else if (orders.length===0) { %>
+    <p>No orders yet.</p>
+  <% } else { %>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Guest Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Subscription</th>
+            <th>Duration</th>
+            <th>Payment</th>
+            <th>Price</th>
+            <th>Time Type</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% 
+            let totalAmountAll = 0; 
+            orders.forEach(order => { 
+              totalAmountAll += order.totalAmount || 0; 
+          %>
+            <tr>
+              <td data-label="Vendor">
+                <%= order.vender ? order.vender.Name : 'Deleted Vendor' %>
+              </td>
+              <td data-label="Guest Name">
+                <%= order.name || 'Unknown Guest' %>
+              </td>
+              <td data-label="Location">
+                <%= order.address ? order.address : 'Unknown Location' %>
+              </td>
+              <td data-label="Phone">
+                <%= order.phone || 'N/A' %>
+              </td>
+              <td data-label="Subscription">
+                <%= order.subscription_model || 'Not Available' %>
+              </td>
+              <td data-label="Duration">
+                <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
+                  <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
+                  (<% if (order.startingDate) { 
+                       const start=new Date(order.startingDate); 
+                       const end=new Date(start);
+                       end.setDate(start.getDate() + 30); %>
+                       <%= start.toDateString() %> - <%= end.toDateString() %>
+                     <% } else { %>
+                       N/A
+                     <% } %>)
+                <% } else { %>
+                  <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
+                  <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
+                <% } %>
+              </td>
+              <td data-label="Payment">
+                <%= order.payment || 'N/A' %>
+              </td>
+              <td data-label="Price">
+                ₹<%= order.totalAmount || 'N/A' %>
+              </td>
+              <td data-label="Time Type">
+                <% if (order.subscription_model==='Per Month' ) { %>
+                  Lunch & Dinner
+                <% } else if (Array.isArray(order.time_type)) { %>
+                  <%= order.time_type.map(type=> type.charAt(0).toUpperCase() + type.slice(1)).join(" & ") %>
+                <% } else if (order.time_type==='lunch' || order.time_type==='dinner' ) { %>
+                  <%= order.time_type.charAt(0).toUpperCase() + order.time_type.slice(1) %>
+                <% } else if (order.time_type==='two' ) { %>
+                  Lunch & Dinner
+                <% } else if (order.time_type==='one' ) { %>
+                  Lunch
+                <% } else { %>
+                  N/A
+                <% } %>
+              </td>
+              <td data-label="Email">
+                <%= order.guest ? order.guest.email : 'Email not found' %>
+              </td>
+            </tr>
+          <% }) %>
+
+          <% 
+            const commission = totalAmountAll * 0.10;
+            const finalAmount = totalAmountAll - commission;
+          %>
+          <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <td colspan="7" style="text-align: right;">TOTAL</td>
+            <td>₹<%= totalAmountAll %></td>
+            <td colspan="2" style="text-align: left;">
+              Commission: ₹<%= commission %><br>
+              Final for Vendor: ₹<%= finalAmount %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
 </div>
 </div>
 </body>
