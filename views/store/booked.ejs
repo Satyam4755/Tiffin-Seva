@@ -167,12 +167,21 @@
   <% orders.forEach(order => { %>
     <% if (order.vender) { %>
       <div class="card">
-        <img src="<%= order.vender.image %>" alt="Vendor Image">
+        <!-- ✅ Banner Image -->
+        <img src="<%= order.vender.bannerImage || '/default.jpg' %>" alt="Vendor Banner" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+
         <div class="content">
-          <h3><%= order.vender.Name %></h3>
-          <p><strong>PricePerDay:</strong> ₹<%= order.vender.PricePerday %></p>
-          <p><strong>PricePerMonth:</strong> ₹<%= order.vender.PricePerMonth %></p>
-          <p><strong>Location:</strong> <%= order.address || order.vender.Location %></p>
+          <!-- ✅ Service Name -->
+          <h3><%= order.vender.serviceName %></h3>
+
+          <!-- ✅ Price -->
+          <p><strong>Price Per Day:</strong> ₹<%= order.vender.pricePerDay %></p>
+          <p><strong>Price Per Month:</strong> ₹<%= order.vender.pricePerMonth %></p>
+
+          <!-- ✅ Location (booked address overrides vendor location) -->
+          <p><strong>Location:</strong> <%= order.address || order.vender.location || 'Not specified' %></p>
+
+          <!-- ✅ Ratings -->
           <p><strong>Ratings:</strong>
             <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
             <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
@@ -180,9 +189,13 @@
               (<%= order.vender.averageRating || 0 %>/5)
             </span>
           </p>
+
+          <!-- ✅ Booked Label -->
           <h3 class="booked">Booked</h3>
+
+          <!-- ✅ Cancel Booking Button -->
           <form action="/user/cancel_booking/<%= order.vender._id %>?location=<%= encodeURIComponent(order.address) %>" method="post" style="margin-top: 10px;">
-            <button onclick="loading()">Cancel</button>
+            <button type="submit" onclick="loading()">Cancel</button>
           </form>
         </div>
       </div>
@@ -191,6 +204,6 @@
 </div>
 </div>
   <%-include('../partials/loading')%>
-  <%-include('../partials/footer')%>
+   
 </body>
 </html>
