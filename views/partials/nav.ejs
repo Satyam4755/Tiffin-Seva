@@ -305,11 +305,10 @@
 
                     <a href="/user/message" class="<%= currentPage === 'message' ? 'selected' : '' %>">Message</a>
                 <% } else if (user && user.userType==='vender') { %>
-                    <a href="/vender/addVenderShip" class="<%= currentPage === 'admin' ? 'selected' : '' %>">Add Your vender details</a>
-                    <a href="/vender/venders_list" class="<%= currentPage === 'adminvender' ? 'selected' : '' %>">My venderships</a>
+                    <a href="/vender/add_meals" class="<%= currentPage === 'admin' ? 'selected' : '' %>">Add Your Meals</a>
+                    <a href="/vender/meals_list" class="<%= currentPage === 'adminMeals' ? 'selected' : '' %>">My Meals</a>
                     <a href="/vender/orders" class="<%= currentPage === 'orders' ? 'selected' : '' %>">Orders</a>
                     <a href="/vender/customerChoice" class="<%= currentPage === 'customerChoice' ? 'selected' : '' %>">Modifications</a>
-                    <a href="/vender/send_message/<%=user._id%>" class="<%= currentPage === 'send_message' ? 'selected' : '' %>">Send Message</a>
                 <% } %>
             <% } else { %>
                 <a href="/logIn" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Log In</a>
