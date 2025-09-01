@@ -281,27 +281,30 @@
 
 <div class="mainDabba">
   <div class="cards-container">
-    <div class="card">
-      <a id="link" href="/user/vender-list/<%=vender._id %>" style="text-decoration: none; color: black;">
-        <img src="<%= vender.image %>" alt="vender Image">
-        <div class="content">
-          <h3><%= vender.Name %></h3>
-          <p><strong>PricePerday:</strong> ₹<%= vender.PricePerday %></p>
-          <p><strong>PricePerMonth:</strong> ₹<%= vender.PricePerMonth %></p>
-          <p><strong>Location:</strong> <%= vender.Location %></p>
-          <p><strong>Ratings:</strong>
-                    <% const fullStars=Math.floor(vender.averageRating || 0);
-                    %>
-                
-                    <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
-                    <span style="margin-left: 5px; font-weight: 700;color: red; ">
-                        (<%= vender.averageRating || 0 %>/5)
-                    </span>
-                </p>
-        </div>
-      </a>
-    </div>
+  <div class="card">
+    <a id="link" href="/user/vender-list/<%= vender._id %>" style="text-decoration: none; color: black;">
+      <!-- ✅ Banner Image -->
+      <img src="<%= vender.bannerImage || '/default.jpg' %>" alt="Vendor Banner" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+
+      <div class="content">
+        <h3><%= vender.serviceName %></h3>
+        <p><strong>Location:</strong> <%= vender.location %></p>
+        <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %></p>
+        <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %></p>
+        
+        <!-- ✅ Ratings -->
+        <p>
+          <strong>Ratings:</strong>
+          <% const fullStars = Math.floor(vender.averageRating || 0); %>
+          <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
+          <span style="margin-left: 5px; font-weight: 700; color: red;">
+            (<%= vender.averageRating || 0 %>/5)
+          </span>
+        </p>
+      </div>
+    </a>
   </div>
+</div>
 
   <div class="booking-cards-container">
     <form action="/user/submit_booking/<%=vender._id%>" method="post">
@@ -316,56 +319,18 @@
       <input type="tel" id="phone" name="phone" placeholder="Enter your phone number (10 digits)" pattern="[0-9]{10}" required>
 
 
-      <!-- address -->
-      <p id="addressWarning" style="color: red; display: none; font-size: 14px;">
-            ⚠️ Address must contain the vendor's location.
-      </p>
-       <label for="address">Address</label>
-       <input type="text" name="address" id="address" placeholder="Enter your address" required>
-       <!-- script for checking the address -->
-        <script>
-          const vendorLocationRaw = "<%= vender.Location %>";
-
-          // Convert to lowercase and split on anything that's not a word (letters or numbers)
-          const locationAreas = vendorLocationRaw
-            .toLowerCase()
-            .split(/[^a-zA-Z0-9]+/)
-            .map(loc => loc.trim())
-            .filter(loc => loc.length > 0);
-
-          const addressInput = document.getElementById('address');
-          const warning = document.getElementById('addressWarning');
-
-          // Clean user input using the same logic
-          function cleanInput(text) {
-            return text
-              .toLowerCase()
-              .split(/[^a-zA-Z0-9]+/)
-              .map(part => part.trim())
-              .filter(Boolean);
-          }
-
-          function checkAddressMatch() {
-            const userAddressParts = cleanInput(addressInput.value);
-
-            const isValid = locationAreas.some(loc =>
-              userAddressParts.includes(loc)
-            );
-
-            warning.style.display = isValid ? 'none' : 'block';
-            return isValid;
-          }
-
-          addressInput.addEventListener('input', checkAddressMatch);
-
-          const form = document.querySelector('form');
-          form.addEventListener('submit', (e) => {
-            if (!checkAddressMatch()) {
-              e.preventDefault();
-              alert("⚠️ Please include the vendor's area in your address before submitting.");
-            }
-          });
-        </script>
+      <!-- Address (from user's profile) -->
+<label for="address">Your Address</label>
+<input 
+  type="text" 
+  name="address" 
+  id="address" 
+  value="<%= user.location || 'No address saved' %>" 
+  readonly 
+  style="background:#f1f1f1; cursor:not-allowed;">
+<p style="font-size: 13px; color: #6c5ce7; margin-top: 4px;">
+  This is your saved address from profile.
+</p>
 
       <div class="radio-tile-group">
         <label class="radio-tile" id="perDayTile">
@@ -430,8 +395,8 @@
         <option value="cash">Cash</option>
       </select>
 
-      <input type="hidden" id="perdayValue" name="perdayValue" value="<%=vender.PricePerday%>">
-      <input type="hidden" id="permonthValue" name="permonthValue" value="<%=vender.PricePerMonth%>">
+      <input type="hidden" id="perdayValue" name="perdayValue" value="<%=vender.pricePerDay%>">
+      <input type="hidden" id="permonthValue" name="permonthValue" value="<%=vender.pricePerMonth%>">
       <input type="hidden" name="totalAmount" id="totalAmountInput">
 
       <h3 style="color: #d6336c; text-align: center;">Total Amount: ₹<span id="totalAmount">0</span></h3>
@@ -620,6 +585,7 @@ monthButtons.forEach(btn => {
 </script>
 
   <%-include('../partials/loading')%>
+   
 </body>
 </html>
  
