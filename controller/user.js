@@ -1,194 +1,236 @@
 const { check, validationResult } = require("express-validator");
-const venders = require('../models/venders')
+const Meals = require('../models/venders');
 const User = require('../models/user');
 const UserOption = require('../models/userOption');
 const VenderOption = require('../models/venderOption'); 
 const Message = require('../models/message');
 const Order = require('../models/orders');
-// home PAGE
+
+// Utility: Haversine formula to calculate distance in km
+function getDistanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// ⭐ HOME PAGE
 exports.homePage = async (req, res, next) => {
   let opacity = {};
-  const locationQuery = req.query.location || '';
   let registervenders = [];
   let user = null;
   let showOptions = false;
-  let ifLucknow = false;
   let birthdayMessage = null;
 
-  if (locationQuery.trim().toLowerCase() === 'lucknow') {
-    ifLucknow = true;
-    registervenders = []; 
-  } else if (locationQuery.trim()) {
-    registervenders = await venders.find({
-      Location: { $regex: locationQuery, $options: 'i' }
-    });
-  } else {
-    registervenders = await venders.find();
-  }
+  try {
+    // 1. Get all vendors
+    registervenders = await User.find();
 
-  if (req.isLogedIn && req.session.user) {
-    user = await User.findById(req.session.user._id);
+    // 2. If logged in, filter vendors within radius
+    if (req.isLogedIn && req.session.user) {
+      user = await User.findById(req.session.user._id);
 
-    // 🎂 Birthday ke liye
-    if (user && user.dob) {
-      function getISTDateOnly(date) {
-        return new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+      // 🎂 Birthday logic
+      if (user && user.dob) {
+        function getISTDateOnly(date) {
+          return new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+        }
+        const todayIST = getISTDateOnly(new Date());
+        const dobIST = getISTDateOnly(new Date(user.dob));
+        const isBirthday = todayIST.getDate() === dobIST.getDate() &&
+                           todayIST.getMonth() === dobIST.getMonth();
+
+        if (isBirthday && !req.session.birthdayWished) {
+          birthdayMessage = `🎉 Happy Birthday, ${user.firstName}! 🎂`;
+          req.session.birthdayWished = true;
+        }
+        if (!isBirthday && req.session.birthdayWished) {
+          req.session.birthdayWished = false;
+        }
       }
 
-      const todayIST = getISTDateOnly(new Date());
-      const dobIST = getISTDateOnly(new Date(user.dob));
+      // ⭐ FILTER: Vendors within customer’s OR vendor’s radius
+      if (user.lat && user.lng) {
+        const uLat = parseFloat(user.lat);
+        const uLng = parseFloat(user.lng);
 
-      const isBirthday = todayIST.getDate() === dobIST.getDate() &&
-        todayIST.getMonth() === dobIST.getMonth();
+        registervenders = registervenders.filter(vender => {
+          if (!vender.lat || !vender.lng || !vender.serviceRadius) {
+            console.log(`⛔ Skipping ${vender.serviceName} (missing coords or radius)`);
+            return false;
+          }
 
-      if (isBirthday && !req.session.birthdayWished) {
-        birthdayMessage = `🎉 Happy Birthday, ${user.firstName}! 🎂`;
-        req.session.birthdayWished = true;
+          const vLat = parseFloat(vender.lat);
+          const vLng = parseFloat(vender.lng);
+          const vRadius = parseFloat(vender.serviceRadius);
+
+          const dist = getDistanceKm(uLat, uLng, vLat, vLng);
+
+          // ✅ Two-way check: 
+          // 1. Customer is inside vendor’s service area
+          // 2. OR Vendor is inside customer’s (if customers will have a serviceRadius later)
+          const withinVendor = dist <= vRadius;
+          const withinCustomer = user.serviceRadius ? dist <= parseFloat(user.serviceRadius) : false;
+
+          console.log(`➡️ ${vender.serviceName} | dist=${dist.toFixed(2)} km | vendorRadius=${vRadius} | withinVendor=${withinVendor} | withinCustomer=${withinCustomer}`);
+
+          return withinVendor || withinCustomer;
+        });
       }
 
-      if (
-        (!isBirthday && req.session.birthdayWished) ||
-        (dobIST.getDate() !== todayIST.getDate() || dobIST.getMonth() !== todayIST.getMonth())
-      ) {
-        req.session.birthdayWished = false;
-      }
-    }
-
-    if (user.userType === 'guest') {
-      showOptions = true;
-      const favIds = user.favourites.map(fav => fav.toString());
-      registervenders.forEach(vender => {
-        opacity[vender._id.toString()] = favIds.includes(vender._id.toString()) ? 10 : 0;
-      });
-    } else {
-      registervenders.forEach(vender => {
-        opacity[vender._id.toString()] = 0;
-      });
-    }
-  } else {
-    registervenders.forEach(vender => {
-      opacity[vender._id.toString()] = 0;
-    });
-  }
-
-  // ⭐ Average Rating logic
-  for (const vender of registervenders) {
-    if (vender.reviews && vender.reviews.length > 0) {
-      const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
-      if (validRatings.length > 0) {
-        const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
-        vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+      // ⭐ Favourite opacity
+      if (user.userType === 'guest') {
+        showOptions = true;
+        const favIds = (user.favourites || []).map(fav => fav.toString());
+        registervenders.forEach(vender => {
+          opacity[vender._id.toString()] = favIds.includes(vender._id.toString()) ? 10 : 0;
+        });
       } else {
-        vender.averageRating = 0;
+        registervenders.forEach(vender => {
+          opacity[vender._id.toString()] = 0;
+        });
       }
-    } else {
-      vender.averageRating = 0;
     }
+
+    // 3. Render page
+    res.render('./store/vender', {
+      venders: registervenders,
+      title: "Vendor Page",
+      opacity,
+      currentPage: 'home',
+      isLogedIn: req.isLogedIn,
+      user: user || null,
+      showOptions,
+      birthdayMessage
+    });
+
+  } catch (err) {
+    console.error("❌ Home page error:", err);
+    res.status(500).send("Server error");
   }
-
-  const uniqueLocations = await venders.distinct("Location");
-
-  res.render('./store/vender', {
-    ifLucknow,
-    venders: registervenders,
-    title: "vender Page",
-    opacity,
-    currentPage: 'home',
-    isLogedIn: req.isLogedIn,
-    user: user || null,
-    showOptions,
-    searchQuery: locationQuery,
-    availableLocations: uniqueLocations,
-    birthdayMessage
-  });
 };
-
-// vender DETAILS
+// ⭐ VENDOR DETAILS
 exports.venderDetails = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
   const venderId = req.params.venderId;
 
-  const vender = await venders.findById(venderId)
-    .populate('vender')
-    .populate('reviews.user');
+  try {
+    // 👉 Fetch vendor with populated reviews
+    const vender = await User.findById(venderId).populate('reviews.user');
+    if (!vender) return res.redirect('/');
 
-  if (!vender) return res.redirect('/user/vender-list');
+    // ✅ Calculate average rating
+    let averageRating = 0;
+    const validRatings = (vender.reviews || []).filter(
+      r => typeof r.rating === 'number' && !isNaN(r.rating)
+    );
+    if (validRatings.length > 0) {
+      const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+      averageRating = parseFloat((total / validRatings.length).toFixed(1));
+    }
 
-  // ✅ Calculate average rating from reviews
-  let averageRating = 0;
-  const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
-  if (validRatings.length > 0) {
-    const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
-    averageRating = parseFloat((total / validRatings.length).toFixed(1));
-  }
+    // ✅ Get total orders from vendor's User.orders field
+    const numberOfOrders = vender.orders || 0;
 
-  const numberOfOrders = vender.orders || 0;
-  let showOptions = false;
-  let opacity = {};
+    // ✅ Fetch related guest users (optional, still using Order collection)
+    const guestOrders = await Order.find({ vender: venderId }).populate('guest');
+    const guestUsers = guestOrders.map(order => order.guest);
 
-  if (req.isLogedIn && req.session.user) {
-    const user = await User.findById(req.session.user._id);
+    // for checking customer
+    let showOptions = false;
+    let opacity = {};
 
-    if (user.userType === 'guest') {
-      showOptions = true;
-      const isFavourite = user.favourites.map(id => id.toString()).includes(vender._id.toString());
-      opacity[vender._id.toString()] = isFavourite ? 10 : 0;
+    if (req.isLogedIn && req.session.user) {
+      const user = await User.findById(req.session.user._id);
+
+      if (user.userType === 'guest') {
+        showOptions = true;
+        const isFavourite = user.favourites.map(id => id.toString()).includes(vender._id.toString());
+        opacity[vender._id.toString()] = isFavourite ? 10 : 0;
+      } else {
+        opacity[vender._id.toString()] = 0;
+      }
     } else {
       opacity[vender._id.toString()] = 0;
     }
-  } else {
-    opacity[vender._id.toString()] = 0;
+
+    // ✅ Fetch vendor's menu (from Meals model)
+    const mealsDoc = await Meals.findOne({ vendor: venderId });
+    const menuByDay = mealsDoc ? mealsDoc.meals : {};
+
+    // ✅ Render view with all required data
+    res.render('./store/vender-details', {
+      vender,
+      title: "Vendor Details",
+      isLogedIn: req.isLogedIn,
+      user: req.session.user || null,
+      averageRating,
+      showOptions,
+      opacity,
+      numberOfOrders,    // ✅ Now from User.orders
+      guestUsers,
+      reviews: vender.reviews || [],
+      menuByDay,
+      messages: req.flash()
+    });
+
+  } catch (err) {
+    console.error("❌ Vendor details error:", err);
+    req.flash('error', 'Something went wrong while fetching vendor details.');
+    res.redirect('/');
   }
-
-  // ✅ Get all users who booked this vendor
-  const guestOrders = await Order.find({ vender: venderId }).populate('guest');
-  const guestUsers = guestOrders.map(order => order.guest); // Extract users
-
-  res.render('./store/vender-details', {
-    vender,
-    title: "vender Details",
-    opacity,
-    isLogedIn: req.isLogedIn,
-    user: req.session.user || null,
-    showOptions,
-    numberOfOrders,
-    messages: req.flash(),
-    reviews: vender.reviews || [],
-    averageRating,
-    guestUsers // ✅ Pass to EJS
-  });
 };
-
-// FAVOURITE LIST
+// ⭐ FAVOURITE LIST
 exports.favouriteList = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
-  const user = await User.findById(req.session.user._id).populate('favourites');
-  const favouriteVendors = user.favourites;
+  try {
+    // Fetch logged-in user with populated favourites
+    const user = await User.findById(req.session.user._id).populate('favourites');
+    const favouriteVendors = user.favourites || [];
 
-  // Add average rating to each favourite vendor
-  for (const vender of favouriteVendors) {
-    if (vender.reviews && vender.reviews.length > 0) {
-      const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
-      if (validRatings.length > 0) {
-        const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
-        vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+    // Add average rating to each favourite vendor
+    favouriteVendors.forEach(vender => {
+      if (vender.reviews && vender.reviews.length > 0) {
+        const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+        if (validRatings.length > 0) {
+          const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
+          vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
+        } else {
+          vender.averageRating = 0;
+        }
       } else {
         vender.averageRating = 0;
       }
-    } else {
-      vender.averageRating = 0;
-    }
-  }
 
-  res.render('./store/favourite_list', {
-    venders: favouriteVendors,
-    title: "favourite list",
-    currentPage: 'favourite',
-    isLogedIn: req.isLogedIn,
-    user: req.session.user,
-    messages: req.flash(),
-  });
+      // Ensure all required fields exist for template
+      vender.bannerImage = vender.bannerImage || '/default-banner.jpg';
+      vender.serviceName = vender.serviceName || 'Service Name';
+      vender.pricePerDay = vender.pricePerDay || 0;
+      vender.pricePerMonth = vender.pricePerMonth || 0;
+      vender.location = vender.location || 'Location not specified';
+    });
+
+    // Render favourite list page
+    res.render('./store/favourite_list', {
+      venders: favouriteVendors,
+      title: "Favourite List",
+      currentPage: 'favourite',
+      isLogedIn: req.isLogedIn,
+      user: req.session.user,
+      messages: req.flash(),
+    });
+  } catch (err) {
+    console.error("❌ Favourite list error:", err);
+    req.flash('error', 'Something went wrong while fetching your favourite list.');
+    res.redirect('/');
+  }
 };
 
 // ADD / REMOVE FAVOURITE
@@ -226,34 +268,32 @@ exports.booking = async (req, res, next) => {
   const venderId = req.params.venderId;
 
   try {
-    const vender = await venders.findById(venderId);
+    const vender = await User.findById(venderId); // ✅ switched to User model
     if (!vender) {
       return res.redirect('/user/vender-list');
     }
 
-    // Add average rating
+    // ✅ Calculate average rating
+    let averageRating = 0;
     if (vender.reviews && vender.reviews.length > 0) {
       const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
       if (validRatings.length > 0) {
         const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
-        vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
-      } else {
-        vender.averageRating = 0;
+        averageRating = parseFloat((total / validRatings.length).toFixed(1));
       }
-    } else {
-      vender.averageRating = 0;
     }
+    vender.averageRating = averageRating;
 
     res.render('./store/booking', {
-      vender: vender,
-      title: "booking",
+      vender,
+      title: "Booking",
       isLogedIn: req.isLogedIn,
-      currentPage: '',
       user: req.session.user || null,
+      currentPage: 'reserve',
     });
 
   } catch (err) {
-    console.error('Error loading booking page:', err);
+    console.error('❌ Error loading booking page:', err);
     res.redirect('/user/vender-list');
   }
 };
@@ -285,20 +325,18 @@ exports.Postbooking = [
 
     try {
       const guestUser = await User.findById(req.session.user._id);
-      const Selectedvender = await venders.findById(venderId).populate('vender');
-      const venderh = Selectedvender?.vender;
-      let numberOfOrders = Selectedvender?.orders || 0;
+      const Selectedvender = await User.findById(venderId);
 
-      if (!venderh) {
+      if (!Selectedvender || Selectedvender.userType !== 'vender') {
         req.flash('error', 'Vendor not found');
         return res.redirect('back');
       }
 
-      // ✅ Address verification logic (handles multiple areas like "bbd / matiyari / goel")
-      const vendorLocation = Selectedvender.Location || '';
+      // ✅ Address verification
+      const vendorLocation = Selectedvender.location || '';
       const locationKeywords = vendorLocation
         .toLowerCase()
-        .split(/[^a-zA-Z0-9]+/) // split by any non-alphanumeric character
+        .split(/[^a-zA-Z0-9]+/)
         .map(loc => loc.trim())
         .filter(loc => loc.length > 0);
 
@@ -307,28 +345,36 @@ exports.Postbooking = [
 
       if (!isMatch) {
         req.flash(
-          'Sorry',
+          'error',
           `This vendor is only available for addresses under: "${vendorLocation}"`
         );
         return res.redirect('back');
       }
 
-      // ✅ Calculate expireAt properly
+      // ✅ Calculate totalAmount
+      let calculatedTotal = 0;
+      if (subscription_model === 'Per Day') {
+        const start = new Date(startingDate);
+        const end = new Date(endingDate);
+        if (isNaN(start) || isNaN(end) || end < start) {
+          req.flash('error', 'Invalid date selection');
+          return res.redirect('back');
+        }
+
+        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        const mealsCount = Array.isArray(time_type) ? time_type.length : (time_type ? 1 : 0);
+        calculatedTotal = days * Selectedvender.pricePerDay * mealsCount;
+      } else if (subscription_model === 'Per Month') {
+        calculatedTotal = Number(selectedMonths) * Selectedvender.pricePerMonth;
+      }
+
+      // ✅ Calculate expireAt
       let expireAt;
       if (subscription_model === 'Per Month') {
-        const parsedStart = new Date();
-        const totalDays = Number(selectedMonths) * 30;
-        const expiryDate = new Date(parsedStart);
-        expiryDate.setDate(parsedStart.getDate() + totalDays);
-        expireAt = expiryDate;
+        const start = new Date();
+        expireAt = new Date(start.setDate(start.getDate() + Number(selectedMonths) * 30));
       } else if (subscription_model === 'Per Day') {
-        const parsedEnd = new Date(endingDate);
-        if (!isNaN(parsedEnd)) {
-          parsedEnd.setDate(parsedEnd.getDate() + 1); // 1 day buffer
-          expireAt = parsedEnd;
-        } else {
-          throw new Error('Invalid endingDate for Per Day');
-        }
+        expireAt = new Date(new Date(endingDate).setDate(new Date(endingDate).getDate() + 1));
       }
 
       // ✅ Create new order
@@ -339,30 +385,29 @@ exports.Postbooking = [
         phone,
         address,
         subscription_model,
-        startingDate: subscription_model === 'Per Month'
-          ? new Date()
-          : subscription_model === 'Per Day'
-            ? new Date(startingDate)
-            : undefined,
+        startingDate: subscription_model === 'Per Month' ? new Date() : new Date(startingDate),
         endingDate: subscription_model === 'Per Day' ? new Date(endingDate) : undefined,
         payment,
-        totalAmount,
+        totalAmount: calculatedTotal,
         time_type: subscription_model === 'Per Day' ? time_type : undefined,
         number_of_months: subscription_model === 'Per Month' ? selectedMonths : undefined,
         expireAt
       });
 
       await newOrder.save();
-      numberOfOrders += 1;
-      await venders.findByIdAndUpdate(venderId, { orders: numberOfOrders });
+
+      // ✅ Increment vendor orders
+      Selectedvender.orders = (Selectedvender.orders || 0) + 1;
+      await Selectedvender.save();
 
       // ✅ Add to user's booked list if not already included
       if (!guestUser.booked.some(id => id.toString() === venderId)) {
-        console.log('👀 Booked Before:', guestUser.booked);
         guestUser.booked.push(venderId);
         await guestUser.save();
-        console.log(`✅ Vendor ${venderId} added to booked list of user ${guestUser._id}`);
       }
+
+      // ✅ Do NOT pre-create messages anymore
+      // Messages will be generated dynamically in getMessage
 
       res.redirect('/user/submit_booking');
     } catch (err) {
@@ -372,6 +417,42 @@ exports.Postbooking = [
     }
   }
 ];
+
+// ✅ POST CANCEL BOOKING
+exports.postCancelBooking = async (req, res, next) => {
+  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+
+  const venderId = req.params.venderId;
+  const userId = req.session.user._id;
+
+  try {
+    // Remove vendor from user's booked list
+    await User.findByIdAndUpdate(userId, { $pull: { booked: venderId } });
+
+    // Fetch vendor from User model
+    const venderh = await User.findById(venderId);
+    if (!venderh || venderh.userType !== 'vender') {
+      req.flash('error', 'Vendor not found');
+      return res.redirect('/user/booked');
+    }
+
+    // Delete related order
+    await Order.deleteOne({ guest: userId, vender: venderId });
+
+    // Clean up related documents
+    await UserOption.deleteMany({ guest: userId, vendor: venderId });
+    await VenderOption.deleteMany({ guest: userId, vendorId: venderId });
+    // No need to delete Message since it's dynamic now
+
+    req.flash('success', 'Booking cancelled!');
+    res.redirect('/user/booked');
+
+  } catch (err) {
+    console.error('Cancel booking error:', err);
+    req.flash('error', 'Something went wrong during cancellation');
+    res.redirect('/user/booked');
+  }
+};
 
 // SUBMIT BOOKING PAGE
 exports.submitBooking = (req, res, next) => {
@@ -384,40 +465,35 @@ exports.submitBooking = (req, res, next) => {
     });
 };
 
-// booked LIST
 exports.booked = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
   try {
     const userId = req.session.user._id;
 
-    // Fetch all orders placed by the user
+    // Fetch all orders placed by the user, newest first
     const orders = await Order.find({ guest: userId })
-      .populate('vender')
+      .populate('vender') // vendor is a User document
       .sort({ createdAt: -1 });
 
-    // Filter out orders with deleted vendors
-    const validOrders = [];
+    // Filter out orders with deleted vendors and calculate average rating
+    const validOrders = orders.filter(order => {
+      if (!order.vender) return false; // skip if vendor deleted
 
-    for (const order of orders) {
-      if (order.vender) {
-        // Calculate average rating
-        const vendor = order.vender;
-        if (vendor.reviews && vendor.reviews.length > 0) {
-          const validRatings = vendor.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
-          if (validRatings.length > 0) {
-            const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
-            vendor.averageRating = parseFloat((total / validRatings.length).toFixed(1));
-          } else {
-            vendor.averageRating = 0;
-          }
-        } else {
-          vendor.averageRating = 0;
-        }
+      const vendor = order.vender;
 
-        validOrders.push(order);
+      // Calculate average rating
+      if (vendor.reviews && vendor.reviews.length > 0) {
+        const validRatings = vendor.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+        vendor.averageRating = validRatings.length > 0
+          ? parseFloat((validRatings.reduce((sum, r) => sum + r.rating, 0) / validRatings.length).toFixed(1))
+          : 0;
+      } else {
+        vendor.averageRating = 0;
       }
-    }
+
+      return true;
+    });
 
     res.render('./store/booked', {
       orders: validOrders,
@@ -435,50 +511,8 @@ exports.booked = async (req, res, next) => {
   }
 };
 
-// POST CANCEL BOOKING
-exports.postCancelBooking = async (req, res, next) => {
-  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
-  const venderId = req.params.venderId;
-
-  try {
-    const userId = req.session.user._id;
-
-    // ✅ Remove vendor from user's booked list
-    await User.findByIdAndUpdate(userId, {
-      $pull: { booked: venderId }
-    });
-
-    // ✅ Fetch the vendor document
-    const venderh = await venders.findById(venderId);
-    if (!venderh) {
-      req.flash('error', 'Vendor not found');
-      return res.redirect('/user/booked');
-    }
-
-    // ✅ Delete the related order from Order collection
-    await Order.deleteOne({
-      guest: userId,
-      vender: venderId
-    });
-
-    // ✅ Clean up related documents
-    await UserOption.deleteMany({ guest: userId, vendor: venderId });
-    await VenderOption.deleteMany({ guest: userId, vendorId: venderId });
-    await Message.deleteMany({ guest: userId, vendorId: venderId });
-
-    req.flash('success', 'Booking cancelled!');
-    res.redirect('/user/booked');
-
-  } catch (err) {
-    console.error('Cancel booking error:', err);
-    req.flash('error', 'Something went wrong during cancellation');
-    res.redirect('/user/booked');
-  }
-};
-
-
-
+// ✅ Get Options
 exports.getOption = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
@@ -499,10 +533,9 @@ exports.getOption = async (req, res, next) => {
     const vendorOptionsList = [];
 
     for (const vendorId of bookedVendorIds) {
-      const vendor = await venders.findById(vendorId);
+      const vendor = await User.findById(vendorId); // ✅ vendor is directly a User
       if (!vendor) continue;
 
-      const hostVender = await User.findById(vendor.vender);
       const vendorOption = await VenderOption.findOne({
         guest: user._id,
         vendorId: vendor._id
@@ -512,9 +545,10 @@ exports.getOption = async (req, res, next) => {
         guest: user._id,
         vendor: vendor._id
       });
+
       vendorOptionsList.push({
-        vendorName: hostVender.firstName || "Vendor",
-        vendorId: vendorId,
+        vendorName: vendor.firstName || "Vendor", // ✅ directly from User
+        vendorId: vendor._id,
         vendor: vendor,
         option: vendorOption,
         isSent: !!userOption
@@ -536,6 +570,8 @@ exports.getOption = async (req, res, next) => {
   }
 };
 
+
+// ✅ Post Option
 exports.postOption = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
@@ -543,24 +579,17 @@ exports.postOption = async (req, res, next) => {
     const user = await User.findById(req.session.user._id);
     const { mealType, vendorId } = req.body;
 
-    // ✅ Get selected vendor
-    const vendor = await venders.findById(vendorId).populate('vender');
+    // ✅ vendor is a User (no more venders collection)
+    const vendor = await User.findById(vendorId);
     if (!vendor) {
       req.flash('error', 'Invalid vendor.');
       return res.redirect('/user/options');
     }
 
-    // ✅ Get the host (vender user)
-    const hostVender = vendor.vender;
-    if (!hostVender) {
-      req.flash('error', 'Vendor not found.');
-      return res.redirect('/user/options');
-    }
-
-    // ✅ Fetch address from Order collection (based on guest & vender)
+    // ✅ Fetch address from Order collection (based on guest & vendor)
     const order = await Order.findOne({
       guest: user._id,
-      vender: vendorId,
+      vendor: vendorId,   // was `vender` earlier
     });
 
     const userAddress = order?.address || '';
@@ -585,59 +614,128 @@ exports.postOption = async (req, res, next) => {
     req.flash('error', 'Could not submit your choice');
     res.redirect(req.get('Referrer') || '/');
   }
-}; 
+};
 
+
+// ✅ Get Messages (Dynamic based on pending meals)
 exports.getMessage = async (req, res, next) => {
-  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+  if (!req.isLogedIn || !req.session.user) {
+    return res.redirect('/login');
+  }
 
   try {
     const user = await User.findById(req.session.user._id);
-    const bookedVendorIds = user.booked;
-    if (!bookedVendorIds || bookedVendorIds.length === 0) {
-      return res.render('./store/message', {
-        title: "Messages",
-        isLogedIn: req.isLogedIn,
-        user: req.session.user,
-        messages: [],
-        currentPage: 'messages'
-      });
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/login');
     }
+
+    // ✅ Normalize today (start of day)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // ✅ Fetch all active (non-expired) orders for this guest
+    const orders = await Order.find({
+      guest: user._id,
+      expireAt: { $gte: today }
+    }).populate('vender'); // include vendor details
+
     const messages = [];
-    for (const vendorId of bookedVendorIds) {
-      const vendor = await venders.findById(vendorId);
-      if (!vendor) continue;
 
-      const hostVender = await User.findById(vendor.vender);
-      if (!hostVender) continue;
+    for (const order of orders) {
+      if (!order.vender) continue; // skip if vendor missing
 
-      const message = await Message.findOne({
-        guest: user._id,
-        vendorId: vendor._id
-      });
+      const mealsDoc = await Meals.findOne({ vendor: order.vender._id });
+      if (!mealsDoc) continue;
 
-      if (message) {
-        messages.push({
-          message: message.message,
-          vendorId: vendor, // ✅ full vendor listing object (not just the ID)
-          hostVendorName: hostVender.firstName || "Vendor"
-        });
+      let checkDates = [];
+
+      // ✅ Handle subscriptions
+      if (order.subscription_model === 'Per Day') {
+        const start = new Date(order.startingDate);
+        const end = new Date(order.endingDate);
+
+        if (today >= start && today <= end) {
+          checkDates.push({ date: today, time_type: order.time_type || [] });
+        }
+      } else if (order.subscription_model === 'Per Month') {
+        const start = new Date(order.startingDate);
+        const end = new Date(order.expireAt);
+
+        if (today >= start && today <= end) {
+          checkDates.push({ date: today, time_type: ['lunch', 'dinner'] });
+        }
+      }
+
+      // ✅ Generate messages for each eligible date + type
+      for (const { date, time_type: types } of checkDates) {
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+        for (const type of types) {
+          const mealForDay = mealsDoc.meals?.[dayName]?.[type];
+          if (!mealForDay || !mealForDay.items?.length) continue;
+
+          const mealNames = mealForDay.items.join(', ');
+          const messageText = `Your meal for today (${type}) is: ${mealNames}`;
+
+          try {
+            // ✅ Insert only if not exists (unique constraint handles duplicates)
+            const savedMsg = await Message.findOneAndUpdate(
+              {
+                guest: user._id,
+                vendorId: order.vender._id,
+                mealDate: date,
+                mealType: type
+              },
+              {
+                $setOnInsert: {
+                  guest: user._id,
+                  vendorId: order.vender._id,
+                  message: messageText,
+                  mealType: type,
+                  mealDate: date,
+                  createdAt: new Date(),
+                  expiresAt: order.expireAt
+                }
+              },
+              { upsert: true, new: true }
+            ).populate('vendorId', 'Name firstName');
+
+            messages.push({
+              message: savedMsg.message,
+              vendor: savedMsg.vendorId,
+              vendorName:
+                savedMsg.vendorId?.Name ||
+                savedMsg.vendorId?.firstName ||
+                'Vendor',
+              mealType: savedMsg.mealType,
+              mealDate: savedMsg.mealDate
+            });
+          } catch (err) {
+            if (err.code !== 11000) {
+              console.error('❌ Error saving message:', err);
+            }
+          }
+        }
       }
     }
+
+    // ✅ Render message view
     res.render('./store/message', {
-      title: "Messages",
+      title: 'Messages',
       isLogedIn: req.isLogedIn,
       user: req.session.user,
-      messages: messages,
+      messages,
       currentPage: 'message'
     });
-  }
-  catch (err) {
-    console.error('Error fetching messages:', err);
+  } catch (err) {
+    console.error('❌ Error fetching messages:', err);
     req.flash('error', 'Could not load messages');
     res.redirect(req.get('Referrer') || '/');
   }
 };
 
+// ⭐ ADD REVIEW
 exports.postvenderDetails = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
@@ -646,27 +744,37 @@ exports.postvenderDetails = async (req, res, next) => {
     const { venderId } = req.params;
     const { Review, Rating } = req.body;
 
-    const vendor = await venders.findById(venderId);
-    if (!vendor) {
+    const vendor = await User.findById(venderId);
+
+    if (!vendor /*|| vendor.role !== 'vendor'*/) {
       req.flash('error', 'Invalid vendor.');
       return res.redirect('/user/vender-list');
     }
+
+    if (!Array.isArray(vendor.reviews)) {
+      vendor.reviews = []; // ensure array
+    }
+
     vendor.reviews.push({
       user: user._id,
       rating: parseInt(Rating, 10),
       comment: Review
     });
+
     await vendor.save();
+
     req.flash('success', 'Review submitted successfully!');
-    res.redirect('/user/vender-list/' + venderId); // ✅ Remove the colon (:) before the ID
+    res.redirect('/user/vender-list/' + venderId);
+
   } catch (err) {
-    console.error('Error fetching vendor details:', err);
-    req.flash('error', 'Could not load vendor details');
+    console.error('❌ Error posting review:', err);
+    req.flash('error', 'Could not submit review.');
     res.redirect(req.get('Referrer') || '/');
   }
 };
 
 
+// ⭐ DELETE REVIEW
 exports.postDeleteReview = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
@@ -674,14 +782,18 @@ exports.postDeleteReview = async (req, res, next) => {
   const { reviewId } = req.body;
 
   try {
-    const vendor = await venders.findById(venderId);
-    if (!vendor) {
+    // ✅ Vendor comes from User model
+    const vendor = await User.findById(venderId);
+    if (!vendor || vendor.role !== 'vendor') {
       req.flash('error', 'Vendor not found.');
       return res.redirect('/user/vender-list');
     }
 
+    // ✅ Check review belongs to logged-in user
     const review = vendor.reviews.find(
-      (rev) => rev._id.toString() === reviewId && rev.user.toString() === req.session.user._id.toString()
+      rev =>
+        rev._id.toString() === reviewId &&
+        rev.user.toString() === req.session.user._id.toString()
     );
 
     if (!review) {
@@ -689,9 +801,9 @@ exports.postDeleteReview = async (req, res, next) => {
       return res.redirect('/user/vender-list/' + venderId);
     }
 
-    // Filter out the review from the reviews array
+    // ✅ Remove the review
     vendor.reviews = vendor.reviews.filter(
-      (rev) => rev._id.toString() !== reviewId
+      rev => rev._id.toString() !== reviewId
     );
 
     await vendor.save();
@@ -699,7 +811,7 @@ exports.postDeleteReview = async (req, res, next) => {
     req.flash('success', 'Your review has been deleted successfully.');
     res.redirect('/user/vender-list/' + venderId);
   } catch (err) {
-    console.error('Error deleting review:', err);
+    console.error('❌ Error deleting review:', err);
     req.flash('error', 'An error occurred while deleting the review.');
     res.redirect('/user/vender-list/' + venderId);
   }
