@@ -452,6 +452,14 @@
             transform: translateY(0);
         }
     }
+    .location {
+  max-width: 250px;   /* adjust width */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+}
 </style>
 
 <%- include('../partials/nav') %>
@@ -480,22 +488,7 @@
     });
   </script>
 <% } %>
-    <form action="/" class="search-bar-form" method="get" style="position: relative;">
-        <input type="text" name="location" placeholder="Search for area in LUCKNOW" id="search-bar" autocomplete="off"
-            value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" oninput="filterDropdown(this.value)" />
-
-        <div id="location-dropdown"
-            style="position: absolute; top: 40px; left: 25px; right: 0; z-index: 10; background: white; border: 1px solid #ccc;display: none;">
-            <% availableLocations.forEach(loc=> { %>
-                <div class="dropdown-item" onclick="selectLocation('<%= loc %>')">
-                    <%= loc %>
-                </div>
-                <% }) %>
-        </div>
-
-        <button type="submit" id="search-btn">🔍</button>
-    </form>
-
+    
 <div class="mainDabba">
 
 <img src="/IMG_3133.jpg" alt="image" class="img3">
@@ -505,74 +498,66 @@
 <img src="/IMG_3135 2.jpg" class="img4" alt="image">
 
         <div class="cards-container">
-            <% if (ifLucknow) { %>
+            <% if (venders.length===0) { %>
                 <p style="text-align:center; margin-top: 40px; font-size: 18px; color: #888;">
-                    Please enter location under the Lucknow
+                    No vendors found nearby
                 </p>
-                <% } else if (venders.length===0) { %>
-                    <p style="text-align:center; margin-top: 40px; font-size: 18px; color: #888;">
-                        No vendors found
-                        <% if (searchQuery && searchQuery.trim() !=='' ) { %>
-                            for "<%= searchQuery %>"
-                                <% } %>.
-                    </p>
-                    <% } else { %>
-
-                        <div class="cards-container">
-                            <% venders.forEach(vender=> { %>
-                                <div class="card">
-
-                                    <a href="/user/vender-list/<%= vender._id %>">
-                                        <img src="<%= vender.image %>" alt="vender Image">
-                                        <div class="content">
-                                            <h3>
-                                                <%= vender.Name %>
-                                            </h3>
-                                            <p><strong>Price Per Day:</strong> ₹<%= vender.PricePerday %>
-                                            </p>
-                                            <p><strong>Price Per Month:</strong> ₹<%= vender.PricePerMonth %>
-                                            </p>
-                                            <p><strong>Location:</strong>
-                                                <%= vender.Location %>
-                                            </p>
-                                            <p><strong>Ratings:</strong>
-                                                <% for (let i=1; i <=Math.round(vender.averageRating); i++) { %>⭐<% } %>
-                                                        (<%= vender.averageRating %>/5)
-                                            </p>
-                                            <% if (showOptions) { %>
-                                                <form action="/user/favourite_list" method="post" class="fav-btn">
-                                                    <input type="hidden" name="venderId" value="<%= vender._id %>">
-                                                    <% if(opacity[vender._id]==10) { %>
-                                                        <button onclick="loading()" type="submit" style="background: none; border: none;">
-                                                            <img id="favImg2"
-                                                                src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
-                                                                alt="Favourite">
-                                                        </button>
-                                                        <% } else { %>
-                                                            <button onclick="loading()" type="submit"
-                                                                style="background: none; border: none;">
-                                                                <img id="favImg1"
-                                                                    src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
-                                                                    alt="Favourite">
-                                                            </button>
-                                                            <% } %>
-                                                </form>
-                                                <% } %>
-                                                    <% if (showOptions) { %>
-                                                        <a href="/user/booking/<%= vender._id %>">
-                                                            <button class="reserve">RESERVE</button>
-                                                        </a>
-                                                        <% } else if (!isLogedIn) { %>
-                                                            <a href="/logIn">
-                                                                <button class="reserve">RESERVE</button>
-                                                            </a>
-                                                            <% } %>
-                                        </div>
-                                    </a>
+                <% } else { %>
+                    <% venders.forEach(vender=> { %>
+                        <div class="card">
+                            <a href="/user/vender-list/<%= vender._id %>">
+        
+                                <!-- ✅ Banner Image -->
+                                <img src="<%= vender.bannerImage %>" alt="Vendor Banner">
+        
+                                <div class="content">
+        
+                                    <!-- ✅ Service Name -->
+                                    <h3>
+                                        <%= vender.serviceName %>
+                                    </h3>
+        
+                                    <!-- ✅ Prices -->
+                                    <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %>
+                                    </p>
+                                    <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %>
+                                    </p>
+        
+                                    <!-- ✅ Location -->
+                                    <p class="location"><strong>Location:</strong>
+                                        <%= vender.location %>
+                                    </p>
+        
+                                    <!-- ✅ Favourite + Reserve Buttons -->
+                                    <% if (showOptions) { %>
+                                        <form action="/user/favourite_list" method="post" class="fav-btn">
+                                            <input type="hidden" name="venderId" value="<%= vender._id %>">
+                                            <% if(opacity[vender._id]==10) { %>
+                                                <button onclick="loading()" type="submit" style="background: none; border: none;">
+                                                    <img id="favImg2" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
+                                                        alt="Favourite">
+                                                </button>
+                                                <% } else { %>
+                                                    <button onclick="loading()" type="submit" style="background: none; border: none;">
+                                                        <img id="favImg1" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png"
+                                                            alt="Favourite">
+                                                    </button>
+                                                    <% } %>
+                                        </form>
+        
+                                        <a href="/user/booking/<%= vender._id %>">
+                                            <button class="reserve">RESERVE</button>
+                                        </a>
+                                        <% } else if (!isLogedIn) { %>
+                                            <a href="/logIn">
+                                                <button class="reserve">RESERVE</button>
+                                            </a>
+                                    <% } %>
                                 </div>
-                                <% }) %>
+                            </a>
                         </div>
-                        <% } %>
+                        <% }) %>
+                            <% } %>
         </div>
         <br>
         <br>
@@ -618,7 +603,7 @@ Powered by the robust MERN stack ⚙️ (MongoDB, Express.js, React.js, Node.js)
             <strong>Note:</strong> This offer is valid only for registered users.
         </div>
 
-        </div>
+</div>
   <%-include('../partials/loading')%>
   <%-include('../partials/footer')%>
 </body>
