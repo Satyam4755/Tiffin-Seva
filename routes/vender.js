@@ -15,8 +15,6 @@ const {
     getOrders,
     getOptions,
     postOptionsBulk,
-    getSendMessage,
-    postSendMessage
 } = require('../controller/vender');
 
 // ---------------- GET ROUTES ---------------- //
