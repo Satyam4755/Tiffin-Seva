@@ -49,7 +49,7 @@ exports.PostLogin = async (req, res, next) => {
     req.session.user = user;
     await req.session.save();
     if (user.userType === 'vender') {
-        return res.redirect('/vender/venders_list')
+        return res.redirect('/vender/meals_list')
     }
     res.redirect('/')
 }
