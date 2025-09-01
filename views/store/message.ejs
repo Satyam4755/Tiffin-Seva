@@ -57,6 +57,13 @@
     color: #444;
   }
 
+  .meal-date {
+    font-size: 14px;
+    color: #9c27b0;
+    margin-top: 5px;
+    font-style: italic;
+  }
+
   hr {
     border: none;
     border-top: 1px solid #e0e0e0;
@@ -67,34 +74,40 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
   }
-  .badaDabba{
-        margin-bottom: 26%;
-    }
-</style>
-<div class="badaDabba">
-<h2>Hello <%= user.firstName %>
-            <%= user.lastName %>! Today's Meal Message!! 🌸</h2>
-<hr>
 
-<div class="cards-container">
-  <% messages.forEach(message => { %>
-    <div class="card">
-      <div class="content">
-      
-        <p><strong>Message:</strong>
-          <%= message.message %>
-        </p>
-      
-        <!-- ✅ Show actual host/vendor name -->
-        <p><strong>From:</strong>
-          <b style="color: rgb(182, 5, 117);"><%= message.vendorId.Name %></b>
-        </p>
-      
-      </div>
-      <hr>
-    </div>
-  <% }) %>
+  .badaDabba{
+    margin-bottom: 26%;
+  }
+</style>
+
+<div class="badaDabba">
+  <h2>Hello <%= user.firstName %> <%= user.lastName %>! Today's Pending Meal Messages 🌸</h2>
+  <hr>
+
+  <div class="cards-container">
+    <% if (!messages || messages.length === 0) { %>
+      <p style="text-align:center; color: #d81b60;">You have no pending meals for today!</p>
+    <% } else { %>
+      <% messages.forEach(msg => { %>
+        <div class="card">
+          <div class="content">
+            <p><strong>Meal:</strong> <%= msg.message %></p>
+            <p><strong>From Vendor:</strong> 
+              <b style="color: rgb(182, 5, 117);"><%= msg.vendorName %></b>
+            </p>
+            <% if(msg.mealType && msg.mealDate) { %>
+              <p class="meal-date">
+                <strong><%= msg.mealType.charAt(0).toUpperCase() + msg.mealType.slice(1) %></strong> - 
+                <%= new Date(msg.mealDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) %>
+              </p>
+            <% } %>
+          </div>
+          <hr>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
 </div>
-</div>
+
 </body>
 </html>
