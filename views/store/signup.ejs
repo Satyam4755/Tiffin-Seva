@@ -1,255 +1,179 @@
 <%- include('../partials/head') %>
 <style>
   body {
-  background: linear-gradient(135deg, #fce4ec, #f8bbd0);
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
 
-.form-container {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  width: 500px;
-  margin: 20px auto;
-  border: 2px solid #f8bbd0;
-}
-
-.form-container h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #e91e63;
-  font-size: 1.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-.input-group {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-/* Inputs and selects styling */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="date"],
-select {
-  width: 92.5%;
-  padding: 12px 15px;
-  border: 2px solid #f8bbd0;
-  border-radius: 1rem;
-  outline: none;
-  font-size: 1rem;
-  background: #fce4ec;
-  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-select:focus {
-  border-color: #e91e63;
-  box-shadow: 0 0 10px #e91e63;
-  background: #fff;
-}
-
-/* File input styling */
-input[type="file"] {
-  width: 100%;
-  padding: 8px 10px;
-  border: 2px solid #f8bbd0;
-  border-radius: 1rem;
-  background: #fce4ec;
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-input[type="file"]:focus {
-  border-color: #e91e63;
-  box-shadow: 0 0 10px #e91e63;
-  background: #fff;
-}
-
-/* Floating labels */
-label {
-  position: absolute;
-  top: 50%;
-  left: 15px;
-  transform: translateY(-50%);
-  color: #aaa;
-  font-size: 1rem;
-  pointer-events: none;
-  background: #fce4ec;
-  padding: 0 5px;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-input[type="text"]:focus + label,
-input[type="text"]:valid + label,
-input[type="email"]:focus + label,
-input[type="email"]:valid + label,
-input[type="password"]:focus + label,
-input[type="password"]:valid + label,
-select:focus + label {
-  top: -10px;
-  font-size: 0.85rem;
-  color: #e91e63;
-  background: #fff;
-}
-
-/* For file input, position label normally (above) */
-input[type="file"] + label {
-  position: static;
-  transform: none;
-  color: #555;
-  font-size: 1rem;
-  padding: 0 0 5px 0;
-  margin-bottom: 5px;
-  background: transparent;
-  border-radius: 0;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #e91e63, #f06292);
-  color: #fff;
-  border: none;
-  border-radius: 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  text-transform: uppercase;
-}
-
-button:hover {
-  background: linear-gradient(135deg, #f06292, #e91e63);
-  transform: scale(1.05);
-}
-
-/* ✅ Fixed Checkbox Group */
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-  color: #555;
-  padding-left: 5px;
-  width: 100%;
-}
-
-.checkbox-group input[type="checkbox"] {
-  transform: scale(1.2);
-  accent-color: #e91e63;
-  cursor: pointer;
-}
-
-.checkbox-group label {
-  position: static;
-  transform: none;
-  font-size: 0.95rem;
-  background: none;
-  color: #555;
-  padding: 0;
-  margin: 0;
-}
-
-.checkbox-group a {
-  color: #e91e63;
-  text-decoration: underline;
-}
-
-.login-link {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.login-link a {
-  color: #e91e63;
-  text-decoration: none;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.login-link a:hover {
-  color: #fff;
-  background-color: #e91e63;
-  padding: 6px 12px;
-  border-radius: 12px;
-}
-
-/* 📱 Responsive Design */
-@media (max-width: 768px) {
   .form-container {
-    width: 90%;
-    padding: 1.5rem;
-    border-radius: 1.5rem;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 500px;
+    margin: 20px auto;
+    border: 2px solid #f8bbd0;
   }
 
   .form-container h2 {
-    font-size: 1.6rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #e91e63;
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
   }
 
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  select {
-    font-size: 0.95rem;
-    padding: 10px;
+  .input-group { position: relative; margin-bottom: 1.5rem; }
+
+  input[type="text"], input[type="email"], input[type="password"], input[type="date"],input[type="number"], select {
+    width: 92.5%;
+    padding: 12px 15px;
+    border: 2px solid #f8bbd0;
+    border-radius: 1rem;
+    outline: none;
+    font-size: 1rem;
+    background: #fce4ec;
+    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  select:focus {
+    border-color: #e91e63;
+    box-shadow: 0 0 10px #e91e63;
+    background: #fff;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 2px solid #f8bbd0;
+    border-radius: 1rem;
+    background: #fce4ec;
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  input[type="file"]:focus {
+    border-color: #e91e63;
+    box-shadow: 0 0 10px #e91e63;
+    background: #fff;
   }
 
   label {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 1rem;
+    pointer-events: none;
+    background: #fce4ec;
+    padding: 0 5px;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  input[type="text"]:focus + label,
+  input[type="text"]:valid + label,
+  input[type="email"]:focus + label,
+  input[type="email"]:valid + label,
+  input[type="password"]:focus + label,
+  input[type="password"]:valid + label,
+  select:focus + label {
+    top: -10px;
     font-size: 0.85rem;
+    color: #e91e63;
+    background: #fff;
+  }
+
+  input[type="file"] + label {
+    position: static;
+    transform: none;
+    color: #555;
+    font-size: 1rem;
+    padding: 0 0 5px 0;
+    margin-bottom: 5px;
+    background: transparent;
+    border-radius: 0;
   }
 
   button {
-    font-size: 0.95rem;
-    padding: 10px;
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #e91e63, #f06292);
+    color: #fff;
+    border: none;
+    border-radius: 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    text-transform: uppercase;
   }
 
-  .login-link a {
-    font-size: 0.9rem;
+  button:hover {
+    background: linear-gradient(135deg, #f06292, #e91e63);
+    transform: scale(1.05);
   }
 
   .checkbox-group {
-    font-size: 0.85rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-    padding-left: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    color: #555;
+    padding-left: 5px;
+    width: 100%;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    transform: scale(1.2);
+    accent-color: #e91e63;
+    cursor: pointer;
   }
 
   .checkbox-group label {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .form-container {
-    padding: 1rem;
-  }
-
-  .form-container h2 {
-    font-size: 1.4rem;
+    position: static;
+    transform: none;
+    font-size: 0.95rem;
+    background: none;
+    color: #555;
+    padding: 0;
+    margin: 0;
   }
 
-  button {
-    font-size: 0.9rem;
+  .checkbox-group a { color: #e91e63; text-decoration: underline; }
+
+  .login-link { text-align: center; margin-top: 1rem; }
+  .login-link a { color: #e91e63; text-decoration: none; font-size: 1rem; transition: all 0.3s ease; }
+  .login-link a:hover { color: #fff; background-color: #e91e63; padding: 6px 12px; border-radius: 12px; }
+
+  @media (max-width: 768px) {
+    .form-container { width: 90%; padding: 1.5rem; border-radius: 1.5rem; }
+    .form-container h2 { font-size: 1.6rem; }
+    input[type="text"], input[type="email"], input[type="password"], select { font-size: 0.95rem; padding: 10px; }
+    label { font-size: 0.85rem; }
+    button { font-size: 0.95rem; padding: 10px; }
+    .login-link a { font-size: 0.9rem; }
+    .checkbox-group { font-size: 0.85rem; flex-direction: column; align-items: flex-start; gap: 0.3rem; padding-left: 0; }
+    .checkbox-group label { font-size: 0.85rem; }
   }
 
-  .login-link a {
-    font-size: 0.85rem;
+  @media (max-width: 480px) {
+    .form-container { padding: 1rem; }
+    .form-container h2 { font-size: 1.4rem; }
+    button { font-size: 0.9rem; }
+    .login-link a { font-size: 0.85rem; }
   }
-}
 </style>
 
 <body>
@@ -263,6 +187,7 @@ button:hover {
       novalidate
     >
       <input type="hidden" name="id" value="<%= editing ? user._id : '' %>" />
+      <%- include('../partials/errorHandel') %>
 
       <!-- Profile Picture -->
       <div class="input-group">
@@ -274,14 +199,11 @@ button:hover {
       <div class="input-group">
         <% if (!editing) { %>
           <select id="userType" name="userType" required>
-            <option value="" disabled <%=!oldInput || !oldInput.userType ? 'selected' : '' %>>Select User Type</option>
-            <option value="guest" <%=oldInput && oldInput.userType==='guest' ? 'selected' : '' %>>Customer</option>
-            <option value="vender" <%=oldInput && oldInput.userType==='vender' ? 'selected' : '' %>>Vendor</option>
+            <option value="" disabled <%= !oldInput?.userType ? 'selected' : '' %>>Select User Type</option>
+            <option value="guest" <%= (oldInput?.userType==='guest') ? 'selected' : '' %>>Customer</option>
+            <option value="vender" <%= (oldInput?.userType==='vender') ? 'selected' : '' %>>Vendor</option>
           </select>
           <label for="userType">Select User Type</label>
-          <% if (errors && errors.userType) { %>
-            <small class="error-msg"><%= errors.userType %></small>
-          <% } %>
         <% } else { %>
           <select id="userType" name="userType" disabled>
             <option value="<%= user.userType %>" selected>
@@ -292,126 +214,98 @@ button:hover {
         <% } %>
       </div>
 
-      <!-- Location -->
+      <!-- Common: Location -->
       <div class="input-group">
         <input type="text" id="location" name="location" placeholder="Enter your location"
-          value="<%= oldInput ? oldInput.location : '' %>" required />
+          value="<%= editing ? user.location : (oldInput?.location || '') %>" required />
         <label for="location">Your Location</label>
-        <input type="hidden" id="lat" name="lat" value="<%= oldInput ? oldInput.lat : '' %>" />
-        <input type="hidden" id="lng" name="lng" value="<%= oldInput ? oldInput.lng : '' %>" />
-        <% if (errors && errors.location) { %>
-          <small class="error-msg"><%= errors.location %></small>
-        <% } %>
+        <input type="hidden" id="lat" name="lat" value="<%= editing ? user.lat : (oldInput?.lat || '') %>" />
+        <input type="hidden" id="lng" name="lng" value="<%= editing ? user.lng : (oldInput?.lng || '') %>" />
       </div>
 
-      <!-- Vendor fields -->
+      <!-- Vendor-only fields -->
       <div id="vendorFields" style="display:none;">
         <div class="input-group">
           <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
           <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
         </div>
+
         <div class="input-group">
-          <input type="text" id="serviceName" name="serviceName" value="<%= oldInput ? oldInput.serviceName : '' %>" />
+          <input type="text" id="serviceName" name="serviceName" placeholder="Enter your Service Name"
+            value="<%= editing ? user.serviceName : (oldInput?.serviceName || '') %>" />
           <label for="serviceName">Service Name</label>
-          <% if (errors && errors.serviceName) { %>
-            <small class="error-msg"><%= errors.serviceName %></small>
-          <% } %>
         </div>
+
         <div class="input-group">
-          <input type="number" id="serviceRadius" name="serviceRadius"
-            value="<%= oldInput ? oldInput.serviceRadius : '' %>" />
-          <label for="serviceRadius">Service Radius (KM)</label>
-          <% if (errors && errors.serviceRadius) { %>
-            <small class="error-msg"><%= errors.serviceRadius %></small>
-          <% } %>
+          <input type="number" id="serviceRadius" name="serviceRadius" min="1" placeholder="Max delivery area in km"
+            value="<%= editing ? user.serviceRadius : (oldInput?.serviceRadius || '') %>" />
         </div>
+
         <div class="input-group">
-          <input type="number" id="pricePerDay" name="pricePerDay" value="<%= oldInput ? oldInput.pricePerDay : '' %>" />
-          <label for="pricePerDay">Price Per Day (₹)</label>
-          <% if (errors && errors.pricePerDay) { %>
-            <small class="error-msg"><%= errors.pricePerDay %></small>
-          <% } %>
+          <input type="number" id="pricePerDay" name="pricePerDay" min="0" placeholder="Price per Day"
+            value="<%= editing ? user.pricePerDay : (oldInput?.pricePerDay || '') %>" />
         </div>
+
         <div class="input-group">
-          <input type="number" id="pricePerMonth" name="pricePerMonth" value="<%= oldInput ? oldInput.pricePerMonth : '' %>" />
-          <label for="pricePerMonth">Price Per Month (₹)</label>
-          <% if (errors && errors.pricePerMonth) { %>
-            <small class="error-msg"><%= errors.pricePerMonth %></small>
-          <% } %>
+          <input type="number" id="pricePerMonth" name="pricePerMonth" min="0" placeholder="Price per Month"
+            value="<%= editing ? user.pricePerMonth : (oldInput?.pricePerMonth || '') %>" />
         </div>
       </div>
 
       <!-- First Name -->
       <div class="input-group">
         <input type="text" id="firstName" name="firstName"
-          value="<%= editing ? user.firstName : (oldInput ? oldInput.firstName : '') %>" required />
+          value="<%= editing ? user.firstName : (oldInput?.firstName || '') %>" required />
         <label for="firstName">First Name</label>
-        <% if (errors && errors.firstName) { %>
-          <small class="error-msg"><%= errors.firstName %></small>
-        <% } %>
       </div>
 
       <!-- Last Name -->
       <div class="input-group">
         <input type="text" id="lastName" name="lastName"
-          value="<%= editing ? user.lastName : (oldInput ? oldInput.lastName : '') %>" required />
+          value="<%= editing ? user.lastName : (oldInput?.lastName || '') %>" required />
         <label for="lastName">Last Name</label>
-        <% if (errors && errors.lastName) { %>
-          <small class="error-msg"><%= errors.lastName %></small>
-        <% } %>
       </div>
 
       <!-- DOB -->
       <div class="input-group">
         D.O.B
         <input type="date" id="dob" name="dob"
-          value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput ? oldInput.dob : '') %>" required />
-        <% if (errors && errors.dob) { %>
-          <small class="error-msg"><%= errors.dob %></small>
-        <% } %>
+          value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput?.dob || '') %>" required />
       </div>
 
       <!-- Email -->
-      <div class="input-group">
-        <input type="email" id="email" name="email"
-          value="<%= editing ? user.email : (oldInput ? oldInput.email : '') %>" required />
-        <label for="email">Email</label>
-        <% if (errors && errors.email) { %>
-          <small class="error-msg"><%= errors.email %></small>
-        <% } %>
-      </div>
+<div class="input-group">
+  <input 
+    type="email" 
+    id="email" 
+    name="email"
+    value="<%= editing ? user.email : (oldInput?.email || '') %>" 
+    <%= editing ? 'disabled' : 'required' %>
+  />
+</div>
 
       <!-- Password -->
       <div class="input-group">
         <input type="password" id="password" name="password" minlength="6"
-          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" required />
+          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" />
         <label for="password">Password</label>
         <small id="passwordHelp" style="color:red; display:none; font-weight:600;">
           Password must contain at least 1 uppercase letter and 1 number.
         </small>
-        <% if (errors && errors.password) { %>
-          <small class="error-msg"><%= errors.password %></small>
-        <% } %>
       </div>
 
       <!-- Confirm Password -->
       <div class="input-group">
         <input type="password" id="confirmPassword" name="confirmPassword" minlength="6"
-          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" required />
+          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" />
         <label for="confirmPassword">Confirm Password</label>
-        <% if (errors && errors.confirmPassword) { %>
-          <small class="error-msg"><%= errors.confirmPassword %></small>
-        <% } %>
       </div>
 
       <% if (!editing) { %>
-      <div class="checkbox-group">
-        <input type="checkbox" id="terms" name="terms" required />
-        <label for="terms">I agree to the <a href="#">terms and conditions</a></label>
-        <% if (errors && errors.terms) { %>
-          <small class="error-msg"><%= errors.terms %></small>
-        <% } %>
-      </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="terms" name="terms" required />
+          <label for="terms">I agree to the <a href="#">terms and conditions</a></label>
+        </div>
       <% } %>
 
       <button type="submit"><%= editing ? 'Update Profile' : 'Create Account' %></button>
@@ -432,21 +326,24 @@ button:hover {
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
+    // Password validation
     const passwordInput = document.getElementById("password");
     const passwordHelp = document.getElementById("passwordHelp");
-
     passwordInput.addEventListener("input", () => {
       const value = passwordInput.value;
-      const hasUppercase = /[A-Z]/.test(value);
-      const hasNumber = /[0-9]/.test(value);
-      passwordHelp.style.display = value && (!hasUppercase || !hasNumber) ? "block" : "none";
+      passwordHelp.style.display = value && (!/[A-Z]/.test(value) || !/[0-9]/.test(value)) ? "block" : "none";
     });
 
+    // Vendor fields toggle & pre-fill
     const userTypeSelect = document.getElementById("userType");
     const vendorFields = document.getElementById("vendorFields");
     function toggleVendorFields() {
-      if (userTypeSelect?.value === "vender") {
+      const val = userTypeSelect.value || "<%= editing ? user.userType : '' %>";
+      if (val === "vender") {
         vendorFields.style.display = "block";
+        ["bannerImage","serviceName","serviceRadius","pricePerDay","pricePerMonth"].forEach(id => {
+          document.getElementById(id)?.setAttribute("required", "true");
+        });
       } else {
         vendorFields.style.display = "none";
       }
@@ -454,6 +351,7 @@ button:hover {
     userTypeSelect?.addEventListener("change", toggleVendorFields);
     toggleVendorFields();
 
+    // Google Maps autocomplete
     function initAutocomplete() {
       const input = document.getElementById("location");
       const autocomplete = new google.maps.places.Autocomplete(input);
