@@ -60,17 +60,17 @@ exports.PostLogout = (req, res, next) => {
 
 }
 exports.postSignUpPage = [
-  // ----------------- VALIDATIONS -----------------
-  check("firstName")
+  // ✅ Validations
+  check('firstName')
     .notEmpty().withMessage("First name should not be empty")
     .trim().isLength({ min: 2 }).withMessage("Name should be greater than 1 character")
     .matches(/^[a-zA-Z]+$/).withMessage("Should be correct name"),
 
-  check("lastName")
+  check('lastName')
     .trim()
     .matches(/^[a-zA-Z]*$/).withMessage("Should be correct name"),
 
-  check("dob")
+  check('dob')
     .notEmpty().withMessage("Date of birth is required")
     .isISO8601().toDate().withMessage("Invalid date format")
     .custom((dob) => {
@@ -84,153 +84,173 @@ exports.postSignUpPage = [
       return true;
     }),
 
-  check("email")
+  check('email')
     .isEmail().withMessage("Email should be in email format")
     .normalizeEmail({ all_lowercase: false }),
 
-  check("userType")
-    .isIn(["guest", "vender"]).withMessage("Please select a valid user type"),
+  check('password')
+    .isLength({ min: 6 }).withMessage("The password must be at least 6 characters")
+    .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase character")
+    .matches(/[0-9]/).withMessage("Password must contain at least one number")
+    .trim(),
 
-  check("location").notEmpty().withMessage("Location is required"),
-  check("lat").notEmpty().withMessage("Latitude is required"),
-  check("lng").notEmpty().withMessage("Longitude is required"),
+  check('confirmPassword')
+    .trim()
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords do not match");
+      }
+      return true;
+    }),
 
-  body("serviceName").if(body("userType").equals("vender"))
+  check('userType')
+    .isIn(['guest', 'vender']).withMessage("Please select a valid user type"),
+
+  // ✅ Location validation (for both)
+  check('location').notEmpty().withMessage("Location is required"),
+  check('lat').notEmpty().withMessage("Latitude is required"),
+  check('lng').notEmpty().withMessage("Longitude is required"),
+
+  // ✅ Vendor-only validation
+  body('serviceName').if(body('userType').equals('vender'))
     .notEmpty().withMessage("Service name is required"),
-  body("serviceRadius").if(body("userType").equals("vender"))
+  body('serviceRadius').if(body('userType').equals('vender'))
     .isNumeric().withMessage("Service radius must be a number")
     .notEmpty().withMessage("Service radius is required"),
-  body("pricePerDay").if(body("userType").equals("vender"))
+  body('pricePerDay').if(body('userType').equals('vender'))
     .isNumeric().withMessage("Price per day must be a number")
     .notEmpty().withMessage("Price per day is required"),
-  body("pricePerMonth").if(body("userType").equals("vender"))
+  body('pricePerMonth').if(body('userType').equals('vender'))
     .isNumeric().withMessage("Price per month must be a number")
     .notEmpty().withMessage("Price per month is required"),
 
-  // ----------------- HANDLER -----------------
+  check('terms')
+    .custom(value => {
+      if (value !== 'on') {
+        throw new Error("Please accept the terms and conditions");
+      }
+      return true;
+    }),
+
+  // ✅ Handler
   async (req, res) => {
     const {
-      firstName, lastName, dob, email, password, confirmPassword, userType,
+      firstName, lastName, dob, email, password, userType,
       location, lat, lng, serviceName, serviceRadius,
       pricePerDay, pricePerMonth
     } = req.body;
 
-    const dobString = dob ? new Date(dob).toISOString().split("T")[0] : "";
-    const result = validationResult(req);
+    const dobString = new Date(dob).toISOString().split('T')[0];
+    const editing = req.query.editing === 'true';
+    const errors = validationResult(req);
 
-    // Build oldInput for re-render
-    const oldInput = {
-      firstName,
-      lastName,
-      dob: dobString,
-      email,
-      userType,
-      location,
-      lat,
-      lng,
-      serviceName,
-      serviceRadius,
-      pricePerDay,
-      pricePerMonth
-    };
-
-    // Collect validation errors
-    const errors = {};
-    if (!result.isEmpty()) {
-      result.array().forEach((err) => {
-        errors[err.param] = err.msg;
-      });
-    }
-
-    // ✅ Extra password checks
-    if (password !== confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
-    } else if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-      errors.password = "Password must contain at least 1 uppercase letter and 1 number";
-    }
-
-    // If any errors → re-render
-    if (Object.keys(errors).length > 0) {
-      return res.status(422).render("store/signup", {
-        title: "Sign-UP Page",
+    if (!errors.isEmpty()) {
+      return res.status(422).render('store/signup', {
+        title: "Sign-Up",
         isLogedIn: false,
-        errors,
-        oldInput,
-        editing: false,
-        user: {},
-        vendorExists: await User.countDocuments({ userType: "vender" }) > 0
+        errorMessage: errors.array().map(err => err.msg),
+        oldInput: {
+          firstName,
+          lastName,
+          dob: dobString,
+          email,
+          password,
+          userType,
+          location,
+          lat,
+          lng,
+          serviceName,
+          serviceRadius,
+          pricePerDay,
+          pricePerMonth
+        },
+        editing,
+        user: {}
       });
     }
 
     try {
-      // ✅ Check duplicate email
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(422).render("store/signup", {
-          title: "Sign-UP Page",
-          isLogedIn: false,
-          errors: { email: "Email already registered" },
-          oldInput,
-          editing: false,
-          user: {},
-          vendorExists: await User.countDocuments({ userType: "vender" }) > 0
-        });
+      const files = req.files;
+      let profilePictureUrl = '';
+      let profilePicturePublicId = '';
+      let bannerImageUrl = '';
+      let bannerImagePublicId = '';
+
+      // ✅ Upload profile picture
+      if (files?.profilePicture && files.profilePicture.length > 0) {
+        const profilePictureBuffer = files.profilePicture[0].buffer;
+        const profilePictureResult = await fileUploadInCloudinary(profilePictureBuffer);
+        profilePictureUrl = profilePictureResult.secure_url;
+        profilePicturePublicId = profilePictureResult.public_id;
       }
 
-      const files = req.files;
+      // ✅ Upload banner image (vendor only)
+      if (userType === 'vender' && files?.bannerImage && files.bannerImage.length > 0) {
+        const bannerBuffer = files.bannerImage[0].buffer;
+        const bannerResult = await fileUploadInCloudinary(bannerBuffer);
+        bannerImageUrl = bannerResult.secure_url;
+        bannerImagePublicId = bannerResult.public_id;
+      }
 
-      // ✅ Create user
+      // ✅ Hash password
+      const hashedPassword = await bcrypt.hash(password, 8);
+
+      // ✅ Save user
       const newUser = new User({
+        profilePicture: profilePictureUrl,
+        profilePicturePublicId,
+        bannerImage: bannerImageUrl,
+        bannerImagePublicId,
         firstName,
         lastName,
         dob: dobString,
         email,
-        password, // assume you hash in schema middleware
+        password: hashedPassword,
         userType,
         location,
         lat,
         lng,
-        serviceName: userType === "vender" ? serviceName : null,
-        serviceRadius: userType === "vender" ? serviceRadius : null,
-        pricePerDay: userType === "vender" ? pricePerDay : null,
-        pricePerMonth: userType === "vender" ? pricePerMonth : null
+        serviceName: userType === 'vender' ? serviceName : null,
+        serviceRadius: userType === 'vender' ? serviceRadius : null,
+        pricePerDay: userType === 'vender' ? pricePerDay : null,
+        pricePerMonth: userType === 'vender' ? pricePerMonth : null,
       });
 
-      // ✅ Profile picture
-      if (files?.profilePicture?.length > 0) {
-        const profileResult = await fileUploadInCloudinary(files.profilePicture[0].buffer);
-        newUser.profilePicture = profileResult.secure_url;
-        newUser.profilePicturePublicId = profileResult.public_id;
-      }
+      const user = await newUser.save();
 
-      // ✅ Banner image
-      if (userType === "vender" && files?.bannerImage?.length > 0) {
-        const bannerResult = await fileUploadInCloudinary(files.bannerImage[0].buffer);
-        newUser.bannerImage = bannerResult.secure_url;
-        newUser.bannerImagePublicId = bannerResult.public_id;
-      }
-
-      await newUser.save();
-
-      // ✅ Session
-      req.session.user = newUser;
+      req.session.isLogedIn = true;
+      req.session.user = user;
       await req.session.save();
 
-      res.redirect("/");
+      return res.redirect('/');
     } catch (err) {
-      console.error("Signup Error:", err.message);
-      return res.status(500).render("store/signup", {
-        title: "Sign-UP Page",
+      console.log("Signup Error:", err.message);
+      return res.status(422).render('store/signup', {
+        title: "Sign-Up",
         isLogedIn: false,
-        errors: { general: "Something went wrong. Please try again." },
-        oldInput,
-        editing: false,
-        user: {},
-        vendorExists: await User.countDocuments({ userType: "vender" }) > 0
+        errorMessage: [err.message],
+        oldInput: {
+          firstName,
+          lastName,
+          dob: dobString,
+          email,
+          password,
+          userType,
+          location,
+          lat,
+          lng,
+          serviceName,
+          serviceRadius,
+          pricePerDay,
+          pricePerMonth
+        },
+        editing,
+        user: {}
       });
     }
   }
 ];
+
 
 // GET the edit profile form
 exports.getEditPage = async (req, res) => {
@@ -276,26 +296,48 @@ exports.getEditPage = async (req, res) => {
 // POST updated profile
 exports.postEditPage = async (req, res) => {
   const {
-    firstName, lastName, dob, email, id,
-    location, lat, lng, serviceName, serviceRadius,
-    pricePerDay, pricePerMonth
+    firstName,
+    lastName,
+    dob,
+    email,
+    password,
+    confirmPassword,
+    id,
+    location,
+    lat,
+    lng,
+    serviceName,
+    serviceRadius,
+    pricePerDay,
+    pricePerMonth
   } = req.body;
 
   const files = req.files;
 
-  // Build oldInput for re-render in case of errors
-  const oldInput = {
-    firstName, lastName, dob, email,
-    location, lat, lng,
-    serviceName, serviceRadius,
-    pricePerDay, pricePerMonth
-  };
-
   try {
     const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
+    if (!user) return res.status(404).send("User not found");
+
+    // Build oldInput for re-render (always take current db values if empty)
+    const dobString = dob
+      ? new Date(dob).toISOString().split("T")[0]
+      : user.dob
+      ? new Date(user.dob).toISOString().split("T")[0]
+      : "";
+
+    const oldInput = {
+      firstName: firstName || user.firstName || "",
+      lastName: lastName || user.lastName || "",
+      dob: dobString,
+      email: email || user.email || "",
+      location: location || user.location || "",
+      lat: lat || user.lat || "",
+      lng: lng || user.lng || "",
+      serviceName: serviceName || user.serviceName || "",
+      serviceRadius: serviceRadius || user.serviceRadius || "",
+      pricePerDay: pricePerDay || user.pricePerDay || "",
+      pricePerMonth: pricePerMonth || user.pricePerMonth || ""
+    };
 
     // ✅ Profile picture update
     if (files?.profilePicture?.length > 0) {
@@ -318,25 +360,41 @@ exports.postEditPage = async (req, res) => {
     }
 
     // ✅ Update common fields
-    user.firstName = firstName || "";
-    user.lastName = lastName || "";
-    user.dob = dob || "";
-    user.email = email || "";
-    user.location = location || "";
-    user.lat = lat || "";
-    user.lng = lng || "";
+    user.firstName = firstName || user.firstName || "";
+    user.lastName = lastName || user.lastName || "";
+    user.dob = dob || user.dob || "";
+    user.email = email || user.email || "";
+    user.location = location || user.location || "";
+    user.lat = lat || user.lat || "";
+    user.lng = lng || user.lng || "";
+
+    // ✅ Update password only if provided
+    if (password && password.trim() !== "") {
+      if (password !== confirmPassword) {
+        return res.status(400).render('./store/signup', {
+          title: "Edit Profile",
+          isLogedIn: req.isLogedIn,
+          editing: true,
+          user,
+          oldInput,
+          errors: { password: "Passwords do not match." }
+        });
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
+      user.password = hashedPassword;
+    }
 
     // ✅ Vendor-only fields
     if (user.userType === "vender") {
-      user.serviceName = serviceName || "";
-      user.serviceRadius = serviceRadius || "";
-      user.pricePerDay = pricePerDay || "";
-      user.pricePerMonth = pricePerMonth || "";
+      user.serviceName = serviceName || user.serviceName || "";
+      user.serviceRadius = serviceRadius || user.serviceRadius || "";
+      user.pricePerDay = pricePerDay || user.pricePerDay || "";
+      user.pricePerMonth = pricePerMonth || user.pricePerMonth || "";
     }
 
     await user.save();
 
-    // ✅ Update session
+    // ✅ Update session if editing self
     if (req.session.user && req.session.user._id === user._id.toString()) {
       req.session.user = user;
       await req.session.save();
@@ -346,6 +404,7 @@ exports.postEditPage = async (req, res) => {
   } catch (err) {
     console.error('❌ Error updating user:', err);
 
+    const user = await User.findById(req.body.id);
     const vendorCount = await User.countDocuments({ userType: 'vender' });
 
     // Re-render the edit page with oldInput in case of error
@@ -363,24 +422,33 @@ exports.postEditPage = async (req, res) => {
 
 // GET the signup page
 exports.getSignUpPage = async (req, res, next) => {
-  const editing = req.query.editing === "true";
+  const editing = req.query.editing === 'true';
+  const { firstName, lastName, dob, email, password, userType } = req.body;
+
+  const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
 
   try {
-    // ✅ Check if vendor already exists
-    const vendorCount = await User.countDocuments({ userType: "vender" });
+    // ✅ Check if a vendor already exists
+    const vendorCount = await User.countDocuments({ userType: 'vender' });
 
-    res.render("./store/signup", {
+    res.render('./store/signup', {
       title: "Sign-UP Page",
       isLogedIn: req.isLogedIn,
       editing,
-      vendorExists: vendorCount > 0,
-      oldInput: {},     // ✅ always provide
-      errors: {},       // ✅ always provide
-      user: {}
+      vendorExists: vendorCount > 0, // ✅ important
+      oldInput: {
+        firstName,
+        lastName,
+        dob: dobString,
+        email,
+        password,
+        userType
+      }
     });
+
   } catch (err) {
-    console.error("❌ Error loading signup page:", err);
-    res.status(500).send("Server error");
+    console.error('❌ Error checking vendor count for signup:', err);
+    res.status(500).send('Server error');
   }
 };
 
