@@ -146,8 +146,6 @@
     <p>You have no listings yet!</p>
   <% } else { %>
     <% listingsData.forEach(listing=> { %>
-      <h2 style="color: rgb(176, 9, 53);">🍱 Vendor Listing: <%= listing.vendor?.Name || 'Unknown' %>
-      </h2>
     
       <% if (listing.guests.length===0) { %>
         <p>No orders for this listing.</p>
