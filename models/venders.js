@@ -1,59 +1,27 @@
 const mongoose = require('mongoose');
-// const user = require('./user');
 
-const venderSchema = mongoose.Schema({
-  imagePublicId: {
-    type: String
-  },
-  image: String,
-  Menuimage: {
-    type: String
-  },
-  MenuimagePublicId: {
-    type: String
-  },
-  Name: {
-    type: String,
-    required: true
-  },
-  PricePerday: {
-    type: Number,
-    required: true
-  },
-  PricePerMonth: {
-    type: Number,
-    required: true
-  },
-  Location: {
-    type: String,
-    required: true
-  },
-  Description: String,
-  rules: String,
-
-  vender: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  user:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  reviews:[{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    rating: {
-      type: Number,
-      required: true
-    },
-    comment: {
-      type: String,
-      required: true
-    },
-  }],
-    orders:Number,
+// Schema for a single meal
+const mealSchema = mongoose.Schema({
+    image: String,           // optional
+    imagePublicId: String,   // Cloudinary image ID
+    items: { type: [String], required: true } // at least one meal item
 });
 
-module.exports = mongoose.model('vender', venderSchema, 'venders');
+// Schema for all days
+const dayMealsSchema = mongoose.Schema({
+    monday: { lunch: mealSchema, dinner: mealSchema },
+    tuesday: { lunch: mealSchema, dinner: mealSchema },
+    wednesday: { lunch: mealSchema, dinner: mealSchema },
+    thursday: { lunch: mealSchema, dinner: mealSchema },
+    friday: { lunch: mealSchema, dinner: mealSchema },
+    saturday: { lunch: mealSchema, dinner: mealSchema },
+    sunday: { lunch: mealSchema, dinner: mealSchema },
+});
+
+// Main schema
+const mealsSchema = mongoose.Schema({
+    meals: dayMealsSchema,
+    vendor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // owner of these meals
+}, { timestamps: true });
+
+module.exports = mongoose.model('Meals', mealsSchema, 'meals');
