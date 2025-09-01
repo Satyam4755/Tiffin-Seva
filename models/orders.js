@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
   guest: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  vender: { type: mongoose.Schema.Types.ObjectId, ref: 'vender' },
+  vender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // ✅ Changed to User model
   name: String,
   phone: Number,
   address: String,
