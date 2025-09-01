@@ -39,6 +39,7 @@
 input[type="text"],
 input[type="email"],
 input[type="password"],
+input[type="date"],
 select {
   width: 92.5%;
   padding: 12px 15px;
@@ -262,7 +263,6 @@ button:hover {
       novalidate
     >
       <input type="hidden" name="id" value="<%= editing ? user._id : '' %>" />
-      <%- include('../partials/errorHandel') %>
 
       <!-- Profile Picture -->
       <div class="input-group">
@@ -271,7 +271,6 @@ button:hover {
       </div>
 
       <h3>Are you Customer or Vendor?</h3>
-      <!-- User Type -->
       <div class="input-group">
         <% if (!editing) { %>
           <select id="userType" name="userType" required>
@@ -280,6 +279,9 @@ button:hover {
             <option value="vender" <%=oldInput && oldInput.userType==='vender' ? 'selected' : '' %>>Vendor</option>
           </select>
           <label for="userType">Select User Type</label>
+          <% if (errors && errors.userType) { %>
+            <small class="error-msg"><%= errors.userType %></small>
+          <% } %>
         <% } else { %>
           <select id="userType" name="userType" disabled>
             <option value="<%= user.userType %>" selected>
@@ -290,41 +292,52 @@ button:hover {
         <% } %>
       </div>
 
-      <!-- Common: Location -->
+      <!-- Location -->
       <div class="input-group">
-        <input type="text" id="location" name="location" placeholder="Enter your location" required />
+        <input type="text" id="location" name="location" placeholder="Enter your location"
+          value="<%= oldInput ? oldInput.location : '' %>" required />
         <label for="location">Your Location</label>
-        <input type="hidden" id="lat" name="lat" />
-        <input type="hidden" id="lng" name="lng" />
+        <input type="hidden" id="lat" name="lat" value="<%= oldInput ? oldInput.lat : '' %>" />
+        <input type="hidden" id="lng" name="lng" value="<%= oldInput ? oldInput.lng : '' %>" />
+        <% if (errors && errors.location) { %>
+          <small class="error-msg"><%= errors.location %></small>
+        <% } %>
       </div>
 
-      <!-- Vendor-only fields -->
-      <div id="vendorFields" style="display: none;">
+      <!-- Vendor fields -->
+      <div id="vendorFields" style="display:none;">
         <div class="input-group">
           <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
           <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
         </div>
-      
         <div class="input-group">
-          <input type="text" id="serviceName" name="serviceName" placeholder="Enter your Service Name" />
+          <input type="text" id="serviceName" name="serviceName" value="<%= oldInput ? oldInput.serviceName : '' %>" />
           <label for="serviceName">Service Name</label>
+          <% if (errors && errors.serviceName) { %>
+            <small class="error-msg"><%= errors.serviceName %></small>
+          <% } %>
         </div>
-      
         <div class="input-group">
-          <input type="number" id="serviceRadius" name="serviceRadius" min="1" placeholder="Max delivery area in km" />
+          <input type="number" id="serviceRadius" name="serviceRadius"
+            value="<%= oldInput ? oldInput.serviceRadius : '' %>" />
           <label for="serviceRadius">Service Radius (KM)</label>
+          <% if (errors && errors.serviceRadius) { %>
+            <small class="error-msg"><%= errors.serviceRadius %></small>
+          <% } %>
         </div>
-      
-        <!-- ✅ Price per Day -->
         <div class="input-group">
-          <input type="number" id="pricePerDay" name="pricePerDay" min="0" placeholder="Price per Day" />
+          <input type="number" id="pricePerDay" name="pricePerDay" value="<%= oldInput ? oldInput.pricePerDay : '' %>" />
           <label for="pricePerDay">Price Per Day (₹)</label>
+          <% if (errors && errors.pricePerDay) { %>
+            <small class="error-msg"><%= errors.pricePerDay %></small>
+          <% } %>
         </div>
-      
-        <!-- ✅ Price per Month -->
         <div class="input-group">
-          <input type="number" id="pricePerMonth" name="pricePerMonth" min="0" placeholder="Price per Month" />
+          <input type="number" id="pricePerMonth" name="pricePerMonth" value="<%= oldInput ? oldInput.pricePerMonth : '' %>" />
           <label for="pricePerMonth">Price Per Month (₹)</label>
+          <% if (errors && errors.pricePerMonth) { %>
+            <small class="error-msg"><%= errors.pricePerMonth %></small>
+          <% } %>
         </div>
       </div>
 
@@ -333,6 +346,9 @@ button:hover {
         <input type="text" id="firstName" name="firstName"
           value="<%= editing ? user.firstName : (oldInput ? oldInput.firstName : '') %>" required />
         <label for="firstName">First Name</label>
+        <% if (errors && errors.firstName) { %>
+          <small class="error-msg"><%= errors.firstName %></small>
+        <% } %>
       </div>
 
       <!-- Last Name -->
@@ -340,6 +356,9 @@ button:hover {
         <input type="text" id="lastName" name="lastName"
           value="<%= editing ? user.lastName : (oldInput ? oldInput.lastName : '') %>" required />
         <label for="lastName">Last Name</label>
+        <% if (errors && errors.lastName) { %>
+          <small class="error-msg"><%= errors.lastName %></small>
+        <% } %>
       </div>
 
       <!-- DOB -->
@@ -347,6 +366,9 @@ button:hover {
         D.O.B
         <input type="date" id="dob" name="dob"
           value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput ? oldInput.dob : '') %>" required />
+        <% if (errors && errors.dob) { %>
+          <small class="error-msg"><%= errors.dob %></small>
+        <% } %>
       </div>
 
       <!-- Email -->
@@ -354,6 +376,9 @@ button:hover {
         <input type="email" id="email" name="email"
           value="<%= editing ? user.email : (oldInput ? oldInput.email : '') %>" required />
         <label for="email">Email</label>
+        <% if (errors && errors.email) { %>
+          <small class="error-msg"><%= errors.email %></small>
+        <% } %>
       </div>
 
       <!-- Password -->
@@ -364,19 +389,28 @@ button:hover {
         <small id="passwordHelp" style="color:red; display:none; font-weight:600;">
           Password must contain at least 1 uppercase letter and 1 number.
         </small>
+        <% if (errors && errors.password) { %>
+          <small class="error-msg"><%= errors.password %></small>
+        <% } %>
       </div>
-      
+
       <!-- Confirm Password -->
       <div class="input-group">
         <input type="password" id="confirmPassword" name="confirmPassword" minlength="6"
           placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" required />
         <label for="confirmPassword">Confirm Password</label>
+        <% if (errors && errors.confirmPassword) { %>
+          <small class="error-msg"><%= errors.confirmPassword %></small>
+        <% } %>
       </div>
 
       <% if (!editing) { %>
       <div class="checkbox-group">
         <input type="checkbox" id="terms" name="terms" required />
         <label for="terms">I agree to the <a href="#">terms and conditions</a></label>
+        <% if (errors && errors.terms) { %>
+          <small class="error-msg"><%= errors.terms %></small>
+        <% } %>
       </div>
       <% } %>
 
@@ -394,15 +428,10 @@ button:hover {
     <% } %>
   </div>
 
-  <!-- Google Maps Places API with callback -->
-  <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete"
-    async
-    defer
-  ></script>
+  <!-- Google Maps Places API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
-    // Password validation
     const passwordInput = document.getElementById("password");
     const passwordHelp = document.getElementById("passwordHelp");
 
@@ -410,25 +439,14 @@ button:hover {
       const value = passwordInput.value;
       const hasUppercase = /[A-Z]/.test(value);
       const hasNumber = /[0-9]/.test(value);
-
-      if (value && (!hasUppercase || !hasNumber)) {
-        passwordHelp.style.display = "block";
-      } else {
-        passwordHelp.style.display = "none";
-      }
+      passwordHelp.style.display = value && (!hasUppercase || !hasNumber) ? "block" : "none";
     });
 
-    // Vendor fields toggle
     const userTypeSelect = document.getElementById("userType");
     const vendorFields = document.getElementById("vendorFields");
     function toggleVendorFields() {
-      if (userTypeSelect.value === "vender") {
+      if (userTypeSelect?.value === "vender") {
         vendorFields.style.display = "block";
-        document.getElementById("bannerImage").setAttribute("required", "true");
-        document.getElementById("serviceName").setAttribute("required", "true");
-        document.getElementById("serviceRadius").setAttribute("required", "true");
-        document.getElementById("pricePerDay").setAttribute("required", "true");
-        document.getElementById("pricePerMonth").setAttribute("required", "true");
       } else {
         vendorFields.style.display = "none";
       }
@@ -436,11 +454,9 @@ button:hover {
     userTypeSelect?.addEventListener("change", toggleVendorFields);
     toggleVendorFields();
 
-    // Google Maps autocomplete for location
     function initAutocomplete() {
       const input = document.getElementById("location");
       const autocomplete = new google.maps.places.Autocomplete(input);
-
       autocomplete.addListener("place_changed", () => {
         const place = autocomplete.getPlace();
         if (place.geometry) {
@@ -451,6 +467,6 @@ button:hover {
     }
   </script>
 
-  <%-include('../partials/loading')%>
+  <%- include('../partials/loading') %>
 </body>
 </html>
