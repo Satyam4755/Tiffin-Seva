@@ -6,12 +6,12 @@ const multiFileUpload = require('../middleware/multer');
 
 // Controller methods
 const { 
-    addVender, 
-    vendersList, 
-    editvender, 
-    postaddVender, 
-    Posteditvender, 
-    deletevender,
+    addMeals, 
+    mealsList, 
+    editMeals, 
+    postAddMeals, 
+    postEditMeals, 
+    deleteMeals,
     getOrders,
     getOptions,
     postOptionsBulk,
@@ -20,24 +20,19 @@ const {
 } = require('../controller/vender');
 
 // ---------------- GET ROUTES ---------------- //
-venderRouter.get('/addVenderShip', addVender);
-venderRouter.get('/venders_list', vendersList);  
-venderRouter.get('/venders_list/:venderId', editvender);
+venderRouter.get('/add_meals', addMeals);
+venderRouter.get('/meals_list', mealsList);
+venderRouter.get('/meals_list/:mealId', editMeals);
 venderRouter.get('/orders', getOrders);
-venderRouter.get('/edit_vender/:venderId', editvender);
-venderRouter.get('/customerChoice',getOptions);
-
-// routes for sending message
-venderRouter.get('/send_message/:venderId', getSendMessage);
+venderRouter.get('/customerChoice', getOptions);
 
 // ---------------- POST ROUTES ---------------- //
 // ⚠️ Add multer upload middleware to handle 'image' and 'Menuimage'
-venderRouter.post('/addVenderShip', multiFileUpload, postaddVender);
-venderRouter.post('/edit_vender', multiFileUpload, Posteditvender);
+venderRouter.post('/add_meals', multiFileUpload, postAddMeals);
+venderRouter.post('/edit_meals', multiFileUpload, postEditMeals);
 
-venderRouter.post('/delete_vender/:venderId', deletevender);
+venderRouter.post('/delete_meal/:mealId', deleteMeals);
 venderRouter.post('/customerChoiceBulk/:venderId', postOptionsBulk);
-venderRouter.post('/send_message/:venderId', postSendMessage);
 
 // Export router
 exports.venderRouter = venderRouter;
