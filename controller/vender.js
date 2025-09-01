@@ -1,5 +1,5 @@
 const cloudinary = require('cloudinary').v2;
-const venders = require('../models/venders');
+const Meals = require('../models/venders');
 const { fileUploadInCloudinary } = require('../utils/cloudinary');
 const User = require('../models/user');
 const venderOption = require('../models/venderOption');
@@ -11,251 +11,230 @@ const Order = require('../models/orders');
 // const twilio = require('twilio');
 // const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 // add vender 
-exports.addVender = (req, res, next) => {
-    res.render('./admin/editvenders', { 
-        editing: false,
-        title: "Add vender details",
-        currentPage: 'admin',
-        isLogedIn: req.isLogedIn,
-        user: req.session.user
-    });
-};
+exports.addMeals = async (req, res) => {
+    try {
+        // check if vendor already has meals
+        const existingMeals = await Meals.findOne({ vendor: req.session.user._id });
 
-// get edit vender
-exports.editvender = (req, res, next) => {
-    const venderId = req.params.venderId;
-    const editing = req.query.editing === 'true';
-
-    venders.findById(venderId).then(vender => {
-        if (!vender) {
-            console.log("vender not found");
-            return res.redirect('/vender/venders_list');
+        if (existingMeals) {
+            // meals already exist -> show message + redirect button
+            return res.render('./admin/editvenders', {
+                editing: false,
+                title: "Add Meals for the Week",
+                currentPage: 'admin',
+                isLogedIn: req.isLogedIn,
+                user: req.session.user,
+                alreadyAdded: true   // 👈 pass flag to EJS
+            });
         }
 
-        console.log("vender vender:", vender.vender); // ✅ Now it's a real value
+        // no meals -> show form
+        res.render('./admin/editvenders', {
+            editing: false,
+            title: "Add Meals for the Week",
+            currentPage: 'admin',
+            isLogedIn: req.isLogedIn,
+            user: req.session.user,
+            alreadyAdded: false
+        });
+
+    } catch (err) {
+        console.error("Error loading addMeals:", err);
+        req.flash('error', 'Something went wrong');
+        res.redirect('back');
+    }
+};
+
+// Render form to add/edit meals
+exports.editMeals = async (req, res) => {
+    const mealId = req.params.mealId;
+    const editing = req.query.editing === 'true';
+
+    try {
+        const mealsDoc = await Meals.findById(mealId);
+        if (!mealsDoc) {
+            console.log("Meals not found");
+            return res.redirect('/vender/meals_list');
+        }
+
+        // If NOT editing, check if meals already exist
+        const alreadyAdded = !editing && !!mealsDoc;
 
         res.render('./admin/editvenders', {
-            vender: vender,
-            editing: editing,
-            title: "Edit vender details",
+            mealsDoc,
+            editing,
+            alreadyAdded,   // ✅ used in EJS
+            title: editing ? "Edit Meals" : "Add Meals",
             currentPage: 'admin',
             isLogedIn: req.isLogedIn,
             user: req.session.user
         });
-    });
-};
-
-// admin vender list
-exports.vendersList = async (req, res, next) => {
-  const venderId = req.session.user._id;
-
-  try {
-    const vendervenders = await venders.find({ vender: venderId }).populate('vender');
-
-    // ✅ Calculate average rating for each vendor
-    for (const vender of vendervenders) {
-      if (vender.reviews && vender.reviews.length > 0) {
-        const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
-        if (validRatings.length > 0) {
-          const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
-          vender.averageRating = parseFloat((total / validRatings.length).toFixed(1));
-        } else {
-          vender.averageRating = 0;
-        }
-      } else {
-        vender.averageRating = 0;
-      }
-    }
-
-    res.render('./admin/venders_list', {
-      venders: vendervenders,
-      title: "Admin venderList Page",
-      currentPage: 'adminvender',
-      isLogedIn: req.isLogedIn,
-      user: req.session.user
-    });
-  } catch (err) {
-    console.error("Error loading vendor list:", err);
-    res.redirect('/dashboard');
-  }
-};
-
-exports.postaddVender = async (req, res) => {
-    const { id, Name, PricePerday, PricePerMonth, Location, Description } = req.body;
-    const files = req.files;
-
-    if (!files || !files.image || !files.Menuimage) {
-        console.log("One or more required files are missing or not valid");
-        return res.status(400).send("Missing image or menu image.");
-    }
-
-    try {
-        const imageBuffer = files.image[0].buffer;
-        const menuImageBuffer = files.Menuimage[0].buffer;
-
-        const imageResult = await fileUploadInCloudinary(imageBuffer);
-        const menuImageResult = await fileUploadInCloudinary(menuImageBuffer);
-
-        if (!imageResult?.secure_url || !menuImageResult?.secure_url) {
-            throw new Error("Cloudinary upload failed");
-        }
-
-        const venderh = new venders({ 
-            id,
-            image: imageResult.secure_url,
-            imagePublicId: imageResult.public_id,
-            Menuimage: menuImageResult.secure_url,
-            MenuimagePublicId: menuImageResult.public_id,
-            Name,
-            PricePerday,
-            PricePerMonth,
-            Location,
-            Description,
-            vender: req.session.user._id
-        });
-        console.log("✅ Menu Image Cloudinary URL:", menuImageResult.secure_url);
-        await venderh.save();
-        console.log("✅ Saved Menuimage in DB:", venderh.Menuimage);
-        // ✅ Redirect to /venders_list after successful addition
-        return res.redirect('/vender/venders_list');
-
-    
     } catch (err) {
-        console.error("Error during vender upload:", err.message);
-        return res.status(500).send("Internal server error: " + err.message);
+        console.error(err);
+        res.redirect('/vender/meals_list');
     }
 };
 
-// Post edit vender
 
-exports.Posteditvender = async (req, res) => {
-    const { Name, PricePerday,PricePerMonth, Location, Description, id: venderId } = req.body;
+// List all meals of this vendor
+exports.mealsList = async (req, res) => {
+    try {
+        const vendorId = req.session.user._id;
+        const mealsList = await Meals.find({ vendor: vendorId });
+        res.render('./admin/venders_list', {
+            mealsList,
+            title: "Weekly Meals List",
+            currentPage: 'adminMeals',
+            isLogedIn: req.isLogedIn,
+            user: req.session.user
+        });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/dashboard');
+    }
+};
+
+exports.postAddMeals = async (req, res) => {
     const files = req.files;
 
     try {
-        const vender = await venders.findById(venderId);
-        if (!vender || vender.vender.toString() !== req.session.user._id.toString()) {
-            return res.status(403).json({ success: false, message: "Unauthorized to edit this vender" });
+        const days = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+        let meals = {};
+
+        for (const day of days) {
+            const lunchInput = req.body[`${day}_lunch_items`];
+            const dinnerInput = req.body[`${day}_dinner_items`];
+
+            meals[day] = {
+                lunch: {
+                    items: Array.isArray(lunchInput)
+                        ? lunchInput
+                        : typeof lunchInput === 'string'
+                        ? lunchInput.split(',').map(item => item.trim())
+                        : [],
+                    image: files?.[`${day}_lunch_image`] 
+                        ? (await fileUploadInCloudinary(files[`${day}_lunch_image`][0].buffer)).secure_url
+                        : '',
+                    imagePublicId: ''
+                },
+                dinner: {
+                    items: Array.isArray(dinnerInput)
+                        ? dinnerInput
+                        : typeof dinnerInput === 'string'
+                        ? dinnerInput.split(',').map(item => item.trim())
+                        : [],
+                    image: files?.[`${day}_dinner_image`] 
+                        ? (await fileUploadInCloudinary(files[`${day}_dinner_image`][0].buffer)).secure_url
+                        : '',
+                    imagePublicId: ''
+                }
+            };
         }
 
-        // ✅ IMAGE update
-        if (files?.image) {
-            if (vender.imagePublicId) {
-                await cloudinary.uploader.destroy(vender.imagePublicId).catch(err => {
-                    console.warn("Error deleting old image:", err.message);
-                });
-            }
+        const newMeals = new Meals({
+            meals,
+            vendor: req.session.user._id
+        });
 
-            const imageBuffer = files.image[0].buffer;
-            const imageResult = await fileUploadInCloudinary(imageBuffer);
-
-            if (!imageResult?.secure_url) {
-                throw new Error("Image upload failed");
-            }
-
-            vender.image = imageResult.secure_url;
-            vender.imagePublicId = imageResult.public_id;
-        }
-
-        // ✅ MENU IMAGE update
-        if (files?.Menuimage) {
-            if (vender.MenuimagePublicId) {
-                await cloudinary.uploader.destroy(vender.MenuimagePublicId).catch(err => {
-                    console.warn("Error deleting old image:", err.message);
-                });
-            }
-
-            const menuImageBuffer = files.Menuimage[0].buffer;
-            const menuImageResult = await fileUploadInCloudinary(menuImageBuffer);
-
-            if (!menuImageResult?.secure_url) {
-                throw new Error("Image upload failed");
-            }
-
-            vender.Menuimage = menuImageResult.secure_url;
-            vender.MenuimagePublicId = menuImageResult.public_id;
-        }
-
-        // ✅ Update other fields
-        vender.Name = Name;
-        vender.PricePerday = PricePerday;
-        vender.PricePerMonth = PricePerMonth;
-        vender.Location = Location;
-        vender.Description = Description;
-
-        await vender.save();
-        // ✅ Redirect to /venders_list after successful addition
-        return res.redirect('/vender/venders_list');
-
-    } catch (error) {
-        console.error("Error during vender update:", error.message);
-        return res.status(500).json({ success: false, message: "Internal server error: " + error.message });
+        await newMeals.save();
+        return res.redirect('/vender/meals_list');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error saving meals: " + err.message);
     }
 };
 
-exports.deletevender = async (req, res, next) => {
-  const venderId = req.params.venderId;
+// Edit existing meals
+exports.postEditMeals = async (req, res) => {
+    const mealId = req.body.id;
+    const files = req.files;
 
-  try {
-    const vender = await venders.findById(venderId);
-    if (!vender) return res.status(404).send("Vendor not found");
+    try {
+        // ✅ Find existing document
+        const mealsDoc = await Meals.findById(mealId);
+        if (!mealsDoc) {
+            return res.status(404).send("Meals not found");
+        }
 
-    // 🔒 Authorization check
-    if (vender.vender.toString() !== req.session.user._id.toString()) {
-      return res.status(403).send('Unauthorized');
+        const days = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+        const mealTypes = ["lunch", "dinner"];
+
+        for (const day of days) {
+            for (const mealType of mealTypes) {
+                const fieldName = `${day}_${mealType}_items`;
+
+                // ✅ Handle items (string or array safely)
+                let itemsInput = req.body[fieldName];
+                if (typeof itemsInput === "string") {
+                    itemsInput = itemsInput.split(",").map(i => i.trim());
+                } else if (Array.isArray(itemsInput)) {
+                    itemsInput = itemsInput.map(i => i.trim());
+                } else {
+                    itemsInput = []; // default
+                }
+
+                mealsDoc.meals[day][mealType].items = itemsInput;
+
+                // ✅ Handle image update
+                const imageField = `${day}_${mealType}_image`;
+                if (files?.[imageField]) {
+                    // delete old image if exists
+                    if (mealsDoc.meals[day][mealType].imagePublicId) {
+                        await cloudinary.uploader.destroy(mealsDoc.meals[day][mealType].imagePublicId);
+                    }
+
+                    const imgResult = await fileUploadInCloudinary(files[imageField][0].buffer);
+                    mealsDoc.meals[day][mealType].image = imgResult.secure_url;
+                    mealsDoc.meals[day][mealType].imagePublicId = imgResult.public_id;
+                }
+            }
+        }
+
+        await mealsDoc.save();
+        res.redirect("/vender/meals_list");
+
+    } catch (err) {
+        console.error("❌ Error updating meals:", err);
+        res.status(500).send("Error updating meals: " + err.message);
     }
+};
 
-    const hostVender = await User.findById(req.session.user._id);
+// Delete meals
+exports.deleteMeals = async (req, res) => {
+    const mealId = req.params.mealId;
 
-    if (hostVender) {
-      // ✅ Clean any custom fields if needed in User (optional now since orders are separate)
-      await GuestOption.deleteMany({ vendor: hostVender._id }); // optional, as per schema
+    try {
+        const mealsDoc = await Meals.findById(mealId);
+        if (!mealsDoc || mealsDoc.vendor.toString() !== req.session.user._id.toString()) {
+            return res.status(403).send("Unauthorized");
+        }
+
+        // Delete images from Cloudinary
+        const days = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+        for (const day of days) {
+            for (const mealType of ['lunch','dinner']) {
+                if (mealsDoc.meals[day][mealType].imagePublicId) {
+                    await cloudinary.uploader.destroy(mealsDoc.meals[day][mealType].imagePublicId);
+                }
+            }
+        }
+
+        await Meals.findByIdAndDelete(mealId);
+        res.redirect('/meals_list');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/meals_list');
     }
-
-    // ✅ Pull vendorId from all users' `booked` arrays
-    await User.updateMany(
-      { booked: venderId },
-      { $pull: { booked: venderId } }
-    );
-
-    // ✅ Delete all GuestOptions related to this vendor
-    await GuestOption.deleteMany({ vendor: venderId });
-
-    // ✅ Delete all VenderOptions related to this vendor
-    await venderOption.deleteMany({ vendorId: venderId });
-
-    // ✅ Delete all Messages related to this vendor
-    await Message.deleteMany({ vendorId: venderId });
-
-    // ✅ Delete all Orders associated with this vendor
-    await Order.deleteMany({ vender: venderId });
-
-    // ✅ Delete vendor images from Cloudinary
-    const cloudinaryDeletePromises = [];
-    if (vender.imagePublicId)
-      cloudinaryDeletePromises.push(cloudinary.uploader.destroy(vender.imagePublicId));
-    if (vender.MenuimagePublicId)
-      cloudinaryDeletePromises.push(cloudinary.uploader.destroy(vender.MenuimagePublicId));
-
-    await Promise.all(cloudinaryDeletePromises);
-
-    // ✅ Finally, delete the vendor document
-    await venders.findByIdAndDelete(venderId);
-
-    res.redirect('/vender/venders_list');
-  } catch (err) {
-    console.log("Error deleting vendor:", err);
-    res.redirect('/vender/venders_list');
-  }
 };
 
 exports.getOrders = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
   try {
-    // ✅ Get all listings created by this vendor user
-    const allVenders = await venders.find({ vender: req.session.user._id });
-    const isVender = allVenders.length > 0;
+    const currentUser = await User.findById(req.session.user._id);
+
+    // Check if the user is a vendor
+    const isVender = currentUser.userType === 'vender';
 
     if (!isVender) {
       return res.render('./admin/orders', {
@@ -268,13 +247,11 @@ exports.getOrders = async (req, res, next) => {
       });
     }
 
-    // ✅ Get all orders where 'vender' is one of this user's listings
-    const venderIds = allVenders.map(v => v._id);
-    const orders = await Order.find({ vender: { $in: venderIds } })
-      .populate('guest')
-      .populate('vender');
+    // Fetch all orders where this user is the vendor
+    const orders = await Order.find({ vender: currentUser._id })
+      .populate('guest') // Get guest details
+      .populate('vender'); // Optional: current user
 
-    // ✅ Render once
     res.render('./admin/orders', {
       title: "Orders",
       isLogedIn: req.isLogedIn,
@@ -294,53 +271,50 @@ exports.getOrders = async (req, res, next) => {
 
 
 // let isRequested;
+// GET Customer Choices (Options)
 exports.getOptions = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
   try {
-    const vendorListings = await venders.find({ vender: req.session.user._id }).populate('vender');
+    // Fetch the logged-in vendor user
+    const vendorUser = await User.findById(req.session.user._id);
+    if (!vendorUser || vendorUser.userType !== 'vender') {
+      req.flash('error', 'You are not a vendor');
+      return res.redirect('back');
+    }
 
-    const listingsData = [];
+    // Fetch orders for this vendor
+    const orders = await Order.find({ vender: vendorUser._id })
+      .populate('guest')
+      .populate('vender');
 
-    for (const listing of vendorListings) {
-      const orders = await Order.find({ vender: listing._id })
-        .populate('guest')
-        .populate('vender');
+    const guestData = [];
+    for (const order of orders) {
+      const guest = order.guest;
+      const existingOption = await venderOption.findOne({
+        guest: guest._id,
+        vendorId: vendorUser._id,
+      });
 
-      const guestData = [];
+      const optionDetails = existingOption
+        ? await GuestOption.findOne({ guest: guest._id, vendor: vendorUser._id })
+            .populate('guest')
+            .populate('vendor')
+        : null;
 
-      for (const order of orders) {
-        const guest = order.guest;
-        const existingOption = await venderOption.findOne({
-          guest: guest._id,
-          vendorId: listing._id,
-        });
-
-        const optionDetails = existingOption
-          ? await GuestOption.findOne({ guest: guest._id, vendor: listing._id })
-              .populate('guest')
-              .populate('vendor')
-          : null;
-
-        guestData.push({
-          guest,
-          order,
-          optionSent: !!existingOption,
-          optionDetails,
-        });
-      }
-
-      listingsData.push({
-        vendor: listing,
-        guests: guestData,
+      guestData.push({
+        guest,
+        order,
+        optionSent: !!existingOption,
+        optionDetails,
       });
     }
 
     res.render('./admin/modification', {
       title: "Customer Choice",
       isLogedIn: req.isLogedIn,
-      user: req.session.user,
-      listingsData,
+      user: vendorUser,
+      listingsData: [{ vendor: vendorUser, guests: guestData }],
       currentPage: 'customerChoice',
       messages: req.flash(),
     });
@@ -351,43 +325,39 @@ exports.getOptions = async (req, res, next) => {
     res.redirect('back');
   }
 };
+
+// POST Bulk Options
 exports.postOptionsBulk = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
-  const vendorId = req.params.venderId;
-  console.log("Vendor ID from URL:", vendorId); // ✅ Check if this is correct
   const { regular, optional } = req.body;
 
   try {
-    // ✅ Fetch the vendor using vendorId
-    const vendor = await venders.findById(vendorId);
-    if (!vendor) {
-      req.flash('error', 'Vendor not found');
-      return res.redirect('/vender/customerChoice');
+    const vendorUser = await User.findById(req.session.user._id);
+    if (!vendorUser || vendorUser.userType !== 'vender') {
+      req.flash('error', 'You are not a vendor');
+      return res.redirect('back');
     }
+
+    const orders = await Order.find({ vender: vendorUser._id });
     let totalUpdated = 0;
-    const orders = await Order.find({ vender: vendor._id });
-    console.log("Orders for this vendor:", orders); // ✅ Check if this is correct
-    // ✅ Loop over all orders from this vendor
+
     for (const order of orders) {
       const guestId = order.guest._id;
 
-      // ✅ Save to venderOption
       await venderOption.findOneAndUpdate(
-        { guest: guestId, vendorId: vendorId },
-        { guest: guestId, vendorId: vendorId, regular, optional },
-        { upsert: true, new: true } // 👈 THIS is necessary
+        { guest: guestId, vendorId: vendorUser._id },
+        { guest: guestId, vendorId: vendorUser._id, regular, optional },
+        { upsert: true, new: true }
       );
 
       totalUpdated++;
     }
 
-    // ✅ Show success message
-    if (totalUpdated === 0) {
-      req.flash('success', 'No pending guests found. All options already sent.');
-    } else {
-      req.flash('success', `Meal options sent to ${totalUpdated} guest(s)!`);
-    }
+    req.flash('success', totalUpdated === 0
+      ? 'No pending guests found. All options already sent.'
+      : `Meal options sent to ${totalUpdated} guest(s)!`
+    );
 
     res.redirect('/vender/customerChoice');
 
@@ -398,92 +368,3 @@ exports.postOptionsBulk = async (req, res, next) => {
   }
 };
 
-exports.getSendMessage = async (req, res, next) => {
-  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
-
-  const editing = req.query.editing === 'true';
-
-  try {
-    const vendorListings = await venders.find({ vender: req.session.user._id }).populate('vender');
-
-    const listingsData = [];
-
-    for (const listing of vendorListings) {
-      const orders = await Order.find({ vender: listing._id })
-        .populate('guest')
-        .populate('vender');
-
-      const guestMessages = [];
-
-      for (const order of orders) {
-        const guest = order.guest;
-        const existingMessage = await Message.findOne({
-          guest: guest._id,
-          vendorId: listing._id,
-        });
-
-        guestMessages.push({
-          guest,
-          order,
-          messageSent: !!existingMessage,
-          messageDetails: existingMessage || null,
-        });
-      }
-
-      listingsData.push({
-        vendor: listing,
-        guests: guestMessages,
-      });
-    }
-
-    res.render('./admin/message', {
-      title: "Send Message",
-      isLogedIn: req.isLogedIn,
-      user: req.session.user,
-      messages: req.flash(),
-      currentPage: 'send_message',
-      listingsData,
-      editing,
-    });
-
-  } catch (err) {
-    console.error('Error fetching send message data:', err);
-    req.flash('error', 'Could not load message page');
-    res.redirect('back');
-  }
-};
-
-exports.postSendMessage = async (req, res, next) => {
-  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
-
-  const vendorId = req.params.venderId; // ⬅️ from URL
-  const { message } = req.body;
-
-  try {
-
-    const vendor = await venders.findById(vendorId);
-    const userVender= await User.findById(req.session.user._id);
-    if (!vendor || vendor.length === 0) {
-      req.flash('error', 'Vendor listing not found');
-      return res.redirect('/vender/send_message');
-    }
-
-    const orders = await Order.find({ vender: vendor._id });
-    // ✅ Loop over all orders from this vendor
-    for (const order of orders) {
-      const guestId = order.guest._id;
-      await Message.findOneAndUpdate(
-        { guest: guestId, vendorId: vendorId },
-        { guest: guestId, vendorId: vendorId, message },
-        { upsert: true, new: true } // 👈 THIS is necessary
-      );
-    }
-
-    req.flash('success', 'Message sent successfully!');
-    res.redirect('/vender/send_message/' + userVender._id);
-  } catch (err) {
-    console.error('Error sending message:', err);
-    req.flash('error', 'Something went wrong.');
-    res.redirect('back');
-  }
-};
