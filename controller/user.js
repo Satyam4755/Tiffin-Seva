@@ -29,8 +29,8 @@ exports.homePage = async (req, res, next) => {
   let birthdayMessage = null;
 
   try {
-    // 1. Get all vendors
-    registervenders = await User.find();
+    // 1. Get all vendors only
+    registervenders = await User.find({ userType: 'vender' });
 
     // 2. If logged in, filter vendors within radius
     if (req.isLogedIn && req.session.user) {
@@ -55,16 +55,13 @@ exports.homePage = async (req, res, next) => {
         }
       }
 
-      // ⭐ FILTER: Vendors within customer’s OR vendor’s radius
+      // ⭐ FILTER: Vendors within vendor's service area
       if (user.lat && user.lng) {
         const uLat = parseFloat(user.lat);
         const uLng = parseFloat(user.lng);
 
         registervenders = registervenders.filter(vender => {
-          if (!vender.lat || !vender.lng || !vender.serviceRadius) {
-            console.log(`⛔ Skipping ${vender.serviceName} (missing coords or radius)`);
-            return false;
-          }
+          if (!vender.lat || !vender.lng || !vender.serviceRadius) return false;
 
           const vLat = parseFloat(vender.lat);
           const vLng = parseFloat(vender.lng);
@@ -72,19 +69,12 @@ exports.homePage = async (req, res, next) => {
 
           const dist = getDistanceKm(uLat, uLng, vLat, vLng);
 
-          // ✅ Two-way check: 
-          // 1. Customer is inside vendor’s service area
-          // 2. OR Vendor is inside customer’s (if customers will have a serviceRadius later)
-          const withinVendor = dist <= vRadius;
-          const withinCustomer = user.serviceRadius ? dist <= parseFloat(user.serviceRadius) : false;
-
-          console.log(`➡️ ${vender.serviceName} | dist=${dist.toFixed(2)} km | vendorRadius=${vRadius} | withinVendor=${withinVendor} | withinCustomer=${withinCustomer}`);
-
-          return withinVendor || withinCustomer;
+          // Show only if customer is inside vendor's service area
+          return dist <= vRadius;
         });
       }
 
-      // ⭐ Favourite opacity
+      // ⭐ Favourite opacity for guests
       if (user.userType === 'guest') {
         showOptions = true;
         const favIds = (user.favourites || []).map(fav => fav.toString());
