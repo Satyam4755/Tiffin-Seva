@@ -59,6 +59,7 @@
         height: 180px;
         object-fit: cover;
         transition: transform 0.3s ease;
+        border-bottom: 1px solid #eee;
     }
 
     .card:hover img {
@@ -72,20 +73,20 @@
 
     .card h3 {
         margin: 10px 0;
-        color: #f06292;
+        color: #d81b60;
         font-size: 20px;
     }
 
     .card p {
         margin: 5px 0;
-        color: #666;
+        color: #555;
         font-size: 14px;
     }
 
     .reserve {
         display: inline-block;
         margin-top: 10px;
-        background-color: #f06292;
+        background-color: #d81b60;
         border: none;
         border-radius: 30px;
         padding: 10px 20px;
@@ -97,7 +98,7 @@
     }
 
     .reserve:hover {
-        background-color: #ec407a;
+        background-color: #c2185b;
         transform: scale(1.05);
     }
 
@@ -112,35 +113,19 @@
         transform: scale(1.2) rotate(-10deg);
         filter: brightness(1);
         filter: grayscale(1);
-
     }
 
-
-  .img1 {
-    position: absolute;
-    top: 15%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
-    transition: transform 0.4s ease;
-    z-index: -1;
+    .img1, .img2 {
+        position: absolute;
+        width: 25vw;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        border-radius: 50%;
+        transition: transform 0.4s ease;
+        z-index: -1;
     }
-    .img2 {
-    position: absolute;
-    top: 40%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
-    transition: transform 0.3s ease;
-    z-index: -1;
-}
-    form {
-        display: inline-block;
-    }
+    .img1 { top: 15%; right: 2.5%; }
+    .img2 { top: 40%; left: 2.5%; }
 
     .fav-container {
         display: flex;
@@ -153,13 +138,13 @@
         .cards-container {
             flex-direction: column;
             align-items: center;
-            /* width: 85%; */
         }
 
         .card {
             width: 100%;
         }
     }
+
     .badaDabba{
         margin-bottom: 15%;
     }
@@ -170,54 +155,52 @@
     alert("<%= messages.success[0] %>");
   </script>
 <% } %>
+
 <%-include('../partials/nav')%>
 
-<h2 style=" color: #d81b60; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); margin-bottom: 30px; animation: bounce 7.5s infinite;">
+<h2 style="color: #d81b60; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-bottom: 30px; animation: bounce 7.5s infinite;">
     ❤️ Favourite List ❤️
 </h2>
+
 <div class="badaDabba">
+    <img src="/IMG_3111 2.jpg" class="img1" alt="image">
+    <img src="/IMG_3112 2.jpg" class="img2" alt="image">
 
-<img src="/IMG_3111 2.jpg" class="img1" alt="image">
-
-<img src="/IMG_3112 2.jpg" class="img2" alt="image">
-
-
-<div class="cards-container">
-    <% venders.forEach(vender => { %>
-        <div class="card">
-            <a href="/user/vender-list/<%=vender._id %>">
-                <img src="<%= vender.image %>" alt="vender Image">
-            </a>
-            <div class="content">
-                <h3><%= vender.Name %></h3>
-                <p><strong>PricePerday:</strong> ₹<%= vender.PricePerday %></p>
-                <p><strong>PricePerMonth:</strong> ₹<%= vender.PricePerMonth %></p>
-                <p><strong>Location:</strong> <%= vender.Location %></p>
-                <p><strong>Ratings:</strong>
-                    <% const fullStars=Math.floor(vender.averageRating || 0);
-                    %>
-                
-                    <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
-                    <span style="margin-left: 5px; font-weight: 700;color: red; ">
-                        (<%= vender.averageRating || 0 %>/5)
-                    </span>
-                </p>
-                <div class="fav-container">
-                    <a href="/user/booking/<%=vender._id%>">
-                        <button class="reserve">RESERVE</button>
-                    </a>
-                    <form action="/user/unfavourite/<%=vender._id%>" method="post">
-                        <input type="hidden" name="id" value="<%=vender._id%>">
-                        <button onclick="loading()" style="background: none; border: none; cursor: pointer;">
-                            <img id="favImg" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
-                        </button>
-                    </form>
+    <div class="cards-container">
+        <% venders.forEach(vender => { %>
+            <div class="card">
+                <a href="/user/vender-list/<%=vender._id %>">
+                    <img src="<%= vender.bannerImage || '/default-banner.jpg' %>" alt="Vendor Banner">
+                </a>
+                <div class="content">
+                    <h3><%= vender.serviceName %></h3>
+                    <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %></p>
+                    <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %></p>
+                    <p><strong>Location:</strong> <%= vender.location %></p>
+                    <p><strong>Ratings:</strong>
+                        <% const fullStars = Math.floor(vender.averageRating || 0); %>
+                        <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
+                        <span style="margin-left: 5px; font-weight: 700; color: red;">
+                            (<%= vender.averageRating || 0 %>/5)
+                        </span>
+                    </p>
+                    <div class="fav-container">
+                        <a href="/user/booking/<%=vender._id%>">
+                            <button class="reserve">RESERVE</button>
+                        </a>
+                        <form action="/user/unfavourite/<%=vender._id%>" method="post">
+                            <input type="hidden" name="id" value="<%=vender._id%>">
+                            <button style="background: none; border: none; cursor: pointer;">
+                                <img id="favImg" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    <% }) %>
+        <% }) %>
+    </div>
 </div>
-</div>
-  <%-include('../partials/loading')%>
+
+<%-include('../partials/loading')%>
 </body>
 </html>
