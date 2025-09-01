@@ -254,7 +254,7 @@ button:hover {
 <body>
   <div class="form-container" role="main" aria-labelledby="form-title">
     <h2 id="form-title"><%= editing ? 'Edit Profile' : 'Sign Up' %></h2>
- 
+
     <form
       action="<%= editing ? '/edit_details' : '/signUP' %>"
       method="post"
@@ -266,66 +266,79 @@ button:hover {
 
       <!-- Profile Picture -->
       <div class="input-group">
-        <input
-          type="file"
-          id="profilePicture"
-          name="profilePicture"
-          accept="image/*"
-          aria-describedby="profilePicture-desc"
-        />
+        <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
         <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
-        <small style="color:darkblue ;" id="profilePicture-desc" class="sr-only">
-          Upload your profile picture (optional)
-        </small>
       </div>
+
       <h3>Are you Customer or Vendor?</h3>
-<!-- User Type -->
-<div class="input-group">
-  <% if (!editing) { %>
-    <select id="userType" name="userType" required aria-required="true" aria-label="User Type">
-      <option value="" disabled <%=!oldInput || !oldInput.userType ? 'selected' : '' %>>
-        Select User Type
-      </option>
-      <option value="guest" <%=oldInput && oldInput.userType==='guest' ? 'selected' : '' %>>
-        Customer
-      </option>
-      <option value="vender" <%=oldInput && oldInput.userType==='vender' ? 'selected' : '' %>>
-        Vendor
-      </option>
-    </select>
-    <label for="userType">Select User Type</label>
-  <% } else { %>
-    <select id="userType" name="userType" disabled aria-disabled="true">
-      <option value="<%= user.userType %>" selected>
-        <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
-      </option>
-    </select>
-    <label for="userType">User Type</label>
-  <% } %>
-</div>
+      <!-- User Type -->
+      <div class="input-group">
+        <% if (!editing) { %>
+          <select id="userType" name="userType" required>
+            <option value="" disabled <%=!oldInput || !oldInput.userType ? 'selected' : '' %>>Select User Type</option>
+            <option value="guest" <%=oldInput && oldInput.userType==='guest' ? 'selected' : '' %>>Customer</option>
+            <option value="vender" <%=oldInput && oldInput.userType==='vender' ? 'selected' : '' %>>Vendor</option>
+          </select>
+          <label for="userType">Select User Type</label>
+        <% } else { %>
+          <select id="userType" name="userType" disabled>
+            <option value="<%= user.userType %>" selected>
+              <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
+            </option>
+          </select>
+          <label for="userType">User Type</label>
+        <% } %>
+      </div>
+
+      <!-- Common: Location -->
+      <div class="input-group">
+        <input type="text" id="location" name="location" placeholder="Enter your location" required />
+        <label for="location">Your Location</label>
+        <input type="hidden" id="lat" name="lat" />
+        <input type="hidden" id="lng" name="lng" />
+      </div>
+
+      <!-- Vendor-only fields -->
+      <div id="vendorFields" style="display: none;">
+        <div class="input-group">
+          <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
+          <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
+        </div>
+      
+        <div class="input-group">
+          <input type="text" id="serviceName" name="serviceName" placeholder="Enter your Service Name" />
+          <label for="serviceName">Service Name</label>
+        </div>
+      
+        <div class="input-group">
+          <input type="number" id="serviceRadius" name="serviceRadius" min="1" placeholder="Max delivery area in km" />
+          <label for="serviceRadius">Service Radius (KM)</label>
+        </div>
+      
+        <!-- ✅ Price per Day -->
+        <div class="input-group">
+          <input type="number" id="pricePerDay" name="pricePerDay" min="0" placeholder="Price per Day" />
+          <label for="pricePerDay">Price Per Day (₹)</label>
+        </div>
+      
+        <!-- ✅ Price per Month -->
+        <div class="input-group">
+          <input type="number" id="pricePerMonth" name="pricePerMonth" min="0" placeholder="Price per Month" />
+          <label for="pricePerMonth">Price Per Month (₹)</label>
+        </div>
+      </div>
+
       <!-- First Name -->
       <div class="input-group">
-        <input
-          type="text"
-          id="firstName"
-          name="firstName"
-          value="<%= editing ? user.firstName : (oldInput ? oldInput.firstName : '') %>"
-          required
-          autocomplete="given-name"
-        />
+        <input type="text" id="firstName" name="firstName"
+          value="<%= editing ? user.firstName : (oldInput ? oldInput.firstName : '') %>" required />
         <label for="firstName">First Name</label>
       </div>
 
       <!-- Last Name -->
       <div class="input-group">
-        <input
-          type="text"
-          id="lastName"
-          name="lastName"
-          value="<%= editing ? user.lastName : (oldInput ? oldInput.lastName : '') %>"
-          required
-          autocomplete="family-name"
-        />
+        <input type="text" id="lastName" name="lastName"
+          value="<%= editing ? user.lastName : (oldInput ? oldInput.lastName : '') %>" required />
         <label for="lastName">Last Name</label>
       </div>
 
@@ -333,84 +346,110 @@ button:hover {
       <div class="input-group">
         D.O.B
         <input type="date" id="dob" name="dob"
-          value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput ? oldInput.dob : '') %>" required
-          autocomplete="bday"
-          style="color: #555; background: #fce4ec; border: 2px solid #f8bbd0; border-radius: 1rem; padding: 12px 15px; width: 92.5%; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;" 
-        />
+          value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput ? oldInput.dob : '') %>" required />
       </div>
 
       <!-- Email -->
       <div class="input-group">
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value="<%= editing ? user.email : (oldInput ? oldInput.email : '') %>"
-          required
-          autocomplete="email"
-        />
+        <input type="email" id="email" name="email"
+          value="<%= editing ? user.email : (oldInput ? oldInput.email : '') %>" required />
         <label for="email">Email</label>
       </div>
 
       <!-- Password -->
       <div class="input-group">
-        <input
-          type="password"
-          id="password"
-          name="password"
-          minlength="6"
-          required
-          autocomplete="<%= editing ? 'new-password' : 'new-password' %>"
-          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>"
-        />
+        <input type="password" id="password" name="password" minlength="6"
+          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" required />
         <label for="password">Password</label>
+        <small id="passwordHelp" style="color:red; display:none; font-weight:600;">
+          Password must contain at least 1 uppercase letter and 1 number.
+        </small>
       </div>
-
+      
       <!-- Confirm Password -->
       <div class="input-group">
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          minlength="6"
-          required
-          autocomplete="<%= editing ? 'new-password' : 'new-password' %>"
-          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>"
-        />
+        <input type="password" id="confirmPassword" name="confirmPassword" minlength="6"
+          placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" required />
         <label for="confirmPassword">Confirm Password</label>
       </div>
 
-
-      <!-- Terms Checkbox -->
       <% if (!editing) { %>
       <div class="checkbox-group">
-        <input type="checkbox" id="terms" name="terms" required aria-required="true" />
-        <label for="terms">
-          I agree to the <a href="#">terms and conditions</a>
-        </label>
+        <input type="checkbox" id="terms" name="terms" required />
+        <label for="terms">I agree to the <a href="#">terms and conditions</a></label>
       </div>
       <% } %>
 
-      <!-- Submit Button -->
-      <button type="submit">
-        <%= editing ? 'Update Profile' : 'Create Account' %>
-      </button>
+      <button type="submit"><%= editing ? 'Update Profile' : 'Create Account' %></button>
     </form>
 
     <% if (!editing) { %>
-    <div class="login-link" aria-label="Login link">
-      Already have an account?
-      <a href="/login"><strong>Log In</strong></a>
-    </div>
+      <div class="login-link">Already have an account? <a href="/login"><strong>Log In</strong></a></div>
     <% } else { %>
-    <div style="text-align:center; margin-top:1rem;">
-      <a href="/" aria-label="Back to home" style="display:inline-block; padding:8px 20px; background:linear-gradient(135deg,#f8bbd0,#e91e63); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:1rem; box-shadow:0 2px 8px rgba(233,30,99,0.08); transition:background 0.3s, color 0.3s, transform 0.2s;">
-        Back
-      </a>
-    </div>
+      <div style="text-align:center; margin-top:1rem;">
+        <a href="/" style="display:inline-block; padding:8px 20px; background:linear-gradient(135deg,#f8bbd0,#e91e63); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; font-size:1rem;">
+          Back
+        </a>
+      </div>
     <% } %>
   </div>
 
+  <!-- Google Maps Places API with callback -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete"
+    async
+    defer
+  ></script>
+
+  <script>
+    // Password validation
+    const passwordInput = document.getElementById("password");
+    const passwordHelp = document.getElementById("passwordHelp");
+
+    passwordInput.addEventListener("input", () => {
+      const value = passwordInput.value;
+      const hasUppercase = /[A-Z]/.test(value);
+      const hasNumber = /[0-9]/.test(value);
+
+      if (value && (!hasUppercase || !hasNumber)) {
+        passwordHelp.style.display = "block";
+      } else {
+        passwordHelp.style.display = "none";
+      }
+    });
+
+    // Vendor fields toggle
+    const userTypeSelect = document.getElementById("userType");
+    const vendorFields = document.getElementById("vendorFields");
+    function toggleVendorFields() {
+      if (userTypeSelect.value === "vender") {
+        vendorFields.style.display = "block";
+        document.getElementById("bannerImage").setAttribute("required", "true");
+        document.getElementById("serviceName").setAttribute("required", "true");
+        document.getElementById("serviceRadius").setAttribute("required", "true");
+        document.getElementById("pricePerDay").setAttribute("required", "true");
+        document.getElementById("pricePerMonth").setAttribute("required", "true");
+      } else {
+        vendorFields.style.display = "none";
+      }
+    }
+    userTypeSelect?.addEventListener("change", toggleVendorFields);
+    toggleVendorFields();
+
+    // Google Maps autocomplete for location
+    function initAutocomplete() {
+      const input = document.getElementById("location");
+      const autocomplete = new google.maps.places.Autocomplete(input);
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+          document.getElementById("lat").value = place.geometry.location.lat();
+          document.getElementById("lng").value = place.geometry.location.lng();
+        }
+      });
+    }
+  </script>
 
   <%-include('../partials/loading')%>
 </body>
