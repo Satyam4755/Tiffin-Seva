@@ -19,31 +19,74 @@
 
     .form-container {
         background-color: white;
-        width: 90%;
-        max-width: 500px;
+        width: 95%;
+        max-width: 900px;
         margin: auto;
         padding: 2rem;
         border-radius: 20px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
-    .form-container input,
-    .form-container select {
-        padding: 12px;
-        width: 100%;
-        border-radius: 10px;
+    .day-section {
         border: 1px solid #ddd;
-        font-size: 1rem;
-        transition: border 0.3s;
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        background-color: #fafafa;
+    }
+
+    .meal-section {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px dashed #ccc;
+        border-radius: 10px;
+    }
+
+    .meal-section h4 {
+        margin: 5px 0;
+        color: #ff5a5f;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .form-group input[type="text"] {
+        padding: 10px;
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        font-size: 0.95rem;
         box-sizing: border-box;
     }
 
-    .form-container input:focus {
-        border-color: #ff5a5f;
-        outline: none;
+    .form-group input[type="file"] {
+        width: 100%;
     }
 
-    .form-container button {
+    .add-item-btn {
+        background-color: #ff5a5f;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+
+    .add-item-btn:hover {
+        background-color: #e0484d;
+    }
+
+    button[type="submit"] {
         padding: 12px 24px;
         background-color: #ff5a5f;
         color: white;
@@ -51,129 +94,133 @@
         border: none;
         border-radius: 30px;
         cursor: pointer;
-        margin-top: 10px;
+        margin-top: 20px;
         width: 100%;
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-    .form-container button:hover {
+    button[type="submit"]:hover {
         background-color: #e0484d;
         transform: scale(1.05);
     }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-top: 6px;
-        font-size: 0.9rem;
-        color: #555;
-    }
-    .img1 {
-    position: absolute;
-    top: 15%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
-    transition: transform 0.4s ease;
-    z-index: -1;
-    }
-    .img2 {
-    position: absolute;
-    top: 40%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
-    transition: transform 0.3s ease;
-    z-index: -1;
+    .already-added-box {
+    text-align: center;
+    background: #e8f5e9;
+    border: 2px solid #66bb6a;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 500px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
 
+.already-added-box p {
+    color: #2e7d32;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
 
-    /* Mobile Responsiveness */
-    @media (max-width: 768px) {
-        h1 {
-            font-size: 1.5rem;
-            margin: 1.5rem 1rem 1rem;
-        }
+.check-meals-btn {
+    padding: 12px 25px;
+    background: linear-gradient(45deg, #66bb6a, #43a047);
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        .form-container {
-            padding: 1.5rem 1rem;
-            width: 95%;
-        }
-
-        .form-container input,
-        .form-container button {
-            font-size: 0.95rem;
-            padding: 10px;
-        }
-
-        .form-group label {
-            font-size: 0.85rem;
-        }
-
-        .form-container button {
-            padding: 10px 18px;
-            font-size: 0.95rem;
-        }
-    }
-    .badaDabba{
-        margin-bottom: 15%;
-    }
+.check-meals-btn:hover {
+    background: linear-gradient(45deg, #388e3c, #2e7d32);
+    transform: scale(1.05);
+}
 </style>
+
 <div class="badaDabba">
-<h1><%= editing ? "Edit Your vender details" : "Add Your vender details " %></h1>
+    <h1>📅 Weekly Meal Planner</h1>
 
-
-<img src="/IMG_3108.jpg" alt="image" class="img2">
-<img src="/IMG_3110.jpg" class="img1" alt="image">
-
-
-
-
-<div class="form-container">
-    <form id="venderForm" action="/vender/<%= editing ? 'edit_vender' : 'addVenderShip' %>" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="id" value="<%= editing ? vender._id : '' %>">
-
-        <div class="form-group">
-            <input type="file" name="image" accept="image/jpg,image/jpeg,image/png">
+    <% if (alreadyAdded) { %>
+        <div class="already-added-box">
+            <p>✅ You have already added your meals.</p>
+            <a href="/vender/meals_list">
+                <button type="button" class="check-meals-btn">🍽️ Check Your Meals</button>
+            </a>
         </div>
+        <% } else { %>
+            <div class="form-container">
+                <form id="mealForm" action="/vender/<%= editing ? 'edit_meals' : 'add_meals' %>" method="post"
+                    enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="<%= mealsDoc._id %>">
 
-        <div class="form-group">
-            <input type="text" name="Name" value="<%= editing ? vender.Name : '' %>" placeholder="🏡 vender Name" required>
-        </div>
+                    <% const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]; %>
+                        <% days.forEach(day=> { %>
+                            <div class="day-section">
+                                <h3>
+                                    <%= day %>
+                                </h3>
 
+                                <% ["Lunch","Dinner"].forEach(mealType=> {
+                                    const mealData = mealsDoc.meals?.[day.toLowerCase()]?.[mealType.toLowerCase()] ||
+                                    {};
+                                    %>
+                                    <div class="meal-section">
+                                        <h4>
+                                            <%= mealType %>
+                                        </h4>
+                                        <div class="form-group">
+                                            <label>Meal Image (optional)</label>
+                                            <% if (mealData.image) { %>
+                                                <img src="<%= mealData.image %>"
+                                                    style="width:50px; height:50px; border-radius:5px; margin-bottom:5px;">
+                                                <% } %>
+                                                    <input type="file"
+                                                        name="<%= day.toLowerCase() %>_<%= mealType.toLowerCase() %>_image"
+                                                        accept="image/jpg,image/jpeg,image/png">
+                                        </div>
+                                        <div class="form-group meal-items">
+                                            <label>Meal Item</label>
+                                            <% if (mealData.items && mealData.items.length) { %>
+                                                <% mealData.items.forEach(item=> { %>
+                                                    <input type="text"
+                                                        name="<%= day.toLowerCase() %>_<%= mealType.toLowerCase() %>_items[]"
+                                                        value="<%= item %>" required>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <input type="text"
+                                                                name="<%= day.toLowerCase() %>_<%= mealType.toLowerCase() %>_items[]"
+                                                                placeholder="Enter meal item" required>
+                                                            <% } %>
+                                        </div>
+                                        <button type="button" class="add-item-btn" onclick="addMealItem(this)">+ Add
+                                            more item</button>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                            <% }) %>
 
-        <div class="form-group">
-            <input type="number" name="PricePerday" value="<%= editing ? vender.PricePerday : '' %>" placeholder="💰 PricePerday " required>
-        </div>
-        <div class="form-group">
-            <input type="number" name="PricePerMonth" value="<%= editing ? vender.PricePerMonth : '' %>" placeholder="💰 PricePerMonth " required>
-        </div>
-
-        <div class="form-group">
-            <input type="text" name="Location" value="<%= editing ? vender.Location : '' %>" placeholder="📍Area, where you can deliver" required>
-        </div>
-
-        <div class="form-group">
-            <input type="text" name="Description" value="<%= editing ? vender.Description : '' %>" placeholder="📝 Description" required>
-        </div>
-        <!-- menu -->
-         <div class="form-group">
-            <input type="file" name="Menuimage" accept="image/jpg,image/jpeg,image/png">
-        </div>
-
-        <button onclick="loading()" type="submit"><%= editing ? "✨ Update vender" : "🏡 Add vender" %></button>
-    </form>
-
+                                <button type="submit">
+                                    <%= editing ? "✨ Update Meals" : "🍱 Add Meals" %>
+                                </button>
+                </form>
+            </div>
+            <% } %>
 </div>
-</div>
-</div>
-  <%-include('../partials/loading')%>
+
+<script>
+    function addMealItem(btn) {
+        const container = btn.previousElementSibling; // meal-items div
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = container.querySelector('input').name; // same name as first
+        input.placeholder = "Enter meal item";
+        input.required = true;
+        input.style.marginTop = "5px";
+        container.appendChild(input);
+    }
+</script>
+
+<%-include('../partials/loading')%>
 </body>
 </html>
