@@ -187,12 +187,19 @@
       novalidate
     >
       <input type="hidden" name="id" value="<%= editing ? user._id : '' %>" />
-      <%- include('../partials/errorHandel') %>
 
       <!-- Profile Picture -->
       <div class="input-group">
-        <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
-        <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
+        <% if (editing && profilePicture) { %>
+          <img src="<%= profilePicture %>" alt="Profile Picture" width="100" height="100" style="margin-bottom:10px;">
+          <% } %>
+            <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
+            <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
+            <% if (errors?.profilePicture) { %>
+              <p class="error">
+                <%= errors.profilePicture %>
+              </p>
+              <% } %>
       </div>
 
       <h3>Are you Customer or Vendor?</h3>
@@ -212,43 +219,76 @@
           </select>
           <label for="userType">User Type</label>
         <% } %>
+        <% if (errors?.userType) { %>
+          <p class="error"><%= errors.userType %></p>
+        <% } %>
       </div>
 
-      <!-- Common: Location -->
+      <!-- Location -->
       <div class="input-group">
         <input type="text" id="location" name="location" placeholder="Enter your location"
           value="<%= editing ? user.location : (oldInput?.location || '') %>" required />
         <label for="location">Your Location</label>
         <input type="hidden" id="lat" name="lat" value="<%= editing ? user.lat : (oldInput?.lat || '') %>" />
         <input type="hidden" id="lng" name="lng" value="<%= editing ? user.lng : (oldInput?.lng || '') %>" />
+        <% if (errors?.location) { %>
+          <p class="error"><%= errors.location %></p>
+        <% } %>
+        <% if (errors?.lat) { %>
+          <p class="error"><%= errors.lat %></p>
+        <% } %>
+        <% if (errors?.lng) { %>
+          <p class="error"><%= errors.lng %></p>
+        <% } %>
       </div>
 
       <!-- Vendor-only fields -->
       <div id="vendorFields" style="display:none;">
+        <!-- Banner Image (only for vendors) -->
         <div class="input-group">
-          <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
-          <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
+          <% if (editing && user.userType==="vender" && bannerImage) { %>
+            <img src="<%= bannerImage %>" alt="Banner Image" width="200" height="100" style="margin-bottom:10px;">
+            <% } %>
+              <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
+              <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
+              <% if (errors?.bannerImage) { %>
+                <p class="error">
+                  <%= errors.bannerImage %>
+                </p>
+                <% } %>
         </div>
 
         <div class="input-group">
           <input type="text" id="serviceName" name="serviceName" placeholder="Enter your Service Name"
             value="<%= editing ? user.serviceName : (oldInput?.serviceName || '') %>" />
           <label for="serviceName">Service Name</label>
+          <% if (errors?.serviceName) { %>
+            <p class="error"><%= errors.serviceName %></p>
+          <% } %>
         </div>
 
         <div class="input-group">
           <input type="number" id="serviceRadius" name="serviceRadius" min="1" placeholder="Max delivery area in km"
             value="<%= editing ? user.serviceRadius : (oldInput?.serviceRadius || '') %>" />
+          <% if (errors?.serviceRadius) { %>
+            <p class="error"><%= errors.serviceRadius %></p>
+          <% } %>
         </div>
 
         <div class="input-group">
           <input type="number" id="pricePerDay" name="pricePerDay" min="0" placeholder="Price per Day"
             value="<%= editing ? user.pricePerDay : (oldInput?.pricePerDay || '') %>" />
+          <% if (errors?.pricePerDay) { %>
+            <p class="error"><%= errors.pricePerDay %></p>
+          <% } %>
         </div>
 
         <div class="input-group">
           <input type="number" id="pricePerMonth" name="pricePerMonth" min="0" placeholder="Price per Month"
             value="<%= editing ? user.pricePerMonth : (oldInput?.pricePerMonth || '') %>" />
+          <% if (errors?.pricePerMonth) { %>
+            <p class="error"><%= errors.pricePerMonth %></p>
+          <% } %>
         </div>
       </div>
 
@@ -257,6 +297,9 @@
         <input type="text" id="firstName" name="firstName"
           value="<%= editing ? user.firstName : (oldInput?.firstName || '') %>" required />
         <label for="firstName">First Name</label>
+        <% if (errors?.firstName) { %>
+          <p class="error"><%= errors.firstName %></p>
+        <% } %>
       </div>
 
       <!-- Last Name -->
@@ -264,6 +307,9 @@
         <input type="text" id="lastName" name="lastName"
           value="<%= editing ? user.lastName : (oldInput?.lastName || '') %>" required />
         <label for="lastName">Last Name</label>
+        <% if (errors?.lastName) { %>
+          <p class="error"><%= errors.lastName %></p>
+        <% } %>
       </div>
 
       <!-- DOB -->
@@ -271,18 +317,24 @@
         D.O.B
         <input type="date" id="dob" name="dob"
           value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput?.dob || '') %>" required />
+        <% if (errors?.dob) { %>
+          <p class="error"><%= errors.dob %></p>
+        <% } %>
       </div>
 
       <!-- Email -->
-<div class="input-group">
-  <input 
-    type="email" 
-    id="email" 
-    name="email"
-    value="<%= editing ? user.email : (oldInput?.email || '') %>" 
-    <%= editing ? 'disabled' : 'required' %>
-  />
-</div>
+      <div class="input-group">
+        <input 
+          type="email" 
+          id="email" 
+          name="email"
+          value="<%= editing ? user.email : (oldInput?.email || '') %>" 
+          <%= editing ? 'disabled' : 'required' %>
+        />
+        <% if (errors?.email) { %>
+          <p class="error"><%= errors.email %></p>
+        <% } %>
+      </div>
 
       <!-- Password -->
       <div class="input-group">
@@ -292,6 +344,9 @@
         <small id="passwordHelp" style="color:red; display:none; font-weight:600;">
           Password must contain at least 1 uppercase letter and 1 number.
         </small>
+        <% if (errors?.password) { %>
+          <p class="error"><%= errors.password %></p>
+        <% } %>
       </div>
 
       <!-- Confirm Password -->
@@ -299,13 +354,23 @@
         <input type="password" id="confirmPassword" name="confirmPassword" minlength="6"
           placeholder="<%= editing ? 'Leave blank to keep current password' : '' %>" />
         <label for="confirmPassword">Confirm Password</label>
+        <% if (errors?.confirmPassword) { %>
+          <p class="error"><%= errors.confirmPassword %></p>
+        <% } %>
       </div>
 
       <% if (!editing) { %>
         <div class="checkbox-group">
           <input type="checkbox" id="terms" name="terms" required />
           <label for="terms">I agree to the <a href="#">terms and conditions</a></label>
+          <% if (errors?.terms) { %>
+            <p class="error"><%= errors.terms %></p>
+          <% } %>
         </div>
+      <% } %>
+
+      <% if (errors?.general) { %>
+        <p class="error"><%= errors.general %></p>
       <% } %>
 
       <button type="submit"><%= editing ? 'Update Profile' : 'Create Account' %></button>
@@ -322,6 +387,16 @@
     <% } %>
   </div>
 
+  <!-- Error styling -->
+  <style>
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+  </style>
+
   <!-- Google Maps Places API -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
 
@@ -329,21 +404,18 @@
     // Password validation
     const passwordInput = document.getElementById("password");
     const passwordHelp = document.getElementById("passwordHelp");
-    passwordInput.addEventListener("input", () => {
+    passwordInput?.addEventListener("input", () => {
       const value = passwordInput.value;
       passwordHelp.style.display = value && (!/[A-Z]/.test(value) || !/[0-9]/.test(value)) ? "block" : "none";
     });
 
-    // Vendor fields toggle & pre-fill
+    // Vendor fields toggle
     const userTypeSelect = document.getElementById("userType");
     const vendorFields = document.getElementById("vendorFields");
     function toggleVendorFields() {
-      const val = userTypeSelect.value || "<%= editing ? user.userType : '' %>";
+      const val = userTypeSelect?.value || "<%= editing ? user.userType : '' %>";
       if (val === "vender") {
         vendorFields.style.display = "block";
-        ["bannerImage","serviceName","serviceRadius","pricePerDay","pricePerMonth"].forEach(id => {
-          document.getElementById(id)?.setAttribute("required", "true");
-        });
       } else {
         vendorFields.style.display = "none";
       }
@@ -364,7 +436,5 @@
       });
     }
   </script>
-
-  <%- include('../partials/loading') %>
 </body>
 </html>
