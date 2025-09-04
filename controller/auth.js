@@ -134,62 +134,87 @@ exports.postSignUpPage = [
 
   // ✅ Handler
   async (req, res) => {
+    console.log("---- New Signup Attempt ----");
+    console.log("body:", req.body);
+    console.log("files:", req.files);
+
     const {
-      firstName, lastName, dob, email, password, userType,
+      firstName, lastName, dob, email, password, confirmPassword, userType,
       location, lat, lng, serviceName, serviceRadius,
-      pricePerDay, pricePerMonth
+      pricePerDay, pricePerMonth,
+      oldProfilePicture, oldBannerImage,
+      oldProfilePicturePublicId, oldBannerImagePublicId // <== add hidden fields for IDs too
     } = req.body;
 
-    const dobString = new Date(dob).toISOString().split('T')[0];
+    const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
     const editing = req.query.editing === 'true';
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      return res.status(422).render('store/signup', {
-        title: "Sign-Up",
-        isLogedIn: false,
-        errorMessage: errors.array().map(err => err.msg),
-        oldInput: {
-          firstName,
-          lastName,
-          dob: dobString,
-          email,
-          password,
-          userType,
-          location,
-          lat,
-          lng,
-          serviceName,
-          serviceRadius,
-          pricePerDay,
-          pricePerMonth
-        },
-        editing,
-        user: {}
-      });
-    }
+    const files = req.files;
+
+    // ✅ defaults to old values if no new file
+    let profilePictureUrl = oldProfilePicture || '';
+    let bannerImageUrl = oldBannerImage || '';
+    let profilePicturePublicId = oldProfilePicturePublicId || '';
+    let bannerImagePublicId = oldBannerImagePublicId || '';
 
     try {
-      const files = req.files;
-      let profilePictureUrl = '';
-      let profilePicturePublicId = '';
-      let bannerImageUrl = '';
-      let bannerImagePublicId = '';
-
-      // ✅ Upload profile picture
+      // ✅ Upload new profile picture only if provided
       if (files?.profilePicture && files.profilePicture.length > 0) {
+        console.log("Uploading NEW profile picture to Cloudinary...");
         const profilePictureBuffer = files.profilePicture[0].buffer;
         const profilePictureResult = await fileUploadInCloudinary(profilePictureBuffer);
         profilePictureUrl = profilePictureResult.secure_url;
         profilePicturePublicId = profilePictureResult.public_id;
       }
 
-      // ✅ Upload banner image (vendor only)
+      // ✅ Upload new banner image only if provided
       if (userType === 'vender' && files?.bannerImage && files.bannerImage.length > 0) {
+        console.log("Uploading NEW banner image to Cloudinary...");
         const bannerBuffer = files.bannerImage[0].buffer;
         const bannerResult = await fileUploadInCloudinary(bannerBuffer);
         bannerImageUrl = bannerResult.secure_url;
         bannerImagePublicId = bannerResult.public_id;
+      }
+
+      // ✅ Validation error → keep old images
+      if (!errors.isEmpty()) {
+        const errorObject = {};
+        errors.array().forEach(err => {
+          errorObject[err.param] = err.msg;
+        });
+        console.log("Validation Errors:", errorObject);
+
+        return res.status(422).render('store/signup', {
+          title: "Sign-Up",
+          isLogedIn: false,
+          errorMessage: errors.array().map(err => err.msg),
+          errors: errorObject,
+          oldInput: {
+            firstName,
+            lastName,
+            dob: dobString,
+            email,
+            password,
+            confirmPassword,
+            userType,
+            location,
+            lat,
+            lng,
+            serviceName,
+            serviceRadius,
+            pricePerDay,
+            pricePerMonth,
+            oldProfilePicture: profilePictureUrl,
+            oldBannerImage: bannerImageUrl,
+            oldProfilePicturePublicId: profilePicturePublicId,
+            oldBannerImagePublicId: bannerImagePublicId
+          },
+          profilePicture: profilePictureUrl || null,
+          bannerImage: bannerImageUrl || null,
+          editing,
+          user: {}
+        });
       }
 
       // ✅ Hash password
@@ -217,24 +242,26 @@ exports.postSignUpPage = [
       });
 
       const user = await newUser.save();
-
       req.session.isLogedIn = true;
       req.session.user = user;
       await req.session.save();
 
+      console.log("Signup successful for:", email);
       return res.redirect('/');
     } catch (err) {
-      console.log("Signup Error:", err.message);
+      console.error("Signup Error:", err);
       return res.status(422).render('store/signup', {
         title: "Sign-Up",
         isLogedIn: false,
         errorMessage: [err.message],
+        errors: { general: err.message },
         oldInput: {
           firstName,
           lastName,
           dob: dobString,
           email,
           password,
+          confirmPassword,
           userType,
           location,
           lat,
@@ -242,8 +269,14 @@ exports.postSignUpPage = [
           serviceName,
           serviceRadius,
           pricePerDay,
-          pricePerMonth
+          pricePerMonth,
+          oldProfilePicture: profilePictureUrl,
+          oldBannerImage: bannerImageUrl,
+          oldProfilePicturePublicId: profilePicturePublicId,
+          oldBannerImagePublicId: bannerImagePublicId
         },
+        profilePicture: profilePictureUrl || null,
+        bannerImage: bannerImageUrl || null,
         editing,
         user: {}
       });
@@ -254,18 +287,18 @@ exports.postSignUpPage = [
 
 // GET the edit profile form
 exports.getEditPage = async (req, res) => {
-  const editing = req.query.editing === 'true';
+  const editing = req.query.editing === "true";
 
   try {
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).send('User not found');
+    if (!user) return res.status(404).send("User not found");
 
-    const vendorCount = await User.countDocuments({ userType: 'vender' });
+    const vendorCount = await User.countDocuments({ userType: "vender" });
 
     // Convert dob to YYYY-MM-DD for input
     const dobString = user.dob ? new Date(user.dob).toISOString().split("T")[0] : "";
 
-    res.render('./store/signup', {
+    res.render("./store/signup", {
       title: "Edit Profile",
       isLogedIn: req.isLogedIn,
       editing,
@@ -285,11 +318,13 @@ exports.getEditPage = async (req, res) => {
         pricePerDay: user.userType === "vender" ? (user.pricePerDay || "") : "",
         pricePerMonth: user.userType === "vender" ? (user.pricePerMonth || "") : ""
       },
+      profilePicture: user.profilePicture || null,   // ✅ added
+      bannerImage: user.bannerImage || null,         // ✅ added
       errors: {}
     });
   } catch (err) {
-    console.error('❌ Error fetching user or vendor count:', err);
-    res.status(500).send('Error fetching user');
+    console.error("❌ Error fetching user or vendor count:", err);
+    res.status(500).send("Error fetching user");
   }
 };
 
@@ -342,7 +377,9 @@ exports.postEditPage = async (req, res) => {
     // ✅ Profile picture update
     if (files?.profilePicture?.length > 0) {
       if (user.profilePicturePublicId) {
-        await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => console.warn(err.message));
+        await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err =>
+          console.warn(err.message)
+        );
       }
       const profileResult = await fileUploadInCloudinary(files.profilePicture[0].buffer);
       user.profilePicture = profileResult.secure_url;
@@ -352,7 +389,9 @@ exports.postEditPage = async (req, res) => {
     // ✅ Banner image update (vendor only)
     if (user.userType === "vender" && files?.bannerImage?.length > 0) {
       if (user.bannerImagePublicId) {
-        await cloudinary.uploader.destroy(user.bannerImagePublicId).catch(err => console.warn(err.message));
+        await cloudinary.uploader.destroy(user.bannerImagePublicId).catch(err =>
+          console.warn(err.message)
+        );
       }
       const bannerResult = await fileUploadInCloudinary(files.bannerImage[0].buffer);
       user.bannerImage = bannerResult.secure_url;
@@ -371,7 +410,7 @@ exports.postEditPage = async (req, res) => {
     // ✅ Update password only if provided
     if (password && password.trim() !== "") {
       if (password !== confirmPassword) {
-        return res.status(400).render('./store/signup', {
+        return res.status(400).render("./store/signup", {
           title: "Edit Profile",
           isLogedIn: req.isLogedIn,
           editing: true,
@@ -400,15 +439,15 @@ exports.postEditPage = async (req, res) => {
       await req.session.save();
     }
 
-    res.redirect('/');
+    res.redirect("/");
   } catch (err) {
-    console.error('❌ Error updating user:', err);
+    console.error("❌ Error updating user:", err);
 
     const user = await User.findById(req.body.id);
-    const vendorCount = await User.countDocuments({ userType: 'vender' });
+    const vendorCount = await User.countDocuments({ userType: "vender" });
 
     // Re-render the edit page with oldInput in case of error
-    res.status(500).render('./store/signup', {
+    res.status(500).render("./store/signup", {
       title: "Edit Profile",
       isLogedIn: req.isLogedIn,
       editing: true,
@@ -423,27 +462,31 @@ exports.postEditPage = async (req, res) => {
 // GET the signup page
 exports.getSignUpPage = async (req, res, next) => {
   const editing = req.query.editing === 'true';
-  const { firstName, lastName, dob, email, password, userType } = req.body;
+  const { firstName, lastName, location, dob, email, password, userType } = req.body;
 
   const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
 
   try {
-    // ✅ Check if a vendor already exists
     const vendorCount = await User.countDocuments({ userType: 'vender' });
 
     res.render('./store/signup', {
       title: "Sign-UP Page",
       isLogedIn: req.isLogedIn,
       editing,
-      vendorExists: vendorCount > 0, // ✅ important
+      vendorExists: vendorCount > 0,
+      errors: {},
+      user:{},
       oldInput: {
         firstName,
         lastName,
+        location,
         dob: dobString,
         email,
         password,
         userType
-      }
+      },
+      profilePicture: null,  // ✅ added
+      bannerImage: null      // ✅ added
     });
 
   } catch (err) {
