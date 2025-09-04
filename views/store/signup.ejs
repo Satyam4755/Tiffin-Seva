@@ -211,7 +211,6 @@
             <option value="guest" <%= (oldInput?.userType==='guest') ? 'selected' : '' %>>Customer</option>
             <option value="vender" <%= (oldInput?.userType==='vender') ? 'selected' : '' %>>Vendor</option>
           </select>
-          <label for="userType">Select User Type</label>
         <% } else { %>
           <select id="userType" name="userType" disabled>
             <option value="<%= user.userType %>" selected>
@@ -296,6 +295,7 @@
     type="email" 
     id="email" 
     name="email"
+    placeholder="Enter your email"
     value="<%= editing ? user.email : (oldInput?.email || '') %>" 
     <%= editing ? 'disabled' : 'required' %>
   />
