@@ -217,7 +217,6 @@
               <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
             </option>
           </select>
-          <label for="userType">User Type</label>
         <% } %>
       </div>
 
@@ -225,7 +224,6 @@
       <div class="input-group">
         <input type="text" id="location" name="location" placeholder="Enter your location"
           value="<%= editing ? user.location : (oldInput?.location || '') %>" required />
-        <label for="location">Your Location</label>
         <input type="hidden" id="lat" name="lat" value="<%= editing ? user.lat : (oldInput?.lat || '') %>" />
         <input type="hidden" id="lng" name="lng" value="<%= editing ? user.lng : (oldInput?.lng || '') %>" />
       </div>
@@ -270,16 +268,14 @@
 
       <!-- First Name -->
       <div class="input-group">
-        <input type="text" id="firstName" name="firstName"
+        <input type="text" id="firstName" name="firstName" placeholder="firstName"
           value="<%= editing ? user.firstName : (oldInput?.firstName || '') %>" required />
-        <label for="firstName">First Name</label>
       </div>
 
       <!-- Last Name -->
       <div class="input-group">
-        <input type="text" id="lastName" name="lastName"
+        <input type="text" id="lastName" name="lastName" placeholder="lastName"
           value="<%= editing ? user.lastName : (oldInput?.lastName || '') %>" required />
-        <label for="lastName">Last Name</label>
       </div>
 
       <!-- DOB -->
