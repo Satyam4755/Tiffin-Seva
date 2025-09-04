@@ -107,14 +107,13 @@ exports.homePage = async (req, res, next) => {
 };
 // ⭐ VENDOR DETAILS
 exports.venderDetails = async (req, res, next) => {
-  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
   const venderId = req.params.venderId;
 
   try {
     // 👉 Fetch vendor with populated reviews
     const vender = await User.findById(venderId).populate('reviews.user');
     if (!vender) return res.redirect('/');
-
+ 
     // ✅ Calculate average rating
     let averageRating = 0;
     const validRatings = (vender.reviews || []).filter(
