@@ -621,7 +621,7 @@ body {
 
   <!-- ✅ Reviews Popup -->
   <div id="reviewsPanel" class="reviews-panel hidden">
-    <button class="close-btn" style="background: none;" onclick="removePanel('reviewsPanel')">X</button>
+    <button class="close-btn" style="background: none; border: none; font-size: 16px;" onclick="removePanel('reviewsPanel')">x</button>
     <h3 style="text-align:center; color:#6c5ce7;">Reviews</h3>
     <div class="review_list">
       <% if (reviews && reviews.length > 0) { %>
@@ -644,20 +644,27 @@ body {
     </div>
 
     <!-- Add Yours button -->
-    <%
-    let userReview = null;
-    if (reviews && reviews.length > 0) {
-        userReview = reviews.find(review => review.user._id.toString() === user._id.toString());
-    }
-    %>
-    <% if (userReview) { %>
-        <form action="/user/delete-review/<%= vender._id %>" method="POST" style="text-align:center; margin-top: 10px;">
+    <% let userReview=null; if (reviews && reviews.length> 0 && user) {
+      userReview = reviews.find(review => review.user._id.toString() === user._id.toString());
+      }
+      %>
+    
+      <% if (!isLogedIn) { %>
+        <!-- not logged in -->
+        <a href="/logIn">
+          <button class="add_btn">Login to Add Review</button>
+        </a>
+        <% } else if (userReview) { %>
+          <!-- logged in and already reviewed -->
+          <form action="/user/delete-review/<%= vender._id %>" method="POST" style="text-align:center; margin-top: 10px;">
             <input type="hidden" name="reviewId" value="<%= userReview._id %>">
-            <button onclick="loading()" type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your Review</button>
-        </form>
-    <% } else { %>
-        <button class="add_btn" onclick="toggleReviewForm()">Add Yours!</button>
-    <% } %>
+            <button onclick="loading()" type="submit" class="add_btn" style="background-color: #e74c3c;">Delete Your
+              Review</button>
+          </form>
+          <% } else { %>
+            <!-- logged in but not reviewed yet -->
+            <button class="add_btn" onclick="toggleReviewForm()">Add Yours!</button>
+            <% } %>
 
     <!-- Hidden review form popup -->
     <div id="reviewFormPopup" class="review-form-popup hidden">
@@ -736,6 +743,7 @@ function showPanel(panel) {
   overlay.classList.remove('hidden');
 }
 
+/* ✅ one universal close function */
 function removePanel(id) {
   const panel = document.getElementById(id);
   const overlay = document.getElementById('overlay');
@@ -745,29 +753,15 @@ function removePanel(id) {
   vender_detailsContainer.classList.remove('blured');
 }
 
-
 // for reviews
 function toggleReviews() {
   const panel = document.getElementById('reviewsPanel');
-  const overlay = document.getElementById('overlay');
-  const vender_detailsContainer = document.querySelector('.vender-details-container');
-
-  vender_detailsContainer.classList.add('blured');
-  panel.classList.remove('hidden');
-  overlay.classList.remove('hidden');
+  showPanel(panel);
 }
+
 function toggleReviewForm() {
-    const popup = document.getElementById("reviewFormPopup");
-    popup.classList.toggle("hidden");
-}
-function removePanel() {
-  const panel = document.getElementById('reviewsPanel');
-  const overlay = document.getElementById('overlay');
-  const vender_detailsContainer = document.querySelector('.vender-details-container');
-
-  panel.classList.add('hidden');
-  overlay.classList.add('hidden');
-  vender_detailsContainer.classList.remove('blured');
+  const popup = document.getElementById("reviewFormPopup");
+  popup.classList.toggle("hidden");
 }
 </script>
 
