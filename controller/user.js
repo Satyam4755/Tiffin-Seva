@@ -26,13 +26,13 @@ exports.homePage = async (req, res, next) => {
   let user = null;
   let showOptions = false;
   let birthdayMessage = null;
+  let opacity = {};
 
   try {
     // 1️⃣ Get all vendors only
     registervenders = await User.find({ userType: 'vender' });
 
     // 2️⃣ Get all vendor IDs who have added meals
-    // (This is one DB call returning only IDs)
     const vendorIdsWithMeals = await Meals.distinct('vendor');
     const vendorsWithMealsSet = new Set(vendorIdsWithMeals.map(id => id.toString()));
 
@@ -73,19 +73,23 @@ exports.homePage = async (req, res, next) => {
           const vRadius = parseFloat(vender.serviceRadius);
 
           const dist = getDistanceKm(uLat, uLng, vLat, vLng);
-
           return dist <= vRadius;
         });
       }
 
-      // ⭐ Mark favourites for guests and attach hasMenu
+      // ⭐ Mark favourites for guests and attach hasMenu + opacity
       if (user.userType === "guest") {
         showOptions = true;
         const favIds = (user.favourites || []).map((fav) => fav.toString());
 
         registervenders = registervenders.map((vender) => {
-          const isFav = favIds.includes(vender._id.toString());
-          const hasMenu = vendorsWithMealsSet.has(vender._id.toString());
+          const vId = vender._id.toString();
+          const isFav = favIds.includes(vId);
+          const hasMenu = vendorsWithMealsSet.has(vId);
+
+          // opacity map used in EJS
+          opacity[vId] = isFav ? 10 : 0;
+
           return {
             ...vender.toObject(),
             vendorClass: isFav ? "fav-vendor" : "",
@@ -93,19 +97,30 @@ exports.homePage = async (req, res, next) => {
           };
         });
       } else {
-        registervenders = registervenders.map((vender) => ({
-          ...vender.toObject(),
-          vendorClass: "",
-          hasMenu: vendorsWithMealsSet.has(vender._id.toString()),
-        }));
+        // logged in but not a guest (e.g., vendor)
+        registervenders = registervenders.map((vender) => {
+          const vId = vender._id.toString();
+          const hasMenu = vendorsWithMealsSet.has(vId);
+          opacity[vId] = 0; // no favs for non-guest
+          return {
+            ...vender.toObject(),
+            vendorClass: "",
+            hasMenu,
+          };
+        });
       }
     } else {
-      // not logged in — still attach vendorClass + hasMenu
-      registervenders = registervenders.map((vender) => ({
-        ...vender.toObject(),
-        vendorClass: "",
-        hasMenu: vendorsWithMealsSet.has(vender._id.toString()),
-      }));
+      // not logged in — still attach hasMenu, keep opacity 0
+      registervenders = registervenders.map((vender) => {
+        const vId = vender._id.toString();
+        const hasMenu = vendorsWithMealsSet.has(vId);
+        opacity[vId] = 0;
+        return {
+          ...vender.toObject(),
+          vendorClass: "",
+          hasMenu,
+        };
+      });
     }
 
     // 4️⃣ Render page
@@ -117,6 +132,7 @@ exports.homePage = async (req, res, next) => {
       user: user || null,
       showOptions,
       birthdayMessage,
+      opacity, // ← back as requested
     });
   } catch (err) {
     console.error("❌ Home page error:", err);
