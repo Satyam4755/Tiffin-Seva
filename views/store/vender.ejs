@@ -6,114 +6,16 @@
         font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         /* min-height: 100vh; */
     }
-/* Wrapper to center search form */
-.search-bar-form {
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    gap: 10px;
-    max-width: 500px;
-    width: 80%;
-    margin: 20px auto;
-    position: relative;
-    padding: 0 20px;
+
+
+    .grayscale {
+  filter: grayscale(100%);
 }
 
-/* Search input */
-#search-bar {
-    z-index: 10;
-    flex: 1;
-    padding: 10px 16px;
-    border-radius: 50px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    outline: none;
-    transition: box-shadow 0.3s;
+.fav-vendor {
+  border: 3px solid gold; /* or any style to indicate favourite */
 }
 
-/* Input focus effect */
-#search-bar:focus {
-    border-color: #ff385c;
-    box-shadow: 0 0 5px rgba(255, 56, 92, 0.3);
-}
-
-/* Submit button */
-#search-btn {
-    z-index: 10;
-    padding: 10px 16px;
-    background: #ff385c;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-}
-
-/* Hover/active effect */
-#search-btn:hover {
-    background: #e0274b;
-    transform: scale(1.05);
-}
-#search-btn:active {
-    transform: scale(0.95);
-}
-
-/* Dropdown styling */
-#location-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 60px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 15px;
-    margin-top: 6px;
-    max-height: 180px;
-    max-width: 66%;
-    overflow-y: auto;
-    z-index: 99;
-    display: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Dropdown items */
-.dropdown-item {
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #eee;
-    transition: background 0.2s;
-}
-
-.dropdown-item:last-child {
-    border-bottom: none;
-}
-
-.dropdown-item:hover {
-    background: #fce9ec;
-}
-
-/* Responsive behavior */
-@media (max-width: 768px) {
-    .search-bar-form {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    #search-bar {
-        width: 80%;
-        border-radius: 30px;
-    }
-    #search-btn {
-        width: 60px;
-        border-radius: 30px;
-    }
-
-    #location-dropdown {
-        right: 0;
-    }
-}
 
     h1 {
         text-align: center;
@@ -163,7 +65,7 @@
 
     .card img:hover {
         transform: scale(1.08);
-        filter: brightness(1.1) saturate(1.2);
+        /* filter: brightness(1.1) saturate(1.2); */
     }
 
     .content {
@@ -506,9 +408,8 @@
                     <% venders.forEach(vender=> { %>
                         <div class="card">
                             <a href="/user/vender-list/<%= vender._id %>">
-        
-                                <!-- ✅ Banner Image -->
-                                <img src="<%= vender.bannerImage %>" alt="Vendor Banner">
+                                <img src="<%= vender.bannerImage %>" alt="Vendor Banner"
+                                    class="<%= vender.vendorClass %> <%= vender.hasMenu ? '' : 'grayscale' %>">
         
                                 <div class="content">
         
