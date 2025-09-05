@@ -842,18 +842,44 @@ exports.postDeleteReview = async (req, res, next) => {
 
 
 // ✅ Controller: postHomePage
+// ✅ Controller: postHomePage
 exports.postHomePage = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
   const userId = req.session.user._id;
-  const themeValue = req.body.theme === 'true'; // convert to boolean
 
   try {
-    await User.findByIdAndUpdate(userId, { theme: themeValue });
-    req.session.user.theme = themeValue; // update session also
-    res.redirect('/');
+    // 🔹 CASE 1: Location update form posted
+    if (req.body.location && req.body.lat && req.body.lng) {
+      const { location, lat, lng } = req.body;
+
+      await User.findByIdAndUpdate(userId, { location, lat, lng });
+
+      // update session so next page load sees new data
+      req.session.user.location = location;
+      req.session.user.lat = lat;
+      req.session.user.lng = lng;
+
+      // if you want JSON (AJAX):
+      // return res.json({ success: true });
+
+      return res.redirect('/'); // if standard form post
+    }
+
+    // 🔹 CASE 2: Theme update form posted
+    if (typeof req.body.theme !== 'undefined') {
+      const themeValue = req.body.theme === 'true'; // convert to boolean
+
+      await User.findByIdAndUpdate(userId, { theme: themeValue });
+      req.session.user.theme = themeValue;
+
+      return res.redirect('/');
+    }
+
+    // 🔹 CASE 3: Unknown form post
+    return res.status(400).send('Invalid form submission');
   } catch (err) {
-    console.error('Theme update failed:', err);
+    console.error('Error in postHomePage:', err);
     res.status(500).send('Internal Server Error');
   }
 };
