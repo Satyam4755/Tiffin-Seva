@@ -1,0 +1,209 @@
+<!-- Delivering to button -->
+<button id="deliveryBtn" class="btn">
+  Delivering to: <%= user && user.location ? user.location : 'Set location' %>
+</button>
+
+<!-- Hidden modal -->
+<div id="addressModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addressModalTitle">
+  <div class="modal-content">
+    <h3 id="addressModalTitle">Change Delivery Location</h3>
+
+    <!-- form -->
+    <form action="/" method="POST" id="addressForm" autocomplete="off">
+      <div class="input-group">
+        <input
+          id="addressInput"
+          name="location"
+          type="text"
+          placeholder="Enter location"
+          class="input"
+          value="<%= user?.location || '' %>"
+          required
+        />
+        <input type="hidden" id="lat" name="lat" value="<%= user?.lat || '' %>" />
+        <input type="hidden" id="lng" name="lng" value="<%= user?.lng || '' %>" />
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:6px;">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="button" id="closeModalBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </form>
+    <!-- /form -->
+  </div>
+</div>
+
+<!-- overlay -->
+<div id="overlay" class="hidden overlay"></div>
+
+<style>
+  /* Buttons */
+  .btn {
+    background: linear-gradient(90deg,#ffb347,#ffcc33);
+    color: #222;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 28px;
+    cursor: pointer;
+    margin: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  .btn-primary {
+    background: linear-gradient(90deg,#4caf50,#81c784);
+    color: #fff;
+  }
+  .btn-secondary {
+    background: #f5f5f5;
+    color: #333;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) scale(1);
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+    z-index: 1001;
+    min-width: 320px;
+    max-width: 90vw;
+    width: 400px;
+    padding: 0;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%,-50%) scale(.98);
+  }
+  .modal-content {
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+  }
+
+  /* Inputs */
+  .input-group {
+    width: 100%;
+  }
+  .input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #ffcc33;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input:focus {
+    border-color: #ffb347;
+    box-shadow: 0 0 0 3px rgba(255,204,51,0.25);
+  }
+
+  /* Overlay */
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,.25);
+    z-index: 1000;
+    transition: opacity .25s ease;
+  }
+  .overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Places dropdown on top */
+  .pac-container {
+    z-index: 3000 !important;
+  }
+</style>
+
+<!-- GOOGLE MAPS: only include ONCE in the page. callback initAutocomplete will run when API loads -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
+
+<script>
+  // elements
+  const deliveryBtn = document.getElementById('deliveryBtn');
+  const addressModal = document.getElementById('addressModal');
+  const overlay = document.getElementById('overlay');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const addressInput = document.getElementById('addressInput');
+  const addressForm = document.getElementById('addressForm');
+  const latInput = document.getElementById('lat');
+  const lngInput = document.getElementById('lng');
+
+  let autocomplete = null;
+  let selectedPlace = null;
+
+  // this function is called by the Google Maps script (callback=initAutocomplete)
+  function initAutocomplete() {
+    // Initialize with NO restrictive "types" so establishments + addresses appear (same as signup)
+    autocomplete = new google.maps.places.Autocomplete(addressInput);
+
+    // request the fields we need (avoid extra quota)
+    autocomplete.setFields(['formatted_address','geometry','name','address_components']);
+
+    autocomplete.addListener('place_changed', () => {
+      selectedPlace = autocomplete.getPlace();
+
+      // if place has geometry fill lat/lng and normalize input value
+      if (selectedPlace && selectedPlace.geometry) {
+        const formatted = selectedPlace.formatted_address || selectedPlace.name || addressInput.value;
+        addressInput.value = formatted;
+        latInput.value = selectedPlace.geometry.location.lat();
+        lngInput.value = selectedPlace.geometry.location.lng();
+      }
+    });
+
+    // If user types after selecting, clear selectedPlace so submit validation works
+    addressInput.addEventListener('input', () => {
+      selectedPlace = null;
+      latInput.value = '';
+      lngInput.value = '';
+    });
+  }
+
+  // open modal and focus input (small delay so focus works reliably)
+  deliveryBtn.addEventListener('click', () => {
+    addressModal.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    setTimeout(() => addressInput.focus(), 60);
+  });
+
+  // close modal (Cancel)
+  closeModalBtn.addEventListener('click', () => {
+    addressModal.classList.add('hidden');
+    overlay.classList.add('hidden');
+  });
+
+  // ensure a place was selected from suggestions before letting form submit
+  addressForm.addEventListener('submit', (e) => {
+    // If you want to allow manual typed addresses, remove this guard.
+    if (!selectedPlace || !selectedPlace.geometry) {
+      e.preventDefault();
+      alert('Please pick a location from the suggestions (click one).');
+      addressInput.focus();
+    } else {
+      // form will post to /update-location (server should accept location, lat, lng)
+      // optionally you can also close modal after successful post (server redirect)
+    }
+  });
+</script>
