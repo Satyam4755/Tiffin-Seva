@@ -18,21 +18,25 @@ function getDistanceKm(lat1, lng1, lat2, lng2) {
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
-}
+} 
 
 // ⭐ HOME PAGE
 exports.homePage = async (req, res, next) => {
-  let opacity = {};
   let registervenders = [];
   let user = null;
   let showOptions = false;
   let birthdayMessage = null;
 
   try {
-    // 1. Get all vendors only
+    // 1️⃣ Get all vendors only
     registervenders = await User.find({ userType: 'vender' });
 
-    // 2. If logged in, filter vendors within radius
+    // 2️⃣ Get all vendor IDs who have added meals
+    // (This is one DB call returning only IDs)
+    const vendorIdsWithMeals = await Meals.distinct('vendor');
+    const vendorsWithMealsSet = new Set(vendorIdsWithMeals.map(id => id.toString()));
+
+    // 3️⃣ If logged in, filter vendors within radius
     if (req.isLogedIn && req.session.user) {
       user = await User.findById(req.session.user._id);
 
@@ -43,8 +47,9 @@ exports.homePage = async (req, res, next) => {
         }
         const todayIST = getISTDateOnly(new Date());
         const dobIST = getISTDateOnly(new Date(user.dob));
-        const isBirthday = todayIST.getDate() === dobIST.getDate() &&
-                           todayIST.getMonth() === dobIST.getMonth();
+        const isBirthday =
+          todayIST.getDate() === dobIST.getDate() &&
+          todayIST.getMonth() === dobIST.getMonth();
 
         if (isBirthday && !req.session.birthdayWished) {
           birthdayMessage = `🎉 Happy Birthday, ${user.firstName}! 🎂`;
@@ -60,7 +65,7 @@ exports.homePage = async (req, res, next) => {
         const uLat = parseFloat(user.lat);
         const uLng = parseFloat(user.lng);
 
-        registervenders = registervenders.filter(vender => {
+        registervenders = registervenders.filter((vender) => {
           if (!vender.lat || !vender.lng || !vender.serviceRadius) return false;
 
           const vLat = parseFloat(vender.lat);
@@ -69,37 +74,50 @@ exports.homePage = async (req, res, next) => {
 
           const dist = getDistanceKm(uLat, uLng, vLat, vLng);
 
-          // Show only if customer is inside vendor's service area
           return dist <= vRadius;
         });
       }
 
-      // ⭐ Favourite opacity for guests
-      if (user.userType === 'guest') {
+      // ⭐ Mark favourites for guests and attach hasMenu
+      if (user.userType === "guest") {
         showOptions = true;
-        const favIds = (user.favourites || []).map(fav => fav.toString());
-        registervenders.forEach(vender => {
-          opacity[vender._id.toString()] = favIds.includes(vender._id.toString()) ? 10 : 0;
+        const favIds = (user.favourites || []).map((fav) => fav.toString());
+
+        registervenders = registervenders.map((vender) => {
+          const isFav = favIds.includes(vender._id.toString());
+          const hasMenu = vendorsWithMealsSet.has(vender._id.toString());
+          return {
+            ...vender.toObject(),
+            vendorClass: isFav ? "fav-vendor" : "",
+            hasMenu,
+          };
         });
       } else {
-        registervenders.forEach(vender => {
-          opacity[vender._id.toString()] = 0;
-        });
+        registervenders = registervenders.map((vender) => ({
+          ...vender.toObject(),
+          vendorClass: "",
+          hasMenu: vendorsWithMealsSet.has(vender._id.toString()),
+        }));
       }
+    } else {
+      // not logged in — still attach vendorClass + hasMenu
+      registervenders = registervenders.map((vender) => ({
+        ...vender.toObject(),
+        vendorClass: "",
+        hasMenu: vendorsWithMealsSet.has(vender._id.toString()),
+      }));
     }
 
-    // 3. Render page
-    res.render('./store/vender', {
+    // 4️⃣ Render page
+    res.render("./store/vender", {
       venders: registervenders,
       title: "Vendor Page",
-      opacity,
-      currentPage: 'home',
+      currentPage: "home",
       isLogedIn: req.isLogedIn,
       user: user || null,
       showOptions,
-      birthdayMessage
+      birthdayMessage,
     });
-
   } catch (err) {
     console.error("❌ Home page error:", err);
     res.status(500).send("Server error");
