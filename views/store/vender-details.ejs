@@ -362,7 +362,7 @@ body {
   max-height: 90vh;
 }
 
-.menu-panel .close-btn {
+.menu-panel .close-btn, .reviews-panel .close-btn {
   position: absolute;
   top: 15px;
   right: 20px;
@@ -451,67 +451,7 @@ body {
         filter: grayscale(1);
     }
 </style>
-<!-- ✅ CSS (add in your stylesheet) -->
-<!-- <style>
-.menu-panel {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 800px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0,0,0,0.2);
-  padding: 20px;
-  z-index: 1000;
-  overflow-y: auto;
-  max-height: 90vh;
-}
-.menu-panel .close-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  border: none;
-  background: transparent;
-  font-size: 20px;
-  cursor: pointer;
-  color: #333;
-}
-.all-days-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.day-section {
-  border: 1px solid #eee;
-  padding: 15px;
-  border-radius: 12px;
-  background: #fafafa;
-}
-.day-title {
-  margin-bottom: 10px;
-  color: #6c5ce7;
-}
-.meal-container {
-  display: flex;
-  gap: 20px;
-}
-.meal-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-.meal-box img {
-  width: 70px;
-  height: 70px;
-  border-radius: 10px;
-  object-fit: cover;
-}
-.meal-info {
-  flex: 1;
-}
-</style> -->
+
 
 <% if (messages.success && messages.success.length > 0) { %>
   <script>
@@ -621,7 +561,7 @@ body {
 
   <!-- ✅ Reviews Popup -->
   <div id="reviewsPanel" class="reviews-panel hidden">
-    <button class="close-btn" style="background: none; border: none; font-size: 16px;" onclick="removePanel('reviewsPanel')">x</button>
+    <button class="close-btn"  onclick="removePanel('reviewsPanel')">✕</button>
     <h3 style="text-align:center; color:#6c5ce7;">Reviews</h3>
     <div class="review_list">
       <% if (reviews && reviews.length > 0) { %>
