@@ -431,52 +431,53 @@
     return hour >= 13 && hour < 18;
   }
 
-function validateTimeSelection(e) {
-  const now = new Date();
-  const hour = now.getHours();
+  function validateTimeSelection(e) {
+    const now = new Date();
+    const hour = now.getHours();
 
-  const lunchInput = document.querySelector('input[value="lunch"]');
-  const dinnerInput = document.querySelector('input[value="dinner"]');
+    const lunchInput = document.querySelector('input[value="lunch"]');
+    const dinnerInput = document.querySelector('input[value="dinner"]');
 
-  const isLunchSelected = lunchInput.checked;
-  const isDinnerSelected = dinnerInput.checked;
+    const isLunchSelected = lunchInput.checked;
+    const isDinnerSelected = dinnerInput.checked;
 
-  // Get selected starting date
-  const startDateValue = startInput.value ? new Date(startInput.value) : null;
-  const today = new Date();
-  today.setHours(0,0,0,0);
+    // Get selected starting date
+    const startDateValue = startInput.value ? new Date(startInput.value) : null;
+    const today = new Date();
+    today.setHours(0,0,0,0);
 
-  // ✅ If starting date is in the future, allow without restrictions
-  if (startDateValue && startDateValue > today) {
+    // ✅ If starting date is in the future, allow without restrictions
+    if (startDateValue && startDateValue > today) {
+      updateTileSelection();
+      calculateTotal();
+      return;
+    }
+
+    // Otherwise, apply today's time restrictions
+    const lunchAvailable = hour >= 9 && hour < 12;
+    const dinnerAvailable = hour < 18;
+
+    if (e.target.value === "lunch" && !lunchAvailable) {
+      lunchInput.checked = false;
+      showMessage("⏰ Time for ordering lunch is 9AM - 12PM today");
+    }
+
+    if (e.target.value === "dinner" && !dinnerAvailable) {
+      dinnerInput.checked = false;
+      showMessage("⏰ Time for ordering dinner is before 6PM today");
+    }
+
+    if (!lunchAvailable && !dinnerAvailable && (isLunchSelected || isDinnerSelected)) {
+      lunchInput.checked = false;
+      dinnerInput.checked = false;
+      showMessage("🚫 Today's time for ordering is over! Please select a future date.");
+    }
+
     updateTileSelection();
     calculateTotal();
-    return;
   }
 
-  // Otherwise, apply today's time restrictions
-  const lunchAvailable = hour >= 9 && hour < 12;
-  const dinnerAvailable = hour < 18;
-
-  if (e.target.value === "lunch" && !lunchAvailable) {
-    lunchInput.checked = false;
-    showMessage("⏰ Time for ordering lunch is 9AM - 12PM today");
-  }
-
-  if (e.target.value === "dinner" && !dinnerAvailable) {
-    dinnerInput.checked = false;
-    showMessage("⏰ Time for ordering dinner is before 6PM today");
-  }
-
-  if (!lunchAvailable && !dinnerAvailable && (isLunchSelected || isDinnerSelected)) {
-    lunchInput.checked = false;
-    dinnerInput.checked = false;
-    showMessage("🚫 Today's time for ordering is over! Please select a future date.");
-  }
-
-  updateTileSelection();
-  calculateTotal();
-}
-function toggleTimeOptions() {
+  function toggleTimeOptions() {
     const isPerDaySelected = document.getElementById('perday').checked;
     const isPerMonthSelected = document.getElementById('permonth')?.checked;
 
@@ -552,36 +553,47 @@ function toggleTimeOptions() {
   startInput.addEventListener('change', calculateTotal);
   endInput.addEventListener('change', calculateTotal);
 
-
-  // for the moths
+  // 🔹 Month buttons logic with start date shift after 11 AM
   const monthButtons = document.querySelectorAll(".month-btn");
 
-monthButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    // remove previous selection
-    monthButtons.forEach(b => b.classList.remove("selected"));
+  monthButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // remove previous selection
+      monthButtons.forEach(b => b.classList.remove("selected"));
 
-    // mark current button as selected
-    btn.classList.add("selected");
+      // mark current button as selected
+      btn.classList.add("selected");
 
-    const months = parseInt(btn.getAttribute("data-months"));
-    document.getElementById("selectedMonths").value = months;
+      const months = parseInt(btn.getAttribute("data-months"));
+      document.getElementById("selectedMonths").value = months;
 
-    // Calculate meal time period
-    const start = new Date();
-    const end = new Date();
-    end.setDate(start.getDate() + (30 * months));
+      // ✅ New start date logic
+      const now = new Date();
+      let start = new Date();
 
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    const msg = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
+      if (now.getHours() >= 11) {
+        // after 11AM, start from tomorrow
+        start.setDate(start.getDate() + 1);
+      }
+      // midnight
+      start.setHours(0, 0, 0, 0);
 
-    const display = document.getElementById("calculatedEndDate");
-    display.textContent = msg;
-    display.style.display = "block";
+      const end = new Date(start);
+      end.setDate(start.getDate() + (30 * months));
 
-    calculateTotal();
+      // update hidden inputs so backend gets same dates
+      startInput.value = start.toISOString().split("T")[0];
+      endInput.value = end.toISOString().split("T")[0];
+
+      const options = { year: "numeric", month: "short", day: "numeric" };
+      const msg = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
+
+      display.textContent = msg;
+      display.style.display = "block";
+
+      calculateTotal();
+    });
   });
-});
 </script>
 
   <%-include('../partials/loading')%>
