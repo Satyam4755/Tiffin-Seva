@@ -2,6 +2,75 @@
 <%- include('../partials/background') %>
 
 <style>
+
+    .slideshow-container {
+  position: relative;
+  max-width: 100%;
+  margin: auto;
+  overflow: hidden;
+}
+
+.slides {
+  display: none;
+}
+
+.slides img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  padding: 16px;
+  margin-top: -22px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.3s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  background: rgba(0,0,0,0.3);
+}
+
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.6);
+}
+
+.dot {
+  cursor: pointer;
+  display: none !important;
+  height: 12px;
+  width: 12px;
+  margin: 0 3px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+.fade {
+  animation-name: fade;
+  animation-duration: 1s;
+}
+
+@keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
     body {
         font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         /* min-height: 100vh; */
@@ -28,85 +97,94 @@
         animation: fadeInDown 0.8s ease forwards;
     }
 
-    .cards-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 32px;
-        padding: 18px 10px 0 10px;
-        max-height: 135vh;
-        overflow: hidden;
-    }
+    /* --- CARDS --- */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* 2+ columns automatically */
+  gap: 16px;
+  padding: 12px;
+  justify-content: center;
+}
 
-    .card {
-        background: linear-gradient(135deg, #fff 60%, #fff0f6 100%);
-        border-radius: 22px;
-        box-shadow: 0 8px 32px rgba(255, 77, 79, 0.09), 0 2px 8px rgba(255, 77, 79, 0.08);
-        overflow: hidden;
-        width: 300px;
-        transition: transform 0.3s, box-shadow 0.3s;
-        border: 2px solid #ffe5e5;
-        position: relative;
-    }
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%; /* grid controls width */
+  border: 1px solid #f0f0f0;
+}
 
-    .card:hover {
-        transform: translateY(-10px) scale(1.03);
-        box-shadow: 0 16px 40px rgba(255, 77, 79, 0.18);
-    }
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
 
-    .card img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        border-top-left-radius: 22px;
-        border-top-right-radius: 22px;
-        transition: transform 0.4s, filter 0.4s;
-    }
+.card img {
+  width: 100%;
+  height: 120px;  /* shorter height */
+  object-fit: cover;
+  border-radius: 14px 14px 0 0;
+}
 
-    .card img:hover {
-        transform: scale(1.08);
-        /* filter: brightness(1.1) saturate(1.2); */
-    }
+.content {
+  padding: 8px;
+}
 
-    .content {
-        padding: 8px 8px 6px 8px;
-    }
+.card h3 {
+  /* margin: 4px 0 2px; */
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
 
-    .card h3 {
-        margin: 10px 0 6px;
-        color: #2c3e50;
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: 1px;
-    }
+.card p {
+  margin: 0;
+  font-size: 13px;
+  color: #777;
+  text-align: left;
+}
+.card p .location{
+    height: auto;
+}
 
-    .card p {
-        margin: 4px 0;
-        color: #555;
-        font-size: 15px;
-        text-align: left;
-    }
+/* Reserve Button */
+.reserve {
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
-    .reserve {
-        background: linear-gradient(90deg, #3bd303 60%, #028f0e 100%);
-        color: white;
-        border: none;
-        border-radius: 30px;
-        padding: 11px 22px;
-        margin-top: 12px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 4px 16px rgba(255, 77, 79, 0.18);
-        letter-spacing: 1px;
-    }
+.reserve:hover {
+  background: #e53e3f;
+  transform: scale(1.04);
+}
 
-    .reserve:hover {
-        background: linear-gradient(90deg, #028f0e 100%, #3bd303 60%);
-        transform: scale(1.07);
-        box-shadow: 0 8px 24px rgba(255, 77, 79, 0.22);
-    }
+/* MOBILE tweaks */
+@media (max-width: 600px) {
+  .cards-container {
+    grid-template-columns: repeat(2, 1fr); /* force 2 columns */
+    gap: 12px;
+  }
+  .card img {
+    height: 100px;
+  }
+  .card h3 {
+    font-size: 14px;
+  }
+  .card p {
+    font-size: 12px;
+  }
+}
 
     .fav-btn {
         position: absolute;
@@ -365,6 +443,61 @@
 </style>
 
 <%- include('../partials/nav') %>
+<!-- ✅ Slideshow Section -->
+<div class="slideshow-container">
+  <div class="slides fade"><img src="/s1.jpg" alt="slide 1"></div>
+  <div class="slides fade"><img src="/s2.jpg" alt="slide 2"></div>
+  <div class="slides fade"><img src="/s3.jpeg" alt="slide 3"></div>
+  <div class="slides fade"><img src="/s4.jpeg" alt="slide 4"></div>
+  <div class="slides fade"><img src="/s5.jpeg" alt="slide 5"></div>
+  <div class="slides fade"><img src="/s6.jpg" alt="slide 6"></div>
+
+  <!-- Next and prev buttons -->
+  <a class="prev" onclick="plusSlides(-1)">❮</a>
+  <a class="next" onclick="plusSlides(1)">❯</a>
+</div>
+
+<!-- Dots below (optional) -->
+<div style="text-align:center">
+  <span class="dot" onclick="currentSlide(1)"></span>
+  <span class="dot" onclick="currentSlide(2)"></span>
+  <span class="dot" onclick="currentSlide(3)"></span>
+  <span class="dot" onclick="currentSlide(4)"></span>
+  <span class="dot" onclick="currentSlide(5)"></span>
+  <span class="dot" onclick="currentSlide(6)"></span>
+</div>
+
+<script>
+let slideIndex = 0;
+showSlides(); // auto-run
+
+function showSlides() {
+  let i;
+  const slides = document.getElementsByClassName("slides");
+  const dots = document.getElementsByClassName("dot");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slideIndex++;
+  if (slideIndex > slides.length) {slideIndex = 1}
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";
+  dots[slideIndex-1].className += " active";
+  setTimeout(showSlides, 3000); // Change image every 3 seconds
+}
+
+function plusSlides(n) {
+  slideIndex += n-1;
+  showSlides();
+}
+
+function currentSlide(n) {
+  slideIndex = n-1;
+  showSlides();
+}
+</script>
 <%- include('../partials/deliveringMsg') %>
 
 
