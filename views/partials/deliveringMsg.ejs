@@ -189,10 +189,19 @@
     autocomplete.addListener('place_changed', () => {
       selectedPlace = autocomplete.getPlace();
 
-      // if place has geometry fill lat/lng and normalize input value
       if (selectedPlace && selectedPlace.geometry) {
-        const formatted = selectedPlace.formatted_address || selectedPlace.name || addressInput.value;
-        addressInput.value = formatted;
+        // combine name + address when both exist
+        let displayValue = '';
+
+        if (selectedPlace.name && selectedPlace.formatted_address) {
+          displayValue = selectedPlace.name + ', ' + selectedPlace.formatted_address;
+        } else if (selectedPlace.formatted_address) {
+          displayValue = selectedPlace.formatted_address;
+        } else {
+          displayValue = selectedPlace.name || addressInput.value;
+        }
+
+        addressInput.value = displayValue;
         latInput.value = selectedPlace.geometry.location.lat();
         lngInput.value = selectedPlace.geometry.location.lng();
       }
