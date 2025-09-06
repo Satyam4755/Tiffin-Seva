@@ -323,6 +323,7 @@ exports.booking = async (req, res, next) => {
 
 // POST BOOKING
 exports.Postbooking = [
+  // ✅ Phone validation
   check('phone')
     .isNumeric()
     .withMessage('Phone number should be numeric')
@@ -341,7 +342,6 @@ exports.Postbooking = [
       endingDate,
       payment,
       time_type,
-      totalAmount,
       selectedMonths,
       address,
     } = req.body;
@@ -350,6 +350,7 @@ exports.Postbooking = [
       const guestUser = await User.findById(req.session.user._id);
       const Selectedvender = await User.findById(venderId);
 
+      // ✅ Vendor check
       if (!Selectedvender || Selectedvender.userType !== 'vender') {
         req.flash('error', 'Vendor not found');
         return res.redirect('back');
@@ -385,19 +386,33 @@ exports.Postbooking = [
         }
 
         const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        const mealsCount = Array.isArray(time_type) ? time_type.length : (time_type ? 1 : 0);
+        const mealsCount = Array.isArray(time_type)
+          ? time_type.length
+          : (time_type ? 1 : 0);
         calculatedTotal = days * Selectedvender.pricePerDay * mealsCount;
       } else if (subscription_model === 'Per Month') {
         calculatedTotal = Number(selectedMonths) * Selectedvender.pricePerMonth;
       }
 
-      // ✅ Calculate expireAt
+      // ✅ Calculate startingDate & expireAt
+      let startDateForOrder;
       let expireAt;
+
       if (subscription_model === 'Per Month') {
-        const start = new Date();
-        expireAt = new Date(start.setDate(start.getDate() + Number(selectedMonths) * 30));
+        // start from tomorrow 00:00
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        startDateForOrder = tomorrow;
+
+        expireAt = new Date(
+          tomorrow.getTime() + Number(selectedMonths) * 30 * 24 * 60 * 60 * 1000
+        );
       } else if (subscription_model === 'Per Day') {
-        expireAt = new Date(new Date(endingDate).setDate(new Date(endingDate).getDate() + 1));
+        startDateForOrder = new Date(startingDate);
+        expireAt = new Date(
+          new Date(endingDate).setDate(new Date(endingDate).getDate() + 1)
+        );
       }
 
       // ✅ Create new order
@@ -408,13 +423,18 @@ exports.Postbooking = [
         phone,
         address,
         subscription_model,
-        startingDate: subscription_model === 'Per Month' ? new Date() : new Date(startingDate),
-        endingDate: subscription_model === 'Per Day' ? new Date(endingDate) : undefined,
+        startingDate: startDateForOrder,
+        endingDate:
+          subscription_model === 'Per Day'
+            ? new Date(endingDate)
+            : undefined,
         payment,
         totalAmount: calculatedTotal,
-        time_type: subscription_model === 'Per Day' ? time_type : undefined,
-        number_of_months: subscription_model === 'Per Month' ? selectedMonths : undefined,
-        expireAt
+        time_type:
+          subscription_model === 'Per Day' ? time_type : undefined,
+        number_of_months:
+          subscription_model === 'Per Month' ? selectedMonths : undefined,
+        expireAt,
       });
 
       await newOrder.save();
@@ -430,7 +450,6 @@ exports.Postbooking = [
       }
 
       // ✅ Do NOT pre-create messages anymore
-      // Messages will be generated dynamically in getMessage
 
       res.redirect('/user/submit_booking');
     } catch (err) {
@@ -438,7 +457,7 @@ exports.Postbooking = [
       req.flash('error', 'Something went wrong during booking');
       res.redirect('back');
     }
-  }
+  },
 ];
 
 // ✅ POST CANCEL BOOKING
