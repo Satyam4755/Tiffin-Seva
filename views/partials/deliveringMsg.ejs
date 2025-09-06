@@ -27,10 +27,53 @@
         <input type="hidden" id="lng" name="lng" value="<%= user?.lng || '' %>" />
       </div>
 
-      <div style="display:flex;gap:12px;justify-content:center;margin-top:6px;">
+    <div class="buttons-row">
         <button type="submit" class="btn btn-primary">Submit</button>
         <button type="button" id="closeModalBtn" class="btn btn-secondary">Cancel</button>
-      </div>
+        <button type="button" id="useCurrentBtn" class="btn btn-secondary">Use my current location</button>
+    </div>
+<script>
+  const useCurrentBtn = document.getElementById('useCurrentBtn');
+
+  useCurrentBtn.addEventListener('click', () => {
+    if (navigator.geolocation) {
+      useCurrentBtn.disabled = true;
+      useCurrentBtn.textContent = 'Detecting…';
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          latInput.value = lat;
+          lngInput.value = lng;
+
+          // optional: reverse-geocode lat/lng to a human-readable address using Maps Geocoder
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+              addressInput.value = results[0].formatted_address;
+              selectedPlace = {
+                geometry: { location: { lat: () => lat, lng: () => lng } },
+              }; // mark as selected
+            } else {
+              addressInput.value = '';
+            }
+            useCurrentBtn.disabled = false;
+            useCurrentBtn.textContent = 'Use my current location';
+          });
+        },
+        (err) => {
+          alert('Could not get your location: ' + err.message);
+          useCurrentBtn.disabled = false;
+          useCurrentBtn.textContent = 'Use my current location';
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  });
+</script>
     </form>
     <!-- /form -->
   </div>
@@ -40,125 +83,137 @@
 <div id="overlay" class="hidden overlay"></div>
 
 <style>
-
- .delivery-btn {
-  display: block;             /* full-width block button */
-  width: 90%;                 /* 90% of parent width */
-  margin-left: auto;          /* center horizontally */
-  margin-right: auto;         /* center horizontally */
-  margin-top: 10px;           /* optional */
-  margin-bottom: 10px;        /* optional */
-  text-align: center;         /* center the text inside */
-  box-sizing: border-box;     /* padding included in width */
+/* Delivering to button */
+.delivery-btn {
+  display: block;                /* block-level */
+  max-width: 90%;              /* limit width */
+  width: 90%;                    /* responsive width */
+  margin: 16px auto;             /* center horizontally */
+  text-align: center;            /* center text inside */
+  box-sizing: border-box;
 }
 
 /* handle long text inside */
 .location-text {
   display: inline-block;
-  max-width: 60%;             /* only allow this much inside */
+  max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
 }
-  /* Buttons */
-  .btn {
-    background: linear-gradient(90deg,#ffb347,#ffcc33);
-    color: #222;
-    border: none;
-    border-radius: 25px;
-    padding: 10px 28px;
-    cursor: pointer;
-    margin: 5px;
-    margin-left: 5%;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  }
-  .btn-primary {
-    background: linear-gradient(90deg,#4caf50,#81c784);
-    color: #fff;
-  }
-  .btn-secondary {
-    background: #f5f5f5;
-    color: #333;
-  }
 
-  /* Modal */
-  .modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%) scale(1);
-    background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
-    z-index: 1001;
-    min-width: 320px;
-    max-width: 90vw;
-    width: 400px;
-    padding: 0;
-    transition: opacity .25s ease, transform .25s ease;
-  }
-  .modal.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(-50%,-50%) scale(.98);
-  }
-  .modal-content {
-    padding: 32px 28px 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .modal-content h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #333;
-    text-align: center;
-  }
+/* General button styling */
+.btn {
+  background: linear-gradient(90deg,#ffb347,#ffcc33);
+  color: #222;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 24px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: 500;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.btn-primary {
+  background: linear-gradient(90deg,#4caf50,#81c784);
+  color: #fff;
+}
+.btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+}
 
-  /* Inputs */
-  .input-group {
-    width: 100%;
-  }
-  .input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1.5px solid #ffcc33;
-    border-radius: 8px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .input:focus {
-    border-color: #ffb347;
-    box-shadow: 0 0 0 3px rgba(255,204,51,0.25);
-  }
+/* Modal */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) scale(1);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+  z-index: 1001;
+  min-width: 320px;
+  max-width: 90vw;
+  width: 400px;
+  padding: 0;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%,-50%) scale(.98);
+}
+.modal-content {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* take full width */
+}
+.modal-content h3 {
+  margin: 0 0 20px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
 
-  /* Overlay */
-  .overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,.25);
-    z-index: 1000;
-    transition: opacity .25s ease;
-  }
-  .overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
+/* Input group */
+.input-group {
+  width: 100%;
+}
+.input {
+  width: 90%;
+  padding: 12px 14px;
+  border: 1.5px solid #ffcc33;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input:focus {
+  border-color: #ffb347;
+  box-shadow: 0 0 0 3px rgba(255,204,51,0.25);
+}
 
-  /* Places dropdown on top */
-  .pac-container {
-    z-index: 3000 !important;
-  }
+/* Buttons inside modal form */
+.modal-content form {
+  width: 100%;
+}
+.modal-content form .buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;  /* center horizontally */
+  gap: 10px;                /* equal spacing between buttons */
+  margin-top: 12px;
+}
+.modal-content form .buttons-row .btn {
+  flex: 1 1 auto;           /* let buttons grow equally */
+  min-width: 120px;         /* prevent too small buttons */
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.25);
+  z-index: 1000;
+  transition: opacity .25s ease;
+}
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Places dropdown above modal */
+.pac-container {
+  z-index: 3000 !important;
+}
 </style>
 
 <!-- GOOGLE MAPS: only include ONCE in the page. callback initAutocomplete will run when API loads -->
