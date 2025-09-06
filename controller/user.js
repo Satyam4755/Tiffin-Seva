@@ -676,36 +676,57 @@ exports.getMessage = async (req, res, next) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // ✅ Fetch all active (non-expired) orders for this guest
+    // current hour for time-window filtering
+    const now = new Date();
+    const hour = now.getHours();
+
+    // helper to decide allowed meal types at this hour
+    const allowedMeals = () => {
+      const arr = [];
+      if (hour >= 11 && hour < 15) arr.push('lunch');
+      if (hour >= 18 && hour < 21) arr.push('dinner');
+      return arr;
+    };
+
     const orders = await Order.find({
       guest: user._id,
       expireAt: { $gte: today }
-    }).populate('vender'); // include vendor details
+    }).populate('vender');
 
     const messages = [];
 
     for (const order of orders) {
-      if (!order.vender) continue; // skip if vendor missing
+      if (!order.vender) continue;
 
       const mealsDoc = await Meals.findOne({ vendor: order.vender._id });
       if (!mealsDoc) continue;
 
       let checkDates = [];
 
-      // ✅ Handle subscriptions
+      const allowed = allowedMeals(); // which meal types allowed now
+
       if (order.subscription_model === 'Per Day') {
         const start = new Date(order.startingDate);
         const end = new Date(order.endingDate);
 
         if (today >= start && today <= end) {
-          checkDates.push({ date: today, time_type: order.time_type || [] });
+          // intersect order.time_type with allowed
+          const orderTypes = Array.isArray(order.time_type) ? order.time_type : [];
+          const activeTypes = orderTypes.filter(t => allowed.includes(t));
+          if (activeTypes.length) {
+            checkDates.push({ date: today, time_type: activeTypes });
+          }
         }
       } else if (order.subscription_model === 'Per Month') {
         const start = new Date(order.startingDate);
         const end = new Date(order.expireAt);
 
         if (today >= start && today <= end) {
-          checkDates.push({ date: today, time_type: ['lunch', 'dinner'] });
+          // for month subscription, always both but still apply allowed window
+          const activeTypes = ['lunch','dinner'].filter(t => allowed.includes(t));
+          if (activeTypes.length) {
+            checkDates.push({ date: today, time_type: activeTypes });
+          }
         }
       }
 
@@ -721,7 +742,6 @@ exports.getMessage = async (req, res, next) => {
           const messageText = `Your meal for today (${type}) is: ${mealNames}`;
 
           try {
-            // ✅ Insert only if not exists (unique constraint handles duplicates)
             const savedMsg = await Message.findOneAndUpdate(
               {
                 guest: user._id,
@@ -762,7 +782,6 @@ exports.getMessage = async (req, res, next) => {
       }
     }
 
-    // ✅ Render message view
     res.render('./store/message', {
       title: 'Messages',
       isLogedIn: req.isLogedIn,
