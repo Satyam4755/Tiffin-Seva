@@ -7,6 +7,8 @@
   position: relative;
   max-width: 100%;
   margin: auto;
+  margin-bottom: 0%;
+  max-height: 350px;
   overflow: hidden;
 }
 /* The slides wrapper: we’ll move this left with JS */
@@ -24,7 +26,6 @@
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 8px;
 }
     body {
         font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -305,50 +306,6 @@
         text-decoration: none !important;
     }
 
-    .img1 {
-    position: absolute;
-    top: 15%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
-    transition: transform 0.4s ease;
-    z-index: -2;
-    }
-    .img2 {
-    position: absolute;
-    top: 40%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
-    transition: transform 0.3s ease;
-    z-index: -2;
-}
-    .img3 {
-    position: absolute;
-    top: 95%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 50% 100% 50% 100% / 40% 60% 40% 60%;
-    transition: transform 0.3s ease;
-    z-index: -2;
-    }
-    .img4{
-    position: absolute;
-    bottom: -90%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 50% 100% 50% 100% / 40% 60% 40% 60%;
-    transition: transform 0.3s ease;
-    z-index: -2;
-    }
 
     
 
@@ -455,12 +412,6 @@ setInterval(showSlide, 5000); // every 5 seconds
 <% } %>
     
 <div class="mainDabba">
-
-<img src="/IMG_3133.jpg" alt="image" class="img3">
-<img src="/2.jpeg" class="img1" alt="image">
-
-<img src="/IMG_3134.jpg" class="img2" alt="image">
-<img src="/IMG_3135 2.jpg" class="img4" alt="image">
 
         <div class="cards-container">
             <% if (venders.length===0) { %>
