@@ -9,9 +9,15 @@
   margin: auto;
   overflow: hidden;
 }
+/* The slides wrapper: we’ll move this left with JS */
+.slideshow-track {
+  display: flex;
+  transition: transform 1s ease; /* smooth slide */
+}
 
 .slides {
-  display: none;
+  min-width: 100%;
+  box-sizing: border-box;
 }
 
 .slides img {
@@ -19,57 +25,6 @@
   height: auto;
   display: block;
   border-radius: 8px;
-}
-
-.prev, .next {
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  width: auto;
-  padding: 16px;
-  margin-top: -22px;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  transition: 0.3s ease;
-  border-radius: 0 3px 3px 0;
-  user-select: none;
-  background: rgba(0,0,0,0.3);
-}
-
-.next {
-  right: 0;
-  border-radius: 3px 0 0 3px;
-}
-
-.prev:hover, .next:hover {
-  background-color: rgba(0,0,0,0.6);
-}
-
-.dot {
-  cursor: pointer;
-  display: none !important;
-  height: 12px;
-  width: 12px;
-  margin: 0 3px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.3s ease;
-}
-
-.active, .dot:hover {
-  background-color: #717171;
-}
-
-.fade {
-  animation-name: fade;
-  animation-duration: 1s;
-}
-
-@keyframes fade {
-  from {opacity: .4}
-  to {opacity: 1}
 }
     body {
         font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -445,62 +400,35 @@
 <%- include('../partials/nav') %>
 <!-- ✅ Slideshow Section -->
 <div class="slideshow-container">
-  <div class="slides fade"><img src="/s1.jpg" alt="slide 1"></div>
-  <div class="slides fade"><img src="/s2.jpg" alt="slide 2"></div>
-  <div class="slides fade"><img src="/s3.jpeg" alt="slide 3"></div>
-  <div class="slides fade"><img src="/s4.jpeg" alt="slide 4"></div>
-  <div class="slides fade"><img src="/s5.jpeg" alt="slide 5"></div>
-  <div class="slides fade"><img src="/s6.jpg" alt="slide 6"></div>
-
-  <!-- Next and prev buttons -->
-  <a class="prev" onclick="plusSlides(-1)">❮</a>
-  <a class="next" onclick="plusSlides(1)">❯</a>
-</div>
-
-<!-- Dots below (optional) -->
-<div style="text-align:center">
-  <span class="dot" onclick="currentSlide(1)"></span>
-  <span class="dot" onclick="currentSlide(2)"></span>
-  <span class="dot" onclick="currentSlide(3)"></span>
-  <span class="dot" onclick="currentSlide(4)"></span>
-  <span class="dot" onclick="currentSlide(5)"></span>
-  <span class="dot" onclick="currentSlide(6)"></span>
+  <div class="slides"><img src="/s1.jpg" alt="slide 1"></div>
+  <div class="slides"><img src="/s2.jpg" alt="slide 2"></div>
+  <div class="slides"><img src="/s3.jpeg" alt="slide 3"></div>
+  <div class="slides"><img src="/s4.jpeg" alt="slide 4"></div>
+  <div class="slides"><img src="/s5.jpeg" alt="slide 5"></div>
+  <div class="slides"><img src="/s6.jpg" alt="slide 6"></div>
 </div>
 
 <script>
-let slideIndex = 0;
-showSlides(); // auto-run
+const container = document.querySelector('.slideshow-container');
+const slides = Array.from(container.children);
 
-function showSlides() {
-  let i;
-  const slides = document.getElementsByClassName("slides");
-  const dots = document.getElementsByClassName("dot");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slideIndex++;
-  if (slideIndex > slides.length) {slideIndex = 1}
-  for (i = 0; i < dots.length; i++) {
-    dots[i].className = dots[i].className.replace(" active", "");
-  }
-  slides[slideIndex-1].style.display = "block";
-  dots[slideIndex-1].className += " active";
-  setTimeout(showSlides, 3000); // Change image every 3 seconds
+// wrap slides into a track div for horizontal scrolling
+const track = document.createElement('div');
+track.className = 'slideshow-track';
+slides.forEach(slide => track.appendChild(slide));
+container.appendChild(track);
+
+let index = 0;
+
+function showSlide() {
+  index++;
+  if (index >= slides.length) index = 0;
+  track.style.transform = `translateX(-${index * 100}%)`;
 }
 
-function plusSlides(n) {
-  slideIndex += n-1;
-  showSlides();
-}
-
-function currentSlide(n) {
-  slideIndex = n-1;
-  showSlides();
-}
+setInterval(showSlide, 5000); // every 5 seconds
 </script>
 <%- include('../partials/deliveringMsg') %>
-
-
 <% if (birthdayMessage) { %>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
