@@ -85,10 +85,9 @@
 <style>
 /* Delivering to button */
 .delivery-btn {
-  display: block;                /* block-level */
-  max-width: 90%;              /* limit width */
-  width: 90%;                    /* responsive width */
-  margin: 16px auto;             /* center horizontally */
+  display: block;              /* limit width */
+  width: 100%;                    /* responsive width */
+  /* margin: 16px auto;             center horizontally */
   text-align: center;            /* center text inside */
   box-sizing: border-box;
 }
@@ -108,7 +107,6 @@
   background: linear-gradient(90deg,#ffb347,#ffcc33);
   color: #222;
   border: none;
-  border-radius: 25px;
   padding: 10px 24px;
   cursor: pointer;
   font-size: 1.25rem;
@@ -220,7 +218,7 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
 
 <script>
-  // elements
+  // Elements
   const deliveryBtn = document.getElementById('deliveryBtn');
   const addressModal = document.getElementById('addressModal');
   const overlay = document.getElementById('overlay');
@@ -229,23 +227,20 @@
   const addressForm = document.getElementById('addressForm');
   const latInput = document.getElementById('lat');
   const lngInput = document.getElementById('lng');
+  const getMyLocationBtn = document.getElementById('getMyLocationBtn'); // optional button
 
   let autocomplete = null;
   let selectedPlace = null;
 
-  // this function is called by the Google Maps script (callback=initAutocomplete)
+  // Called by the Google Maps script (callback=initAutocomplete)
   function initAutocomplete() {
-    // Initialize with NO restrictive "types" so establishments + addresses appear (same as signup)
     autocomplete = new google.maps.places.Autocomplete(addressInput);
-
-    // request the fields we need (avoid extra quota)
     autocomplete.setFields(['formatted_address','geometry','name','address_components']);
 
     autocomplete.addListener('place_changed', () => {
       selectedPlace = autocomplete.getPlace();
 
       if (selectedPlace && selectedPlace.geometry) {
-        // combine name + address when both exist
         let displayValue = '';
 
         if (selectedPlace.name && selectedPlace.formatted_address) {
@@ -262,7 +257,6 @@
       }
     });
 
-    // If user types after selecting, clear selectedPlace so submit validation works
     addressInput.addEventListener('input', () => {
       selectedPlace = null;
       latInput.value = '';
@@ -270,29 +264,52 @@
     });
   }
 
-  // open modal and focus input (small delay so focus works reliably)
+  // Open modal
   deliveryBtn.addEventListener('click', () => {
     addressModal.classList.remove('hidden');
     overlay.classList.remove('hidden');
     setTimeout(() => addressInput.focus(), 60);
   });
 
-  // close modal (Cancel)
+  // Close modal
   closeModalBtn.addEventListener('click', () => {
     addressModal.classList.add('hidden');
     overlay.classList.add('hidden');
   });
 
-  // ensure a place was selected from suggestions before letting form submit
+  // Ask for current location when button clicked
+  if (getMyLocationBtn) {
+    getMyLocationBtn.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            // fill hidden fields
+            latInput.value = lat;
+            lngInput.value = lng;
+
+            // you can also display coordinates in the input
+            addressInput.value = `Lat: ${lat}, Lng: ${lng}`;
+            selectedPlace = { geometry: { location: { lat: () => lat, lng: () => lng } } };
+          },
+          (err) => {
+            alert('Unable to get location: ' + err.message);
+          }
+        );
+      } else {
+        alert('Geolocation is not supported by this browser.');
+      }
+    });
+  }
+
+  // Validate form before submit
   addressForm.addEventListener('submit', (e) => {
-    // If you want to allow manual typed addresses, remove this guard.
-    if (!selectedPlace || !selectedPlace.geometry) {
+    if ((!selectedPlace || !selectedPlace.geometry) && !latInput.value) {
       e.preventDefault();
-      alert('Please pick a location from the suggestions (click one).');
+      alert('Please pick a location from suggestions or use "Get My Location".');
       addressInput.focus();
-    } else {
-      // form will post to /update-location (server should accept location, lat, lng)
-      // optionally you can also close modal after successful post (server redirect)
     }
   });
 </script>
