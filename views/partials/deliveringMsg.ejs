@@ -281,27 +281,52 @@
   if (getMyLocationBtn) {
     getMyLocationBtn.addEventListener('click', () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-
-            // fill hidden fields
-            latInput.value = lat;
-            lngInput.value = lng;
-
-            // you can also display coordinates in the input
-            addressInput.value = `Lat: ${lat}, Lng: ${lng}`;
-            selectedPlace = { geometry: { location: { lat: () => lat, lng: () => lng } } };
-          },
-          (err) => {
-            alert('Unable to get location: ' + err.message);
-          }
-        );
+        // Check permission status
+        if (navigator.permissions) {
+          navigator.permissions.query({name:'geolocation'}).then(function(result) {
+            if (result.state === 'granted') {
+              // Already granted
+              navigator.geolocation.getCurrentPosition(fillPosition, showLocationError);
+            } else if (result.state === 'prompt') {
+              // Browser will show prompt
+              navigator.geolocation.getCurrentPosition(fillPosition, showLocationError);
+            } else if (result.state === 'denied') {
+              alert("Location permission denied. Please enable it in your browser settings to use 'Get My Location'. You can also enter your address manually.");
+            }
+          });
+        } else {
+          // Fallback if Permissions API not supported
+          navigator.geolocation.getCurrentPosition(fillPosition, showLocationError);
+        }
       } else {
         alert('Geolocation is not supported by this browser.');
       }
     });
+  }
+
+  function fillPosition(pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    // fill hidden fields
+    latInput.value = lat;
+    lngInput.value = lng;
+
+    // display coordinates in the input
+    addressInput.value = `Lat: ${lat}, Lng: ${lng}`;
+    selectedPlace = { geometry: { location: { lat: () => lat, lng: () => lng } } };
+  }
+
+  function showLocationError(err) {
+    if (err.code === 1) {
+      alert("Location permission denied. Please enable it in your browser settings.");
+    } else if (err.code === 2) {
+      alert("Location unavailable. Please try again.");
+    } else if (err.code === 3) {
+      alert("Location request timed out. Please try again.");
+    } else {
+      alert("Unable to get location: " + err.message);
+    }
   }
 
   // Validate form before submit
