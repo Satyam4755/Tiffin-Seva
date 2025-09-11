@@ -1,149 +1,234 @@
 <%-include('../partials/head')%>
 <%-include('../partials/background')%>
     
-<style> 
-    h1, h2 {
-        text-align: center;
-        color: #4a148c;
-        margin-bottom: 20px;
-    }
+<style>
+  /* 🌸 Global Styling */
+  body {
+    background: linear-gradient(135deg, #fff8f0 0%, #fce4ec 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
 
+  h1, h2 {
+    text-align: center;
+    color: #6a1b9a;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    animation: bounce 2s infinite;
+  }
+
+  .badaDabba {
+    margin-bottom: 15%;
+    position: relative;
+    padding-top: 40px;
+  }
+
+  /* Decorative Images */
+  .img1, .img2 {
+    position: absolute;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.8;
+  }
+
+  .img1 {
+    top: 10%;
+    left: 3%;
+    width: 20vw;
+    aspect-ratio: 1/1;
+    border-radius: 50% 40% 60% 40% / 40% 50% 50% 60%;
+    transition: transform 0.3s ease;
+  }
+
+  .img2 {
+    top: 40%;
+    right: 3%;
+    width: 22vw;
+    aspect-ratio: 1/1;
+    border-radius: 45% 55% 65% 35% / 50% 30% 70% 60%;
+    transition: transform 0.4s ease;
+  }
+
+  .img1:hover, .img2:hover {
+    transform: scale(1.05);
+  }
+
+  /* Cards Container */
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+    gap: 25px;
+  }
+
+  /* Individual Card */
+  .card {
+    display: flex;
+    gap: 250px;
+    width: 620px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  .card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .card img {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 0.4s ease;
+  }
+
+  .card:hover img {
+    transform: scale(1.1);
+  }
+
+  .card .content {
+    padding: 18px;
+    text-align: left;
+    float: right;
+  }
+
+  .card h3 {
+    margin: 10px 0;
+    color: #8e24aa;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+
+  .card p {
+    margin: 6px 0;
+    color: #6a1b9a;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  /* Booked Label */
+  .card h3.booked {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: #ffffff;
+    font-weight: bold;
+    background-color: #d81b60;
+    padding: 5px 15px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Cancel Button */
+  .card button {
+    background-color: #d81b60;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-top: 10px;
+  }
+
+  .card button:hover {
+    background-color: #ad1457;
+    transform: scale(1.05);
+  }
+  /* ✅ Note text styles */
+.cancel-note {
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* Green note for allowed cancellation */
+.cancel-note.allowed {
+  color: #388e3c;
+}
+
+/* Red note for disallowed cancellation */
+.cancel-note.not-allowed {
+  color: #d32f2f;
+}
+
+/* ✅ Cancel button styles */
+.cancel-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #f44336; /* default red button */
+  cursor: pointer;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hover effect for active button */
+.cancel-button:hover {
+  background-color: #d32f2f;
+}
+
+/* Disabled button style */
+.cancel-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
+}
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-5px);
+    }
+    60% {
+      transform: translateY(-3px);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
     .cards-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        padding: 20px;
-        gap: 20px;
+      flex-direction: column;
+      align-items: center;
     }
 
     .card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        background: linear-gradient(to bottom, #ffffff, #f8bbd0);
-        width: 320px;
-        overflow: hidden;
-        position: relative;
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
-        animation: fadeIn 0.6s ease-in-out;
+      width: 90%;
     }
 
-    .card:hover {
-        transform: translateY(-15px);
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 15px 15px 0 0;
-        transition: transform 0.4s ease;
-    }
-
-    .card:hover img {
-        transform: scale(1.1);
-    }
-
-    .card .content {
-        padding: 20px;
-        text-align: center;
-    }
-
-    .card h3 {
-        margin: 10px 0;
-        color: #880e4f;
-        font-size: 1.5rem;
-    }
-
-    .card p {
-        margin: 5px 0;
-        color: #6a1b9a;
-        font-size: 1rem;
-    }
-
-    .card button {
-        background-color: #d81b60;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-
-    .card button:hover {
-        background-color: #ad1457;
-        transform: scale(1.1);
-    }
-
-    .card h3.booked {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        color: #ffffff;
-        font-weight: bold;
-        background-color: #d81b60;
-        padding: 5px 15px;
-        border-radius: 25px;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-
-
-  .img1 {
-    position: absolute;
-    top: 15%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
-    transition: transform 0.3s ease;
-    z-index: -1;
-    }
-    .img2 {
-    position: absolute;
-    top: 40%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
-    transition: transform 0.4s ease;
-    z-index: -1;
-}
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-        }
-        40% {
-            transform: translateY(-10px);
-        }
-        60% {
-            transform: translateY(-5px);
-        }
+    .img1, .img2 {
+      display: none;
     }
 
     h1, h2 {
-        animation: bounce 1s ease-in-out;
+      font-size: 1.5rem;
     }
-    .badaDabba{
-        margin-bottom: 15%;
-    }
+  }
 </style>
 
 <% if (messages.success && messages.success.length > 0) { %>
@@ -158,52 +243,94 @@
 
 
 <div class="badaDabba">
+  <img src="/IMG_3133.jpg" class="img1" alt="image">
+  <img src="/IMG_3132.jpg" class="img2" alt="image">
 
-<img src="/IMG_3133.jpg" class="img1" alt="image">
+  <div class="cards-container">
+    <% orders.forEach(order => { %>
+      <% if (order.vender) { %>
+        <div class="card">
+          <div class="img-container">
+            <!-- ✅ Banner Image -->
+            <img src="<%= order.vender.bannerImage || '/default.jpg' %>" 
+                 alt="Vendor Banner" >
+          </div>
 
-<img src="/IMG_3132.jpg" class="img2" alt="image">
+          <div class="content">
+            <!-- ✅ Vendor Service Name -->
+            <h3><%= order.vender.serviceName %></h3>
 
-<div class="cards-container">
-  <% orders.forEach(order => { %>
-    <% if (order.vender) { %>
-      <div class="card">
-        <!-- ✅ Banner Image -->
-        <img src="<%= order.vender.bannerImage || '/default.jpg' %>" alt="Vendor Banner" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+            <!-- ✅ Subscription & Duration -->
+            <p><strong>Subscription:</strong> <%= order.subscription_model || 'N/A' %></p>
+            <p><strong>Duration:</strong>
+              <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
+                <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
+                (<% if (order.startingDate) { 
+                     const start = new Date(order.startingDate); 
+                     const end = new Date(start);
+                     end.setDate(start.getDate() + 30 * order.number_of_months); %>
+                     <%= start.toDateString() %> - <%= end.toDateString() %>
+                   <% } else { %>
+                     N/A
+                   <% } %>)
+              <% } else { %>
+                <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
+                <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
+              <% } %>
+            </p>
 
-        <div class="content">
-          <!-- ✅ Service Name -->
-          <h3><%= order.vender.serviceName %></h3>
+            <!-- ✅ Delivery Address -->
+            <p><strong>Delivering to:</strong> <%= order.address || order.vender.location || 'Not specified' %></p>
 
-          <!-- ✅ Price -->
-          <p><strong>Price Per Day:</strong> ₹<%= order.vender.pricePerDay %></p>
-          <p><strong>Price Per Month:</strong> ₹<%= order.vender.pricePerMonth %></p>
+            <!-- ✅ Payment Mode -->
+            <p><strong>Payment:</strong> <%= order.payment || 'N/A' %></p>
 
-          <!-- ✅ Location (booked address overrides vendor location) -->
-          <p><strong>Location:</strong> <%= order.address || order.vender.location || 'Not specified' %></p>
+            <!-- ✅ Total Amount -->
+            <p><strong>Total Amount:</strong> ₹<%= order.totalAmount || 0 %></p>
 
-          <!-- ✅ Ratings -->
-          <p><strong>Ratings:</strong>
-            <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
-            <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
-            <span style="margin-left: 5px; font-weight: 700; color: red;">
-              (<%= order.vender.averageRating || 0 %>/5)
-            </span>
-          </p>
+            <!-- ✅ Vendor Price Info (optional, can remove if not needed) -->
+            <p><strong>Vendor Price Per Day:</strong> ₹<%= order.vender.pricePerDay %></p>
+            <p><strong>Vendor Price Per Month:</strong> ₹<%= order.vender.pricePerMonth %></p>
 
-          <!-- ✅ Booked Label -->
-          <h3 class="booked">Booked</h3>
+            <!-- ✅ Ratings -->
+            <p><strong>Ratings:</strong>
+              <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
+              <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
+              <span style="margin-left: 5px; font-weight: 700; color: red;">
+                (<%= order.vender.averageRating || 0 %>/5)
+              </span>
+            </p>
 
-          <!-- ✅ Cancel Booking Button -->
-          <form action="/user/cancel_booking/<%= order.vender._id %>?location=<%= encodeURIComponent(order.address) %>" method="post" style="margin-top: 10px;">
-            <button type="submit" onclick="loading()">Cancel</button>
-          </form>
+            <!-- ✅ Booked Label -->
+            <h3 class="booked">Booked</h3>
+
+            <!-- ✅ Show Note -->
+            <% if (order.cancelAllowed) { %>
+              <p class="cancel-note allowed">
+                <%= order.cancelNote %>
+              </p>
+              <% } else { %>
+                <p class="cancel-note not-allowed">
+                  <%= order.cancelNote %>
+                </p>
+                <% } %>
+            
+                  <!-- ✅ Cancel Booking Button -->
+                  <form action="/user/cancel_booking/<%= order.vender._id %>?location=<%= encodeURIComponent(order.address) %>"
+                    method="post" style="margin-top:10px;">
+                    <% if (order.cancelAllowed) { %>
+                      <button type="submit" onclick="loading()" class="cancel-button">Cancel</button>
+                      <% } else { %>
+                        <button type="submit" disabled class="cancel-button">Cancel</button>
+                        <% } %>
+                  </form>
+          </div>
         </div>
-      </div>
-    <% } %>
-  <% }) %>
+      <% } %>
+    <% }) %>
+  </div>
 </div>
-</div> 
-  <%-include('../partials/loading')%>
-   
+
+<%- include('../partials/loading') %>
 </body>
 </html>
