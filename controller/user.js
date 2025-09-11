@@ -516,36 +516,79 @@ exports.booked = async (req, res, next) => {
     // Fetch all orders placed by the user, newest first
     const orders = await Order.find({ guest: userId })
       .populate('vender') // vendor is a User document
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // ✅ returns plain JS objects so we can safely attach new fields
 
-    // Filter out orders with deleted vendors and calculate average rating
-    const validOrders = orders.filter(order => {
-      if (!order.vender) return false; // skip if vendor deleted
+    // Filter & enrich orders
+    const validOrders = orders
+      .filter(order => order.vender) // skip deleted vendors
+      .map(order => {
+        const vendor = order.vender;
 
-      const vendor = order.vender;
+        // ✅ Compute average rating for vendor
+        if (vendor.reviews && vendor.reviews.length > 0) {
+          const validRatings = vendor.reviews.filter(
+            r => typeof r.rating === 'number' && !isNaN(r.rating)
+          );
+          vendor.averageRating =
+            validRatings.length > 0
+              ? parseFloat(
+                  (
+                    validRatings.reduce((sum, r) => sum + r.rating, 0) /
+                    validRatings.length
+                  ).toFixed(1)
+                )
+              : 0;
+        } else {
+          vendor.averageRating = 0;
+        }
 
-      // Calculate average rating
-      if (vendor.reviews && vendor.reviews.length > 0) {
-        const validRatings = vendor.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
-        vendor.averageRating = validRatings.length > 0
-          ? parseFloat((validRatings.reduce((sum, r) => sum + r.rating, 0) / validRatings.length).toFixed(1))
-          : 0;
-      } else {
-        vendor.averageRating = 0;
-      }
+        // ✅ Add pre-formatted date range (optional)
+        if (order.startingDate) {
+          order.startingDateFormatted = new Date(order.startingDate).toDateString();
+        }
+        if (order.endingDate) {
+          order.endingDateFormatted = new Date(order.endingDate).toDateString();
+        }
 
-      return true;
-    });
+        // ✅ If Per Month subscription, compute end date automatically
+        if (
+          order.subscription_model === 'Per Month' &&
+          order.number_of_months &&
+          order.startingDate
+        ) {
+          const start = new Date(order.startingDate);
+          const end = new Date(start);
+          end.setDate(start.getDate() + 30 * order.number_of_months);
+          order.monthRange = `${start.toDateString()} - ${end.toDateString()}`;
+        }
+
+        // ✅ Add cancelAllowed flag & cancelNote based on 7-day rule
+        if (order.startingDate) {
+          const startDate = new Date(order.startingDate);
+          const now = new Date();
+          const diffInDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+
+          order.cancelAllowed = diffInDays <= 7; // true if within 7 days
+          order.cancelNote = order.cancelAllowed
+            ? "NOTE: You can cancel your order & get remaining amount refunded only within 7 days"
+            : "You cannot cancel your order now, because 7 days have passed";
+        } else {
+          order.cancelAllowed = false;
+          order.cancelNote = "No starting date found for this order";
+        }
+
+        return order;
+      });
 
     res.render('./store/booked', {
       orders: validOrders,
-      title: "Booked Vendor List",
+      title: 'Booked Vendor List',
       currentPage: 'reserve',
       isLogedIn: req.isLogedIn,
       user: req.session.user,
       messages: req.flash(),
     });
-
   } catch (err) {
     console.error('❌ Error loading booked orders:', err);
     req.flash('error', 'Could not load your booked vendors');
