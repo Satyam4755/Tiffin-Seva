@@ -8,7 +8,7 @@
   max-width: 100%;
   margin: auto;
   margin-bottom: 0%;
-  max-height: 350px;
+  max-height: 380px;
   overflow: hidden;
 }
 /* The slides wrapper: we’ll move this left with JS */
@@ -27,6 +27,14 @@
   height: auto;
   display: block;
 }
+
+@media (max-width: 480px) {
+  .slideshow-container {
+    max-height: 300px;
+  }
+  
+}
+
     body {
         font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         /* min-height: 100vh; */
@@ -59,17 +67,21 @@
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* 2+ columns automatically */
   gap: 16px;
   padding: 12px;
-  justify-content: center;
+  justify-items: center;
+  justify-content: center;     /* 👈 center the columns */
+  max-width: 1200px;           /* 👈 optional, controls how wide */
+  margin: 0 auto; 
 }
 
 .card {
-  background: #fff;
+  position: relative;
+  background: #ffffff6f;
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%; /* grid controls width */
-  border: 1px solid #f0f0f0;
+  /* border: 1px solid #f0f0f0; */
 }
 
 .card:hover {
@@ -86,6 +98,7 @@
 
 .content {
   padding: 8px;
+  text-shadow: #fff 10px 20px 30px;
 }
 
 .card h3 {
@@ -99,7 +112,7 @@
 .card p {
   margin: 0;
   font-size: 13px;
-  color: #777;
+  color: #333;
   text-align: left;
 }
 .card p .location{
@@ -109,7 +122,7 @@
 /* Reserve Button */
 .reserve {
   background: #ff4d4f;
-  color: white;
+  color: yellow;
   border: none;
   border-radius: 20px;
   padding: 6px 12px;
@@ -144,8 +157,10 @@
 
     .fav-btn {
         position: absolute;
+        bottom: 8px;
         right: 5%;
         z-index: 2;
+        margin: 0;
     }
 
     .fav-btn img {
@@ -322,7 +337,7 @@
     }
 
     @media (max-width: 480px) {
-        .card, .offer-card, .special-offer {
+        .offer-card, .special-offer {
             width: 90%;
             padding: 16px 8px 12px 8px;
         }
@@ -436,11 +451,6 @@ setInterval(showSlide, 5000); // every 5 seconds
                                     <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %>
                                     </p>
                                     <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %>
-                                    </p>
-        
-                                    <!-- ✅ Location -->
-                                    <p class="location"><strong>Location:</strong>
-                                        <%= vender.location %>
                                     </p>
         
                                     <!-- ✅ Favourite + Reserve Buttons -->
