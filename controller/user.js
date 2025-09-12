@@ -192,6 +192,7 @@ exports.venderDetails = async (req, res, next) => {
       vender,
       title: "Vendor Details",
       isLogedIn: req.isLogedIn,
+      currentPage:"home",
       user: req.session.user || null,
       averageRating,
       showOptions,
