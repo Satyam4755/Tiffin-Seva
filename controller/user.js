@@ -331,6 +331,12 @@ exports.Postbooking = [
     .withMessage('Phone number should be 10 digits long'),
 
   async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      req.flash('error', errors.array()[0].msg);
+      return res.redirect('back');
+    }
+
     if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
     const venderId = req.params.venderId;
@@ -399,14 +405,18 @@ exports.Postbooking = [
       let expireAt;
 
       if (subscription_model === 'Per Month') {
-        // start from tomorrow 00:00
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
-        startDateForOrder = tomorrow;
+        // 👇 apply 11 AM rule for monthly subscriptions
+        const now = new Date();
+        let start = new Date();
+        if (now.getHours() >= 11) {
+          // after 11AM start from next day
+          start.setDate(start.getDate() + 1);
+        }
+        start.setHours(0, 0, 0, 0);
+        startDateForOrder = start;
 
         expireAt = new Date(
-          tomorrow.getTime() + Number(selectedMonths) * 30 * 24 * 60 * 60 * 1000
+          start.getTime() + Number(selectedMonths) * 30 * 24 * 60 * 60 * 1000
         );
       } else if (subscription_model === 'Per Day') {
         startDateForOrder = new Date(startingDate);
@@ -448,8 +458,6 @@ exports.Postbooking = [
         guestUser.booked.push(venderId);
         await guestUser.save();
       }
-
-      // ✅ Do NOT pre-create messages anymore
 
       res.redirect('/user/submit_booking');
     } catch (err) {
