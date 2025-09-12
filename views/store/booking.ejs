@@ -408,52 +408,42 @@
 </div>
 </div>
 <script>
+  // ---------- helpers ----------
+  const pad = n => (n < 10 ? '0' + n : n);
+  function formatDateLocal(d) {
+    // produce YYYY-MM-DD using local date parts (no toISOString)
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  // Elements
   const totalElement = document.getElementById('totalAmount');
   const subscriptionRadios = document.getElementsByName('subscription_model');
   const startInput = document.getElementById('startingDate');
   const endInput = document.getElementById('endingDate');
   const totalAmount = document.getElementById('totalAmountInput');
   const display = document.getElementById('calculatedEndDate');
+  const monthButtons = document.querySelectorAll(".month-btn");
 
-  const showMessage = (msg) => {
-    alert(msg);  // 🔔 You can change to custom modal/snackbar if needed
-  };
+  // simple message helper
+  const showMessage = msg => alert(msg);
 
-  function isWithinLunchTime() {
-    const now = new Date();
-    const hour = now.getHours();
-    return hour >= 9 && hour < 12;
-  }
-
-  function isWithinDinnerTime() {
-    const now = new Date();
-    const hour = now.getHours();
-    return hour >= 13 && hour < 18;
-  }
-
+  // time validation
   function validateTimeSelection(e) {
     const now = new Date();
     const hour = now.getHours();
-
     const lunchInput = document.querySelector('input[value="lunch"]');
     const dinnerInput = document.querySelector('input[value="dinner"]');
 
-    const isLunchSelected = lunchInput.checked;
-    const isDinnerSelected = dinnerInput.checked;
-
-    // Get selected starting date
     const startDateValue = startInput.value ? new Date(startInput.value) : null;
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0,0,0,0);
 
-    // ✅ If starting date is in the future, allow without restrictions
+    // if future start date allow
     if (startDateValue && startDateValue > today) {
       updateTileSelection();
       calculateTotal();
       return;
     }
 
-    // Otherwise, apply today's time restrictions
     const lunchAvailable = hour >= 9 && hour < 12;
     const dinnerAvailable = hour < 18;
 
@@ -461,13 +451,11 @@
       lunchInput.checked = false;
       showMessage("⏰ Time for ordering lunch is 9AM - 12PM today");
     }
-
     if (e.target.value === "dinner" && !dinnerAvailable) {
       dinnerInput.checked = false;
       showMessage("⏰ Time for ordering dinner is before 6PM today");
     }
-
-    if (!lunchAvailable && !dinnerAvailable && (isLunchSelected || isDinnerSelected)) {
+    if (!lunchAvailable && !dinnerAvailable) {
       lunchInput.checked = false;
       dinnerInput.checked = false;
       showMessage("🚫 Today's time for ordering is over! Please select a future date.");
@@ -477,6 +465,7 @@
     calculateTotal();
   }
 
+  // toggle fields
   function toggleTimeOptions() {
     const isPerDaySelected = document.getElementById('perday').checked;
     const isPerMonthSelected = document.getElementById('permonth')?.checked;
@@ -490,10 +479,11 @@
     calculateTotal();
   }
 
+  // calc total
   function calculateTotal() {
     const perDay = Number(document.getElementById('perdayValue')?.value || 0);
     const perMonth = Number(document.getElementById('permonthValue')?.value || 0);
-    const selectedModel = Array.from(subscriptionRadios).find(radio => radio.checked)?.value;
+    const selectedModel = Array.from(subscriptionRadios).find(r => r.checked)?.value;
     const startDate = new Date(startInput.value);
     const endDate = new Date(endInput.value);
     const selectedMonths = Number(document.getElementById('selectedMonths')?.value || 0);
@@ -505,13 +495,8 @@
         totalAmount.value = 0;
         return;
       }
-
-      const diffTime = endDate.getTime() - startDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-      const selectedTimes = document.querySelectorAll('input[name="time_type"]:checked');
-      const multiplier = selectedTimes.length;
-
+      const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      const multiplier = document.querySelectorAll('input[name="time_type"]:checked').length;
       total = diffDays * perDay * multiplier;
     } else if (selectedModel === 'Per Month') {
       if (!selectedMonths) {
@@ -538,57 +523,44 @@
     document.getElementById('dinnerTile').classList.toggle('selected', dinner);
   }
 
-  // Event Listeners
+  // listeners
   document.querySelectorAll('input[name="subscription_model"]').forEach(input => {
     input.addEventListener('change', () => {
       toggleTimeOptions();
       updateTileSelection();
     });
   });
-
   document.querySelectorAll('input[name="time_type"]').forEach(input => {
     input.addEventListener('change', validateTimeSelection);
   });
-
   startInput.addEventListener('change', calculateTotal);
   endInput.addEventListener('change', calculateTotal);
 
-  // 🔹 Month buttons logic with start date shift after 11 AM
-  const monthButtons = document.querySelectorAll(".month-btn");
-
+  // month buttons with after-11AM logic + local date format
   monthButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      // remove previous selection
       monthButtons.forEach(b => b.classList.remove("selected"));
-
-      // mark current button as selected
       btn.classList.add("selected");
 
       const months = parseInt(btn.getAttribute("data-months"));
       document.getElementById("selectedMonths").value = months;
 
-      // ✅ New start date logic
       const now = new Date();
       let start = new Date();
-
       if (now.getHours() >= 11) {
-        // after 11AM, start from tomorrow
         start.setDate(start.getDate() + 1);
       }
-      // midnight
       start.setHours(0, 0, 0, 0);
 
       const end = new Date(start);
       end.setDate(start.getDate() + (30 * months));
 
-      // update hidden inputs so backend gets same dates
-      startInput.value = start.toISOString().split("T")[0];
-      endInput.value = end.toISOString().split("T")[0];
+      // use local formatted date (fix offset issues)
+      startInput.value = formatDateLocal(start);
+      endInput.value = formatDateLocal(end);
 
       const options = { year: "numeric", month: "short", day: "numeric" };
-      const msg = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
-
-      display.textContent = msg;
+      display.textContent = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
       display.style.display = "block";
 
       calculateTotal();
