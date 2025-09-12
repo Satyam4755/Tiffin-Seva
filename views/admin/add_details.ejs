@@ -1,0 +1,337 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+<style>
+:root {
+    --primary: #ff7e5f; /* Peachy orange */
+    --primary-dark: #e55d3c;
+    --bg: #fff5ee; /* Peach background */
+    --card-bg: #ffffff;
+    --border: #ffd6c1;
+    --radius: 0.75rem;
+    --text-color: #3d2c29;
+    --input-bg: #fff0e6;
+    --input-focus: #ffbfae;
+    --input-shadow: 0 2px 8px rgba(255,126,95,0.08);
+}
+
+body {
+    background-color: var(--bg);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 16px rgba(255,126,95,0.08);
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--primary-dark);
+}
+
+h3 {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: 500;
+    font-size: .95rem;
+    margin-bottom: .3rem;
+    color: var(--primary-dark);
+}
+
+input[type="text"],
+input[type="url"],
+textarea,
+input[type="file"] {
+    padding: 0.7rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow: var(--input-shadow);
+}
+
+input[type="file"] {
+    background: #fff;
+    color: var(--primary-dark);
+    border: none;
+    padding: 0.5rem 0;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--input-focus);
+    box-shadow: 0 0 0 2px rgba(255,126,95,0.15);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--primary), #feb47b);
+    color: #fff;
+    padding: 0.8rem 1.6rem;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+    margin-top: .5rem;
+    box-shadow: 0 2px 8px rgba(255,126,95,0.10);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #feb47b, var(--primary));
+    transform: translateY(-1px) scale(1.03);
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.gallery img,
+.gallery video {
+    width: 170px;
+    height: 140px;
+    border-radius: 20%;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(255,126,95,0.10);
+    transition: transform 0.2s;
+    justify-self: center;
+}
+
+.gallery img:hover,
+.gallery video:hover {
+    transform: scale(1.03);
+}
+
+.media-item {
+    position: relative;
+    display: inline-block;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    background: white;
+    color: var(--primary-dark);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(255,126,95,0.18);
+    transition: transform 0.15s, background 0.15s;
+}
+
+.delete-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.flash {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    font-weight: 500;
+    text-align: center;
+}
+.flash-success {
+    background-color: #ffeedd;
+    color: #065f46;
+    border: 1px solid #ffd6c1;
+}
+.flash-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+video.main-video {
+    width: 35%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10%;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(255,126,95,0.08);
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1.25rem;
+    }
+    h2 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h2 {
+        font-size: 1.5rem;
+    }
+    input, textarea, .btn-primary {
+        font-size: 0.95rem;
+    }
+}
+</style>
+
+<% if (success && success.length) { %>
+  <div class="flash flash-success"><%= success[0] %></div>
+<% } %>
+
+<% if (error && error.length) { %>
+  <div class="flash flash-error"><%= error[0] %></div>
+<% } %>
+
+<body>
+<div class="container">
+  <h2>
+    <%= (vendor && (vendor.detailedDescription || vendor.photos?.length || vendor.videoDescription || vendor.socialMediaLinks)) 
+      ? "Edit Details" : "Add More Details" %>
+  </h2>
+
+  <form id="vendorForm" action="/vender/add_details" method="POST" enctype="multipart/form-data">
+    <!-- Detailed Description -->
+    <div class="form-group">
+      <label for="detailedDescription">Detailed Description</label>
+      <textarea id="detailedDescription" name="detailedDescription" rows="4"><%= vendor.detailedDescription || '' %></textarea>
+    </div>
+
+    <!-- Upload New Photos -->
+    <% if (!hidePhotoInput) { %>
+        <div class="form-group">
+            <label for="photos">Upload New Photos</label>
+            <input type="file" id="photos" name="photos" multiple accept="image/*">
+            <% if (vendor.photos && vendor.photos.length> 0) { %>
+                <small>You can upload <%= 5 - vendor.photos.length %> more photos.</small>
+                <% } %>
+        </div>
+        <% } %>
+    
+            <!-- Upload New Video -->
+            <% if (!hideVideoInput) { %>
+                <div class="form-group">
+                    <label for="video">Upload New Video Description</label>
+                    <input type="file" id="video" name="video" accept="video/*">
+                </div>
+                <% } %>
+
+    <!-- Gallery of Current Photos and Video -->
+    <% if ((vendor.photos && vendor.photos.length) || vendor.videoDescription) { %>
+      <h3>Current Photos & Video</h3>
+      <div class="gallery" id="mediaGallery">
+        <% if (vendor.photos && vendor.photos.length) { %>
+          <% vendor.photos.forEach(function(photo) { %>
+            <div class="media-item" data-type="photo" data-url="<%= photo %>">
+              <img src="<%= photo %>" alt="Photo">
+              <button type="button" class="delete-btn">🗑️</button>
+            </div>
+          <% }) %>
+        <% } %>
+
+        <% if (vendor.videoDescription) { %>
+          <div class="media-item" data-type="video" data-url="<%= vendor.videoDescription %>">
+            <video controls>
+              <source src="<%= vendor.videoDescription %>" type="video/mp4">
+              <source src="<%= vendor.videoDescription %>" type="video/quicktime">
+              <source src="<%= vendor.videoDescription %>" type="video/webm">
+            </video>
+            <button type="button" class="delete-btn">🗑️</button>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+
+    <!-- Social Media Links -->
+    <div class="form-group">
+      <label for="facebook">Facebook</label>
+      <input type="url" id="facebook" name="facebook" value="<%= vendor.socialMediaLinks?.facebook || '' %>">
+    </div>
+
+    <div class="form-group">
+      <label for="instagram">Instagram</label>
+      <input type="url" id="instagram" name="instagram" value="<%= vendor.socialMediaLinks?.instagram || '' %>">
+    </div>
+
+    <div class="form-group">
+      <label for="twitter">Twitter</label>
+      <input type="url" id="twitter" name="twitter" value="<%= vendor.socialMediaLinks?.twitter || '' %>">
+    </div>
+
+    <button type="submit" class="btn-primary">Save Details</button>
+  </form>
+</div>
+
+<script>
+// Handle media deletion without nested forms
+document.querySelectorAll('.delete-btn').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    const mediaItem = e.target.closest('.media-item');
+    const type = mediaItem.dataset.type;
+    const url = mediaItem.dataset.url;
+
+    if (confirm('Are you sure you want to delete this media?')) {
+      try {
+        const res = await fetch('/vender/delete_media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, url })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          mediaItem.remove();
+        } else {
+          alert(data.message || 'Failed to delete.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error deleting media.');
+      }
+    }
+  });
+});
+</script>
+
+</body>
+<%- include('../partials/loading') %>
+</html>
