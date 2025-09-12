@@ -58,7 +58,18 @@ const userSchema = mongoose.Schema({
   }],
 
   // ✅ Orders count (only for vendors)
-  orders: { type: Number, default: 0 }
+  orders: { type: Number, default: 0 },
+  // video description, photos, detailed description, social media links
+  videoDescription: String,
+  videoDescriptionPublicId: String,
+  photos: [String],
+  photosPublicIds: [String],
+  detailedDescription: String,
+  socialMediaLinks: {
+    facebook: String,
+    instagram: String,
+    twitter: String,
+  },
 });
 
 module.exports = mongoose.model('User', userSchema, 'user');
