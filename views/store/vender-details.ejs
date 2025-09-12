@@ -8,6 +8,133 @@ body {
     padding: 0;
 }
 
+/* ---------------- Vendor Info Section ---------------- */
+.vender-info-section {
+    margin-top: 40px;
+    padding: 24px 20px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* ---------------- Detailed Description ---------------- */
+.vender-description h3 {
+    color: #6c5ce7;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.vender-description p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #333;
+    text-align: justify;
+    padding: 0 12px;
+}
+
+/* ---------------- Social Media Links ---------------- */
+.vender-socials {
+    text-align: center;
+}
+
+.vender-socials h3 {
+    color: #6c5ce7;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.vender-socials .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.vender-socials .social-links a img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    transition: transform 0.3s, filter 0.3s;
+    border-radius: 8px;
+}
+
+.vender-socials .social-links a img:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+}
+
+/* ---------------- Media Gallery ---------------- */
+.vender-media-gallery {
+    padding: 16px;
+    border-radius: 16px;
+    background: #fafafa;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.vender-media-gallery h3 {
+    text-align: center;
+    color: #6c5ce7;
+    font-size: 1.6rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.vender-media-gallery .media-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+}
+
+.vender-media-gallery .media-item {
+    flex: 1 1 180px;
+    max-width: 220px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.vender-media-gallery .media-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.vender-media-gallery .media-item img,
+.vender-media-gallery .media-item video {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.vender-media-gallery .video-item video {
+    height: 200px;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 768px) {
+    .vender-media-gallery .media-item {
+        flex: 1 1 45%;
+    }
+    .vender-description p {
+        padding: 0 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vender-media-gallery .media-item {
+        flex: 1 1 100%;
+    }
+}
+
 .mainDabba {
     max-width: 900px;
     margin: 40px auto;
@@ -123,6 +250,7 @@ body {
 
 .action-buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 18px;
     align-items: center;
     margin-top: 18px;
@@ -452,7 +580,7 @@ body {
     }
 </style>
 
-
+<%-include('../partials/nav')%>
 <% if (messages.success && messages.success.length > 0) { %>
   <script>
     alert("<%= messages.success[0] %>");
@@ -551,10 +679,69 @@ body {
     </div>
   <% } %>
 
-  <!-- ✅ Back Button -->
-  <a href="/" style="text-decoration: none;">
-    <button class="btn back-btn">Go Back To Home</button>
-  </a>
+  <div class="vender-info-section">
+  
+  <!-- Detailed Description -->
+  <% if (vender.detailedDescription) { %>
+    <div class="vender-description">
+      <h3>About This Vendor</h3>
+      <p><%= vender.detailedDescription %></p>
+    </div>
+  <% } %>
+
+  <!-- Social Media Links -->
+  <% if (vender.socialMediaLinks && 
+        (vender.socialMediaLinks.facebook || vender.socialMediaLinks.instagram || vender.socialMediaLinks.twitter)) { %>
+    <div class="vender-socials">
+      <h3>Follow Vendor</h3>
+      <div class="social-links">
+        <% if (vender.socialMediaLinks.facebook) { %>
+          <a href="<%= vender.socialMediaLinks.facebook %>" target="_blank">
+            <img src="/icons/facebook.png" alt="Facebook">
+          </a>
+        <% } %>
+        <% if (vender.socialMediaLinks.instagram) { %>
+          <a href="<%= vender.socialMediaLinks.instagram %>" target="_blank">
+            <img src="/icons/instagram.png" alt="Instagram">
+          </a>
+        <% } %>
+        <% if (vender.socialMediaLinks.twitter) { %>
+          <a href="<%= vender.socialMediaLinks.twitter %>" target="_blank">
+            <img src="/icons/twitter.png" alt="Twitter">
+          </a>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Vendor Photos & Video Gallery -->
+  <% if ((vender.photos && vender.photos.length) || vender.videoDescription) { %>
+    <div class="vender-media-gallery">
+      <h3>Gallery</h3>
+      <div class="media-items">
+        <% if (vender.photos && vender.photos.length) { %>
+          <% vender.photos.forEach(photo => { %>
+            <div class="media-item">
+              <img src="<%= photo %>" alt="Vendor Photo">
+            </div>
+          <% }) %>
+        <% } %>
+
+        <% if (vender.videoDescription) { %>
+          <div class="media-item video-item">
+            <video controls>
+              <source src="<%= vender.videoDescription %>" type="video/mp4">
+              <source src="<%= vender.videoDescription %>" type="video/quicktime">
+              <source src="<%= vender.videoDescription %>" type="video/webm">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+
+</div>
 
   <!-- Overlay -->
   <div id="overlay" class="overlay hidden"></div>
@@ -666,6 +853,8 @@ body {
       <p style="text-align:center; color:#555;">No menu added yet!</p>
     <% } %>
   </div>
+
+  
 </div>
 
 <!-- ✅ Script -->
@@ -710,3 +899,7 @@ function toggleReviewForm() {
 <%-include('../partials/loading')%>
 </body>
 </html>
+
+
+
+
