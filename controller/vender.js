@@ -6,6 +6,7 @@ const venderOption = require('../models/venderOption');
 const GuestOption = require('../models/userOption');
 const Message = require('../models/message');
 const Order = require('../models/orders');
+const { error } = require('console');
 
 // for twillio
 // const twilio = require('twilio');
@@ -368,3 +369,155 @@ exports.postOptionsBulk = async (req, res, next) => {
   }
 };
 
+
+// adding vendor details 
+// (video description, product photos, detailed descriptions, social media links.)
+// GET Add/Edit form
+exports.getAddDetails = async (req, res) => {
+  try {
+    const vendorId = req.session.user._id;
+    const vendor = await User.findById(vendorId);
+
+    if (!vendor || vendor.userType !== 'vender') {
+      req.flash('error', 'You are not authorized to access this page.');
+      return res.redirect('/dashboard');
+    }
+
+    // Flags to control input visibility
+    const hideVideoInput = !!vendor.videoDescription; // hide if video exists
+    const hidePhotoInput = (vendor.photos && vendor.photos.length >= 5); // hide if 5+ photos
+
+    return res.render('./admin/add_details', {
+      title: "Add / Edit Details",
+      currentPage: 'addDetails',
+      isLogedIn: req.isLogedIn,
+      user: req.session.user,
+      success: '',
+      error: '',
+      vendor,              // existing values
+      hideVideoInput,
+      hidePhotoInput
+    });
+  } catch (err) {
+    console.error("Error in getAddDetails:", err);
+    req.flash('error', 'Something went wrong.');
+    return res.redirect('back');
+  }
+};
+
+/// POST Add/Edit form
+exports.postAddDetails = async (req, res) => {
+  try {
+    const vendorId = req.session.user._id;
+    const vendor = await User.findById(vendorId);
+    if (!vendor || vendor.userType !== 'vender') {
+      req.flash('error', 'Unauthorized');
+      return res.redirect('/dashboard');
+    }
+
+    // text fields
+    const { detailedDescription, facebook, instagram, twitter } = req.body;
+    const files = req.files;
+
+    // keep old values if new value is empty
+    vendor.detailedDescription = detailedDescription?.trim() !== ''
+      ? detailedDescription
+      : vendor.detailedDescription;
+
+    // ensure socialMediaLinks object exists
+    if (!vendor.socialMediaLinks) vendor.socialMediaLinks = {};
+
+    vendor.socialMediaLinks.facebook =
+      facebook?.trim() !== '' ? facebook : vendor.socialMediaLinks.facebook;
+
+    vendor.socialMediaLinks.instagram =
+      instagram?.trim() !== '' ? instagram : vendor.socialMediaLinks.instagram;
+
+    vendor.socialMediaLinks.twitter =
+      twitter?.trim() !== '' ? twitter : vendor.socialMediaLinks.twitter;
+
+    // photos upload (append new photos to existing ones)
+    if (files && files['photos']) {
+      const newPhotoUrls = [];
+      const newPhotoPublicIds = [];
+      for (const file of files['photos']) {
+        const uploadResult = await fileUploadInCloudinary(file.buffer);
+        newPhotoUrls.push(uploadResult.secure_url);
+        newPhotoPublicIds.push(uploadResult.public_id);
+      }
+      vendor.photos = vendor.photos
+        ? [...vendor.photos, ...newPhotoUrls]
+        : newPhotoUrls;
+      vendor.photosPublicIds = vendor.photosPublicIds
+        ? [...vendor.photosPublicIds, ...newPhotoPublicIds]
+        : newPhotoPublicIds;
+    }
+
+    // video upload (replace if a new one is uploaded)
+    if (files && files['video'] && files['video'][0]) {
+      const videoFile = files['video'][0];
+      const uploadResult = await fileUploadInCloudinary(videoFile.buffer, {
+        resource_type: "video"
+      });
+      vendor.videoDescription = uploadResult.secure_url;
+      vendor.videoDescriptionPublicId = uploadResult.public_id;
+    }
+
+    await vendor.save();
+
+    req.flash('success', 'Details saved successfully!');
+    return res.redirect('/vender/add_details');
+  } catch (err) {
+    console.error("Error in postAddDetails:", err);
+    req.flash('error', 'Something went wrong.');
+    return res.redirect('back');
+  }
+};
+
+
+exports.deleteMedia = async (req, res) => {
+  try {
+    const { type, url } = req.body;
+    const userId = req.session.user._id; // Logged-in vendor
+
+    const user = await User.findById(userId);
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/vender/add_details');
+    }
+
+    if (type === 'photo') {
+      // Find index of the photo to delete
+      const photoIndex = user.photos.indexOf(url);
+      if (photoIndex > -1) {
+        // Remove photo URL
+        user.photos.splice(photoIndex, 1);
+
+        // Optional: delete from Cloudinary if public IDs are stored
+        if (user.photosPublicIds && user.photosPublicIds[photoIndex]) {
+          const publicId = user.photosPublicIds.splice(photoIndex, 1)[0];
+          await cloudinary.uploader.destroy(publicId);
+        }
+      }
+
+    } else if (type === 'video') {
+      // Delete video URL
+      user.videoDescription = undefined;
+
+      // Optional: delete from Cloudinary if public ID exists
+      if (user.videoDescriptionPublicId) {
+        await cloudinary.uploader.destroy(user.videoDescriptionPublicId);
+        user.videoDescriptionPublicId = undefined;
+      }
+    }
+
+    await user.save();
+    req.flash('success', `${type} deleted successfully`);
+    res.redirect('/vender/add_details');
+
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to delete media');
+    res.redirect('/vender/add_details');
+  }
+};
