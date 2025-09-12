@@ -90,8 +90,6 @@ exports.postSignUpPage = [
 
   check('password')
     .isLength({ min: 6 }).withMessage("The password must be at least 6 characters")
-    .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase character")
-    .matches(/[0-9]/).withMessage("Password must contain at least one number")
     .trim(),
 
   check('confirmPassword')
@@ -293,16 +291,12 @@ exports.getEditPage = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).send("User not found");
 
-    const vendorCount = await User.countDocuments({ userType: "vender" });
-
-    // Convert dob to YYYY-MM-DD for input
     const dobString = user.dob ? new Date(user.dob).toISOString().split("T")[0] : "";
 
     res.render("./store/signup", {
       title: "Edit Profile",
       isLogedIn: req.isLogedIn,
       editing,
-      vendorExists: vendorCount > 0,
       user,
       oldInput: {
         firstName: user.firstName || "",
@@ -316,27 +310,33 @@ exports.getEditPage = async (req, res) => {
         serviceName: user.userType === "vender" ? (user.serviceName || "") : "",
         serviceRadius: user.userType === "vender" ? (user.serviceRadius || "") : "",
         pricePerDay: user.userType === "vender" ? (user.pricePerDay || "") : "",
-        pricePerMonth: user.userType === "vender" ? (user.pricePerMonth || "") : ""
+        pricePerMonth: user.userType === "vender" ? (user.pricePerMonth || "") : "",
+        profilePicture: user.profilePicture || "",
+        profilePicturePublicId: user.profilePicturePublicId || "",
+        bannerImage: user.bannerImage || "",
+        bannerImagePublicId: user.bannerImagePublicId || ""
+        // 🚫 no password, confirmPassword here
       },
-      profilePicture: user.profilePicture || null,   // ✅ added
-      bannerImage: user.bannerImage || null,         // ✅ added
+      profilePicture: user.profilePicture || null,
+      bannerImage: user.bannerImage || null,
       errors: {}
     });
   } catch (err) {
-    console.error("❌ Error fetching user or vendor count:", err);
+    console.error("❌ Error fetching user:", err);
     res.status(500).send("Error fetching user");
   }
 };
-
-// POST updated profile
+// POST the edit profile form
 exports.postEditPage = async (req, res) => {
+  console.log("----- POST EDIT PROFILE START -----");
+  console.log("Body:", req.body);
+  console.log("Files:", req.files);
+
   const {
     firstName,
     lastName,
     dob,
     email,
-    password,
-    confirmPassword,
     id,
     location,
     lat,
@@ -350,10 +350,15 @@ exports.postEditPage = async (req, res) => {
   const files = req.files;
 
   try {
+    console.log("Looking for user with ID:", id);
     const user = await User.findById(id);
-    if (!user) return res.status(404).send("User not found");
+    if (!user) {
+      console.log("User not found!");
+      return res.status(404).send("User not found");
+    }
+    console.log("User found:", user.email);
 
-    // Build oldInput for re-render (always take current db values if empty)
+    // Build oldInput (retain current DB values if no new input)
     const dobString = dob
       ? new Date(dob).toISOString().split("T")[0]
       : user.dob
@@ -371,12 +376,20 @@ exports.postEditPage = async (req, res) => {
       serviceName: serviceName || user.serviceName || "",
       serviceRadius: serviceRadius || user.serviceRadius || "",
       pricePerDay: pricePerDay || user.pricePerDay || "",
-      pricePerMonth: pricePerMonth || user.pricePerMonth || ""
+      pricePerMonth: pricePerMonth || user.pricePerMonth || "",
+      profilePicture: user.profilePicture || "",
+      profilePicturePublicId: user.profilePicturePublicId || "",
+      bannerImage: user.bannerImage || "",
+      bannerImagePublicId: user.bannerImagePublicId || ""
     };
 
-    // ✅ Profile picture update
+    console.log("Old Input:", oldInput);
+
+    // -------- Profile Picture Update --------
     if (files?.profilePicture?.length > 0) {
+      console.log("Uploading new profile picture...");
       if (user.profilePicturePublicId) {
+        console.log("Deleting old profile picture:", user.profilePicturePublicId);
         await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err =>
           console.warn(err.message)
         );
@@ -384,11 +397,17 @@ exports.postEditPage = async (req, res) => {
       const profileResult = await fileUploadInCloudinary(files.profilePicture[0].buffer);
       user.profilePicture = profileResult.secure_url;
       user.profilePicturePublicId = profileResult.public_id;
+      console.log("Profile picture updated:", user.profilePicture);
+
+      oldInput.profilePicture = user.profilePicture;
+      oldInput.profilePicturePublicId = user.profilePicturePublicId;
     }
 
-    // ✅ Banner image update (vendor only)
+    // -------- Banner Image Update (Vendor Only) --------
     if (user.userType === "vender" && files?.bannerImage?.length > 0) {
+      console.log("Uploading new banner image...");
       if (user.bannerImagePublicId) {
+        console.log("Deleting old banner image:", user.bannerImagePublicId);
         await cloudinary.uploader.destroy(user.bannerImagePublicId).catch(err =>
           console.warn(err.message)
         );
@@ -396,9 +415,13 @@ exports.postEditPage = async (req, res) => {
       const bannerResult = await fileUploadInCloudinary(files.bannerImage[0].buffer);
       user.bannerImage = bannerResult.secure_url;
       user.bannerImagePublicId = bannerResult.public_id;
+      console.log("Banner image updated:", user.bannerImage);
+
+      oldInput.bannerImage = user.bannerImage;
+      oldInput.bannerImagePublicId = user.bannerImagePublicId;
     }
 
-    // ✅ Update common fields
+    // -------- Update Common Fields --------
     user.firstName = firstName || user.firstName || "";
     user.lastName = lastName || user.lastName || "";
     user.dob = dob || user.dob || "";
@@ -407,23 +430,9 @@ exports.postEditPage = async (req, res) => {
     user.lat = lat || user.lat || "";
     user.lng = lng || user.lng || "";
 
-    // ✅ Update password only if provided
-    if (password && password.trim() !== "") {
-      if (password !== confirmPassword) {
-        return res.status(400).render("./store/signup", {
-          title: "Edit Profile",
-          isLogedIn: req.isLogedIn,
-          editing: true,
-          user,
-          oldInput,
-          errors: { password: "Passwords do not match." }
-        });
-      }
-      const hashedPassword = await bcrypt.hash(password, 12);
-      user.password = hashedPassword;
-    }
+    // ❌ No password update here anymore
 
-    // ✅ Vendor-only fields
+    // -------- Vendor-Only Fields --------
     if (user.userType === "vender") {
       user.serviceName = serviceName || user.serviceName || "";
       user.serviceRadius = serviceRadius || user.serviceRadius || "";
@@ -432,26 +441,26 @@ exports.postEditPage = async (req, res) => {
     }
 
     await user.save();
+    console.log("User updated successfully.");
 
-    // ✅ Update session if editing self
+    // -------- Update Session --------
     if (req.session.user && req.session.user._id === user._id.toString()) {
       req.session.user = user;
       await req.session.save();
+      console.log("Session updated.");
     }
 
+    console.log("Redirecting to home page...");
     res.redirect("/");
   } catch (err) {
     console.error("❌ Error updating user:", err);
 
     const user = await User.findById(req.body.id);
-    const vendorCount = await User.countDocuments({ userType: "vender" });
 
-    // Re-render the edit page with oldInput in case of error
     res.status(500).render("./store/signup", {
       title: "Edit Profile",
       isLogedIn: req.isLogedIn,
       editing: true,
-      vendorExists: vendorCount > 0,
       user,
       oldInput,
       errors: { general: "Something went wrong. Please try again." }
@@ -467,13 +476,11 @@ exports.getSignUpPage = async (req, res, next) => {
   const dobString = dob ? new Date(dob).toISOString().split('T')[0] : '';
 
   try {
-    const vendorCount = await User.countDocuments({ userType: 'vender' });
 
     res.render('./store/signup', {
       title: "Sign-UP Page",
       isLogedIn: req.isLogedIn,
       editing,
-      vendorExists: vendorCount > 0,
       errors: {},
       user:{},
       oldInput: {
@@ -518,6 +525,7 @@ exports.deleteUser = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
+    console.log('PROFILE PIC ID:', user.profilePicturePublicId);
 
     if (!user) return res.status(404).send('User not found');
 
@@ -532,17 +540,43 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-    // 1. Fetch all vendors owned by user
+    // 1️⃣ Fetch all vendors owned by user
     const userVenders = await vender.find({ vender: user._id });
 
-    // 2. Delete Cloudinary images and related collections for each vendor
+    // 2️⃣ Delete Cloudinary images and related collections for each vendor
     for (const v of userVenders) {
-      const promises = [];
+      const vendorDeletePromises = [];
 
-      if (v.imagePublicId) promises.push(cloudinary.uploader.destroy(v.imagePublicId));
-      if (v.MenuimagePublicId) promises.push(cloudinary.uploader.destroy(v.MenuimagePublicId));
-      await Promise.all(promises);
+      // main image
+      if (v.imagePublicId) {
+        vendorDeletePromises.push(
+          cloudinary.uploader.destroy(v.imagePublicId)
+            .then(r => console.log(`Vendor ${v._id} main image deleted:`, r))
+            .catch(err => console.warn(`Error deleting vendor main image:`, err.message))
+        );
+      }
 
+      // menu image
+      if (v.MenuimagePublicId) {
+        vendorDeletePromises.push(
+          cloudinary.uploader.destroy(v.MenuimagePublicId)
+            .then(r => console.log(`Vendor ${v._id} menu image deleted:`, r))
+            .catch(err => console.warn(`Error deleting vendor menu image:`, err.message))
+        );
+      }
+
+      // banner image (if you store it)
+      if (v.bannerImagePublicId) {
+        vendorDeletePromises.push(
+          cloudinary.uploader.destroy(v.bannerImagePublicId)
+            .then(r => console.log(`Vendor ${v._id} banner image deleted:`, r))
+            .catch(err => console.warn(`Error deleting vendor banner image:`, err.message))
+        );
+      }
+
+      await Promise.all(vendorDeletePromises);
+
+      // delete all related docs for this vendor
       await Orders.deleteMany({ vender: v._id });
       await venderOptions.deleteMany({ vendorId: v._id });
       await userOptions.deleteMany({ vendor: v._id });
@@ -551,25 +585,40 @@ exports.deleteUser = async (req, res) => {
       await vender.findByIdAndDelete(v._id);
     }
 
-    // 3. Remove this user's ID from all users' `booked` arrays
-    await User.updateMany({}, { $pull: { booked: { $in: userVenders.map(v => v._id) } } });
+    // 3️⃣ Remove this user's ID from all users' booked arrays
+    await User.updateMany(
+      {},
+      { $pull: { booked: { $in: userVenders.map(v => v._id) } } }
+    );
 
-    // 4. Delete all user-related records
+    // 4️⃣ Delete all user-related records
     await Orders.deleteMany({ guest: user._id });
     await message.deleteMany({ guestId: user._id });
     await venderOptions.deleteMany({ guest: user._id });
     await userOptions.deleteMany({ guest: user._id });
 
+    // 5️⃣ Delete user images from Cloudinary
+    const userDeletePromises = [];
     if (user.profilePicturePublicId) {
-      await cloudinary.uploader.destroy(user.profilePicturePublicId).catch(err => {
-        console.warn("Error deleting profile image:", err.message);
-      });
+      userDeletePromises.push(
+        cloudinary.uploader.destroy(user.profilePicturePublicId)
+          .then(r => console.log(`User profile image deleted:`, r))
+          .catch(err => console.warn("Error deleting user profile image:", err.message))
+      );
     }
+    if (user.bannerImagePublicId) {
+      userDeletePromises.push(
+        cloudinary.uploader.destroy(user.bannerImagePublicId)
+          .then(r => console.log(`User banner image deleted:`, r))
+          .catch(err => console.warn("Error deleting user banner image:", err.message))
+      );
+    }
+    await Promise.all(userDeletePromises);
 
-    // 5. Delete the user
+    // 6️⃣ Delete the user itself
     await User.findByIdAndDelete(user._id);
 
-    // 6. Clear session if needed
+    // 7️⃣ Clear session if needed
     if (req.session.user && req.session.user._id.toString() === user._id.toString()) {
       req.session.destroy(err => {
         if (err) {
