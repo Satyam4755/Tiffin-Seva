@@ -15,6 +15,9 @@ const {
     getOrders,
     getOptions,
     postOptionsBulk,
+    getAddDetails,
+    postAddDetails,
+    deleteMedia,
 } = require('../controller/vender');
 
 // ---------------- GET ROUTES ---------------- //
@@ -23,6 +26,7 @@ venderRouter.get('/meals_list', mealsList);
 venderRouter.get('/meals_list/:mealId', editMeals);
 venderRouter.get('/orders', getOrders);
 venderRouter.get('/customerChoice', getOptions);
+venderRouter.get('/add_details', getAddDetails);
 
 // ---------------- POST ROUTES ---------------- //
 // ⚠️ Add multer upload middleware to handle 'image' and 'Menuimage'
@@ -31,6 +35,8 @@ venderRouter.post('/edit_meals', multiFileUpload, postEditMeals);
 
 venderRouter.post('/delete_meal/:mealId', deleteMeals);
 venderRouter.post('/customerChoiceBulk/:venderId', postOptionsBulk);
+venderRouter.post('/add_details', multiFileUpload, postAddDetails);
+venderRouter.post('/delete_media', deleteMedia);
 
 // Export router
 exports.venderRouter = venderRouter;
