@@ -36,6 +36,7 @@ exports.addMeals = async (req, res) => {
             currentPage: 'admin',
             isLogedIn: req.isLogedIn,
             user: req.session.user,
+            mealsDoc: {},  // empty doc for form fields
             alreadyAdded: false
         });
 
