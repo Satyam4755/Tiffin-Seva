@@ -3,102 +3,40 @@
 <%- include('../partials/nav') %>
 
 <style>
-  body {
-    background-color: #fefefe;
-    font-family: 'Segoe UI', sans-serif;
-    padding-bottom: 50px;
-  }
-
-  h2 {
-    text-align: center;
-    color: #d81b60;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    margin: 40px 0 20px 0;
-    animation: bounce 7.5s infinite;
-    font-size: 28px;
-  }
-
-  .cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 0 20px;
-  }
-
-  .card {
-    background-color: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  .content h3 {
-    font-size: 20px;
-    color: #2d3436;
-    margin-bottom: 10px;
-  }
-
-  .content p {
-    font-size: 16px;
-    color: #555;
-    line-height: 1.5;
-    margin: 5px 0;
-  }
-
-  .content strong {
-    color: #444;
-  }
-
-  .meal-date {
-    font-size: 14px;
-    color: #9c27b0;
-    margin-top: 5px;
-    font-style: italic;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #e0e0e0;
-    margin-top: 15px;
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-  }
-
-  .badaDabba{
-    margin-bottom: 26%;
-  }
+  body { background: #fefefe; font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
+  h2 { text-align: center; color: #d81b60; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin: 40px 0 20px; animation: bounce 7.5s infinite; font-size: 28px; }
+  .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 0 20px; }
+  .card { background: #fff; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); width: 300px; padding: 20px; transition: transform 0.3s, box-shadow 0.3s; }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+  .content h3 { font-size: 20px; color: #2d3436; margin-bottom: 10px; }
+  .content p { font-size: 16px; color: #555; line-height: 1.5; margin: 5px 0; }
+  .content strong { color: #444; }
+  .meal-date { font-size: 14px; color: #9c27b0; margin-top: 5px; font-style: italic; }
+  hr { border: none; border-top: 1px solid #e0e0e0; margin-top: 15px; }
+  @keyframes bounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);} }
+  .badaDabba{margin-bottom: 26%;}
 </style>
 
 <div class="badaDabba">
-  <h2>Hello <%= user.firstName %> <%= user.lastName %>! Today's Pending Meal Messages 🌸</h2>
+  <h2>Hello <%= user.firstName %> <%= user.lastName %>! Today's Meal Messages 🌸</h2>
   <hr>
 
   <div class="cards-container">
     <% if (!messages || messages.length === 0) { %>
-      <p style="text-align:center; color: #d81b60;">You have no pending meals for today!</p>
+      <p style="text-align:center; color: #d81b60; font-size: 18px;">
+        You haven't received any meal messages yet! Want to check today's meals? 
+        <a href="/store/my_meals" style="color:#ff4081; text-decoration:underline;">View Meals</a>
+      </p>
     <% } else { %>
       <% messages.forEach(msg => { %>
         <div class="card">
           <div class="content">
             <p><strong>Meal:</strong> <%= msg.message %></p>
-            <p><strong>From Vendor:</strong> 
-              <b style="color: rgb(182, 5, 117);"><%= msg.vendorName %></b>
-            </p>
+            <p><strong>From Vendor:</strong> <b style="color: rgb(182, 5, 117);"><%= msg.vendorName %></b></p>
             <% if(msg.mealType && msg.mealDate) { %>
               <p class="meal-date">
                 <strong><%= msg.mealType.charAt(0).toUpperCase() + msg.mealType.slice(1) %></strong> - 
-                <%= new Date(msg.mealDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) %>
+                <%= new Date(msg.mealDate).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'short' }) %>
               </p>
             <% } %>
           </div>
