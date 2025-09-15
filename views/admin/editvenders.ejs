@@ -1,23 +1,24 @@
 <%-include('../partials/head')%>
 <%-include('../partials/nav')%>
 <%-include('../partials/background')%>
+
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+        background: linear-gradient(to bottom, #ffe5d0, #ffd6ba); /* light peach gradient */
         margin: 0;
         padding: 0;
-    }
+        }
 
-    h1 {
-        color: #ff5a5f;
+        h1 {
+        color: #1a237e; /* deep blue for strong contrast */
         text-align: center;
         margin-top: 2rem;
         margin-bottom: 1rem;
         font-size: 2rem;
-    }
+        }
 
-    .form-container {
+        .form-container {
         background-color: white;
         width: 95%;
         max-width: 900px;
@@ -25,117 +26,145 @@
         padding: 2rem;
         border-radius: 20px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
+        }
 
-    .day-section {
+        .day-section {
         border: 1px solid #ddd;
         padding: 15px;
         border-radius: 15px;
         margin-bottom: 20px;
         background-color: #fafafa;
-    }
+        }
 
-    .meal-section {
+        .meal-section {
         margin-top: 10px;
         padding: 10px;
         border: 1px dashed #ccc;
         border-radius: 10px;
-    }
+        }
 
-    .meal-section h4 {
+        .meal-section h4 {
         margin: 5px 0;
-        color: #ff5a5f;
-    }
+        color: #1a237e; /* deep blue for contrast */
+        }
 
-    .form-group {
+        .form-group {
         margin-bottom: 10px;
-    }
+        }
 
-    .form-group label {
+        .form-group label {
         display: block;
         margin-bottom: 5px;
         font-size: 0.9rem;
         color: #555;
-    }
+        }
 
-    .form-group input[type="text"] {
-        padding: 10px;
+        .form-group input[type="text"] {
+        padding: 12px 16px;
         width: 100%;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        font-size: 0.95rem;
+        border-radius: 10px;
+        border: 1.5px solid #ffd6ba;
+        font-size: 1rem;
         box-sizing: border-box;
-    }
+        background: #fff7f0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+        margin-bottom: 6px;
+        box-shadow: 0 2px 8px rgba(255, 214, 186, 0.1);
+        }
 
-    .form-group input[type="file"] {
+        .form-group input[type="text"]:focus {
+        border-color: #1a237e;
+        box-shadow: 0 0 0 2px #ffe5d0;
+        background: #fff3e6;
+        }
+
+        .form-group input[type="file"] {
         width: 100%;
-    }
+        padding: 8px 0;
+        border-radius: 10px;
+        background: #fff7f0;
+        border: 1.5px solid #ffd6ba;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+        margin-top: 4px;
+        }
 
-    .add-item-btn {
-        background-color: #ff5a5f;
+        .form-group input[type="file"]:focus {
+        border-color: #1a237e;
+        background: #fff3e6;
+        }
+
+        .add-item-btn {
+        background-color: #1a237e; /* deep blue */
         color: white;
         border: none;
-        padding: 6px 12px;
+        padding: 8px 16px;
         border-radius: 20px;
         cursor: pointer;
-        font-size: 0.85rem;
-        margin-top: 5px;
-    }
+        font-size: 0.95rem;
+        margin-top: 8px;
+        box-shadow: 0 2px 8px rgba(26, 35, 126, 0.08);
+        transition: background 0.2s, transform 0.2s;
+        }
 
-    .add-item-btn:hover {
-        background-color: #e0484d;
-    }
+        .add-item-btn:hover {
+        background-color: #3949ab;
+        transform: scale(1.05);
+        }
 
-    button[type="submit"] {
-        padding: 12px 24px;
-        background-color: #ff5a5f;
+        button[type="submit"] {
+        padding: 14px 28px;
+        background-color: #1a237e; /* deep blue */
         color: white;
-        font-size: 1rem;
+        font-size: 1.1rem;
         border: none;
         border-radius: 30px;
         cursor: pointer;
         margin-top: 20px;
         width: 100%;
         transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+        box-shadow: 0 4px 16px rgba(26, 35, 126, 0.08);
+        letter-spacing: 0.5px;
+        }
 
-    button[type="submit"]:hover {
-        background-color: #e0484d;
+        button[type="submit"]:hover {
+        background-color: #3949ab;
         transform: scale(1.05);
-    }
-    .already-added-box {
-    text-align: center;
-    background: #e8f5e9;
-    border: 2px solid #66bb6a;
-    border-radius: 15px;
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 500px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-}
+        }
+        .already-added-box {
+        text-align: center;
+        background: #e8f5e9;
+        border: 2px solid #66bb6a;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 500px;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
 
-.already-added-box p {
-    color: #2e7d32;
-    font-weight: bold;
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-}
+        .already-added-box p {
+        color: #2e7d32;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        }
 
-.check-meals-btn {
-    padding: 12px 25px;
-    background: linear-gradient(45deg, #66bb6a, #43a047);
-    color: white;
-    font-size: 1rem;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+        .check-meals-btn {
+        padding: 12px 25px;
+        background: linear-gradient(45deg, #1a237e, #3949ab); /* deep blue gradient */
+        color: white;
+        font-size: 1rem;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        }
 
-.check-meals-btn:hover {
-    background: linear-gradient(45deg, #388e3c, #2e7d32);
-    transform: scale(1.05);
-}
+        .check-meals-btn:hover {
+        background: linear-gradient(45deg, #3949ab, #1a237e);
+        transform: scale(1.05);
+        }
 </style>
 
 <div class="badaDabba">
