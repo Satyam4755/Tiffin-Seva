@@ -437,7 +437,7 @@ setInterval(showSlide, 5000); // every 5 seconds
                     <% venders.forEach(vender=> { %>
                         <div class="card">
                             <a href="/user/vender-list/<%= vender._id %>">
-                                <img src="<%= vender.bannerImage %>" alt="Vendor Banner"
+                                <img src="<%= vender.bannerImage || '/tiffin.png'%> " alt="Vendor Banner"
                                     class="<%= vender.vendorClass %> <%= vender.hasMenu ? '' : 'grayscale' %>">
         
                                 <div class="content">
