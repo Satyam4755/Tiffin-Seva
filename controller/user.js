@@ -713,20 +713,35 @@ exports.postOption = async (req, res, next) => {
 
 // ✅ Get Messages (Dynamic based on pending meals)
 exports.getMessage = async (req, res, next) => {
-  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+  if (!req.isLogedIn || !req.session.user) {
+    return res.redirect('/login');
+  }
 
   try {
     const user = await User.findById(req.session.user._id);
-    if (!user) return res.redirect('/login');
+    if (!user) {
+      return res.redirect('/login');
+    }
 
-    const now = new Date();
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    // Force India time (Asia/Kolkata)
+    const now = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
+    );
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
 
     const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    // Meal windows (IST)
     let allowedMeals = [];
-    if(hour >= 11 && hour < 15) allowedMeals.push('lunch');
-    if(hour >= 22 && hour < 23) allowedMeals.push('dinner');//checking for 10pm to 11pm
+    if (hour >= 11 && hour < 15) {
+      allowedMeals.push('lunch');
+    }
+    // dinner window starts at 18:00 IST
+    if (hour === 18 || hour > 18) {
+      allowedMeals.push('dinner');
+    }
 
     const orders = await Order.find({
       guest: user._id,
@@ -735,44 +750,58 @@ exports.getMessage = async (req, res, next) => {
 
     const messages = [];
 
-    for(const order of orders){
-      if(!order.vender) continue;
+    for (const order of orders) {
+      if (!order.vender) continue;
+
       const mealsDoc = await Meals.findOne({ vendor: order.vender._id });
-      if(!mealsDoc) continue;
+      if (!mealsDoc) continue;
 
       // Determine subscription range
       let inRange = false;
       const todayTime = today.getTime();
-      if(order.subscription_model === 'Per Day'){
-        const start = new Date(order.startingDate).getTime();
-        const end = new Date(order.endingDate).getTime();
+      let start, end;
+      if (order.subscription_model === 'Per Day') {
+        start = new Date(order.startingDate).getTime();
+        end = new Date(order.endingDate).getTime();
         inRange = todayTime >= start && todayTime <= end;
-      } else if(order.subscription_model === 'Per Month'){
-        const start = new Date(order.startingDate).getTime();
-        const end = new Date(order.expireAt).getTime();
+      } else if (order.subscription_model === 'Per Month') {
+        start = new Date(order.startingDate).getTime();
+        end = new Date(order.expireAt).getTime();
         inRange = todayTime >= start && todayTime <= end;
       }
-      if(!inRange) continue;
+      if (!inRange) continue;
 
-      // Allowed meal types
-      const orderTypes = Array.isArray(order.time_type) ? order.time_type : ['lunch','dinner'];
-      const activeMeals = orderTypes.filter(t => allowedMeals.includes(t));
-      if(!activeMeals.length) continue;
+      // Allowed meal types for this order
+      let orderTypes = ['lunch', 'dinner']; // default
+      if (Array.isArray(order.time_type) && order.time_type.length) {
+        orderTypes = order.time_type.map(t => t.toLowerCase());
+      }
+      const activeMeals = orderTypes.filter(t =>
+        allowedMeals.includes(t)
+      );
+      if (!activeMeals.length) continue;
 
-      const dayName = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      const dayName = today
+        .toLocaleDateString('en-US', { weekday: 'long' })
+        .toLowerCase();
 
-      for(const type of activeMeals){
+      for (const type of activeMeals) {
         const mealForDay = mealsDoc.meals?.[dayName]?.[type];
-        if(!mealForDay || !mealForDay.items?.length) continue;
+        if (!mealForDay || !mealForDay.items?.length) continue;
 
         const mealNames = mealForDay.items.join(', ');
         const messageText = `Your ${type} for today: ${mealNames}`;
 
-        // Save message if not already exists
         try {
           const savedMsg = await Message.findOneAndUpdate(
-            { guest: user._id, vendorId: order.vender._id, mealDate: today, mealType: type },
-            { $setOnInsert: {
+            {
+              guest: user._id,
+              vendorId: order.vender._id,
+              mealDate: today,
+              mealType: type
+            },
+            {
+              $setOnInsert: {
                 guest: user._id,
                 vendorId: order.vender._id,
                 message: messageText,
@@ -780,18 +809,22 @@ exports.getMessage = async (req, res, next) => {
                 mealDate: today,
                 createdAt: new Date(),
                 expiresAt: order.expireAt
-            }},
+              }
+            },
             { upsert: true, new: true }
           ).populate('vendorId', 'Name firstName');
 
           messages.push({
             message: savedMsg.message,
-            vendorName: savedMsg.vendorId?.Name || savedMsg.vendorId?.firstName || 'Vendor',
+            vendorName:
+              savedMsg.vendorId?.Name ||
+              savedMsg.vendorId?.firstName ||
+              'Vendor',
             mealType: savedMsg.mealType,
             mealDate: savedMsg.mealDate
           });
-        } catch(err) {
-          if(err.code !== 11000) console.error(err);
+        } catch (err) {
+          // swallow duplicate error silently
         }
       }
     }
@@ -803,9 +836,7 @@ exports.getMessage = async (req, res, next) => {
       messages,
       currentPage: 'message'
     });
-
-  } catch(err){
-    console.error(err);
+  } catch (err) {
     req.flash('error', 'Could not load messages');
     res.redirect(req.get('Referrer') || '/');
   }
