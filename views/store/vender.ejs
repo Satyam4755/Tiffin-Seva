@@ -400,6 +400,12 @@ function showSlide() {
 
 setInterval(showSlide, 5000); // every 5 seconds
 </script>
+
+<% if (errorMessage) { %>
+  <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:6px; margin-bottom:15px;">
+    <%= errorMessage %>
+  </div>
+<% } %>
 <%- include('../partials/deliveringMsg') %>
 <% if (birthdayMessage) { %>
   <script>
@@ -411,7 +417,7 @@ setInterval(showSlide, 5000); // every 5 seconds
         confirmButtonText: 'Thanks!',
         backdrop: `
           rgba(0,0,123,0.4)
-          url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExczEzN3ByZDUxMjRuejNmemp1OXFpZGc5ZDlmdzB6NWRkZWhmM2M2MyZlcD12MV9naWZzX3RyZW5kaW5nJmN0PWc/kyLYXonQYYfwYDIeZl/giphy.gif")
+          url("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnV0b3AwcXJycWJwdzY1aDFpMHMzOWUyZWQ0dDNqejRmZTJkNXdlOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/11sBLVxNs7v6WA/giphy.gif")
           left top
           no-repeat
         `,
