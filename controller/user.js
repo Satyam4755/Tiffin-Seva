@@ -122,18 +122,21 @@ exports.homePage = async (req, res, next) => {
         };
       });
     }
+    const errorMessage = req.flash('error');
+
 
     // 4️⃣ Render page
     res.render("./store/vender", {
-      venders: registervenders,
-      title: "Vendor Page",
-      currentPage: "home",
-      isLogedIn: req.isLogedIn,
-      user: user || null,
-      showOptions,
-      birthdayMessage,
-      opacity, // ← back as requested
-    });
+  venders: registervenders,
+  title: "Vendor Page",
+  currentPage: "home",
+  isLogedIn: req.isLogedIn,
+  user: user || null,
+  showOptions,
+  birthdayMessage,
+  opacity,
+  errorMessage: errorMessage.length ? errorMessage[0] : null // add this
+});
   } catch (err) {
     console.error("❌ Home page error:", err);
     res.status(500).send("Server error");
@@ -292,12 +295,19 @@ exports.booking = async (req, res, next) => {
   const venderId = req.params.venderId;
 
   try {
-    const vender = await User.findById(venderId); // ✅ switched to User model
-    if (!vender) {
-      return res.redirect('/user/vender-list');
+    const vender = await User.findById(venderId);
+    if (!vender) return res.redirect('/user/vender-list');
+
+    // ✅ check if vendor has added meals
+    const mealsDoc = await Meals.findOne({ vendor: venderId });
+
+    if (!mealsDoc) {
+      // store a flash message and redirect to home
+      req.flash('error', `The Vendor ${vender.firstName || vender.Name || 'This vendor'} has not added their meals yet. Please choose another vendor.`);
+      return res.redirect('/');
     }
 
-    // ✅ Calculate average rating
+    // ✅ Calculate average rating (same as before)
     let averageRating = 0;
     if (vender.reviews && vender.reviews.length > 0) {
       const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
@@ -308,6 +318,7 @@ exports.booking = async (req, res, next) => {
     }
     vender.averageRating = averageRating;
 
+    // ✅ render normal booking page if meals exist
     res.render('./store/booking', {
       vender,
       title: "Booking",
