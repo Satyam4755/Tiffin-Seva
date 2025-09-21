@@ -303,9 +303,10 @@
   </div>
 
   <div class="booking-cards-container">
-    <form action="/user/submit_booking/<%=vender._id%>" method="post">
+    <!-- no action attribute because we handle via JS -->
+    <form id="bookingForm">
       <%-include('../partials/errorHandel')%>
-      <h2>Vender Booking</h2>
+      <h2>Vendor Booking</h2>
 
       <input type="hidden" name="venderId" value="<%= vender._id %>">
 
@@ -368,24 +369,19 @@
       <input type="hidden" id="selectedMonths" name="selectedMonths">
       <p id="calculatedEndDate" style="color: green; font-weight: bold; display: none;"></p>
 
-      <label for="payment">Payment Method</label>
-      <select id="payment" name="payment" required>
-        <option value="">Select Payment Method</option>
-        <option value="credit_card">Credit Card</option>
-        <option value="debit_card">Debit Card</option>
-        <option value="paypal">PayPal</option>
-        <option value="cash">Cash</option>
-      </select>
+      <!-- Removed the Payment Method select box -->
 
       <input type="hidden" id="perdayValue" name="perdayValue" value="<%=vender.pricePerDay%>">
       <input type="hidden" id="permonthValue" name="permonthValue" value="<%=vender.pricePerMonth%>">
       <input type="hidden" name="totalAmount" id="totalAmountInput">
+      <input type="hidden" id="razorpayKey" value="<%= RAZORPAY_KEY_ID %>">
 
       <h3 style="color: #d6336c; text-align: center;">Total Amount: ₹<span id="totalAmount">0</span></h3>
-      <button class="submit" type="submit" onclick="loading()">Book Now</button>
+      <button class="submit" type="button" id="payBtn">Book & Pay Now</button>
     </form>
   </div>
 </div>
+
 
 <script>
   const pad = n => (n < 10 ? '0' + n : n);
@@ -511,6 +507,61 @@
     });
   });
 </script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById('payBtn').addEventListener('click', async function(e) {
+    e.preventDefault();
+
+    const amount = Number(document.getElementById('totalAmountInput').value || 0);
+    if (!amount || amount <= 0) {
+      alert('Please select a valid plan first');
+      return;
+    }
+
+    // 🔹 get key from hidden input
+    const RAZORPAY_KEY_ID = document.getElementById('razorpayKey').value;
+
+    // create order on server
+    const res = await fetch('/payment/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount })
+    });
+    const order = await res.json();
+
+    // open Razorpay Checkout
+    const options = {
+      key: RAZORPAY_KEY_ID,        // ✅ from hidden input
+      amount: order.amount,
+      currency: order.currency,
+      name: 'Tiffin Seva',
+      description: 'Meal Subscription Booking',
+      order_id: order.id,
+      handler: function (response){
+        fetch('/user/submit_booking/<%=vender._id%>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            totalAmount: amount,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature
+          })
+        }).then(() => {
+          window.location.href = '/user/submit_booking';
+        });
+      },
+      theme: { color: '#3399cc' }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+  });
+</script>
+
   <%-include('../partials/loading')%>
    
 </body>
