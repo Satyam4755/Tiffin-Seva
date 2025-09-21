@@ -303,14 +303,19 @@ exports.booking = async (req, res, next) => {
 
     if (!mealsDoc) {
       // store a flash message and redirect to home
-      req.flash('error', `The Vendor ${vender.firstName || vender.Name || 'This vendor'} has not added their meals yet. Please choose another vendor.`);
+      req.flash(
+        'error',
+        `The Vendor ${vender.firstName || vender.Name || 'This vendor'} has not added their meals yet. Please choose another vendor.`
+      );
       return res.redirect('/');
     }
 
     // ✅ Calculate average rating (same as before)
     let averageRating = 0;
     if (vender.reviews && vender.reviews.length > 0) {
-      const validRatings = vender.reviews.filter(r => typeof r.rating === 'number' && !isNaN(r.rating));
+      const validRatings = vender.reviews.filter(
+        (r) => typeof r.rating === 'number' && !isNaN(r.rating)
+      );
       if (validRatings.length > 0) {
         const total = validRatings.reduce((sum, review) => sum + review.rating, 0);
         averageRating = parseFloat((total / validRatings.length).toFixed(1));
@@ -318,15 +323,15 @@ exports.booking = async (req, res, next) => {
     }
     vender.averageRating = averageRating;
 
-    // ✅ render normal booking page if meals exist
+    // ✅ render booking page and pass Razorpay key to template
     res.render('./store/booking', {
       vender,
-      title: "Booking",
+      title: 'Booking',
       isLogedIn: req.isLogedIn,
       user: req.session.user || null,
       currentPage: 'reserve',
+      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID // <-- add this line
     });
-
   } catch (err) {
     console.error('❌ Error loading booking page:', err);
     res.redirect('/user/vender-list');
