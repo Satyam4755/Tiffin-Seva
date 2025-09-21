@@ -16,6 +16,8 @@ app.use(express.json());
 // Routers wala part
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
+const policyRoutes = require('./routes/policyRoutes');
+
 const { venderRouter } = require('./routes/vender');
 
 // Middleware imports wala part
@@ -49,6 +51,9 @@ app.use(authRouter);
 
 // Protected vender routes
 app.use('/vender', protectvenderRoutes, venderRouter);
+
+// for policy
+app.use('/', policyRoutes);
 
 // View engine
 app.set('view engine', 'ejs');
