@@ -17,6 +17,8 @@ app.use(express.json());
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
 const policyRoutes = require('./routes/policyRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+
 
 const { venderRouter } = require('./routes/vender');
 
@@ -54,6 +56,9 @@ app.use('/vender', protectvenderRoutes, venderRouter);
 
 // for policy
 app.use('/', policyRoutes);
+
+// for payment
+app.use('/payment', paymentRoutes);
 
 // View engine
 app.set('view engine', 'ejs');
