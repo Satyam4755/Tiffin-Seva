@@ -207,20 +207,31 @@
                   ₹<%= order.totalAmount || 'N/A' %>
                 </td>
                 <td data-label="Time Type">
-                  <% if (order.subscription_model==='Per Month') { %>
-                    Lunch & Dinner
-                  <% } else if (Array.isArray(order.time_type)) { %>
-                    <%= order.time_type.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(" & ") %>
-                  <% } else if (order.time_type==='lunch' || order.time_type==='dinner') { %>
-                    <%= order.time_type.charAt(0).toUpperCase() + order.time_type.slice(1) %>
-                  <% } else if (order.time_type==='two') { %>
-                    Lunch & Dinner
-                  <% } else if (order.time_type==='one') { %>
-                    Lunch
-                  <% } else { %>
-                    N/A
-                  <% } %>
-                </td>
+  <% 
+    // Normalize time_type into an array
+    let timeTypes = [];
+    if (Array.isArray(order.time_type) && order.time_type.length) {
+      timeTypes = order.time_type;
+    } else if (typeof order.time_type === 'string' && order.time_type.trim().length) {
+      // handle cases like 'lunch', 'dinner', 'one', 'two'
+      if (order.time_type === 'one') {
+        timeTypes = ['lunch'];
+      } else if (order.time_type === 'two') {
+        timeTypes = ['lunch', 'dinner'];
+      } else {
+        timeTypes = [order.time_type];
+      }
+    }
+  %>
+
+  <% if (order.subscription_model === 'Per Month' && !timeTypes.length) { %>
+    Lunch & Dinner
+  <% } else if (timeTypes.length) { %>
+    <%= timeTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(' & ') %>
+  <% } else { %>
+    N/A
+  <% } %>
+</td>
               </tr>
             <% }) %>
 
