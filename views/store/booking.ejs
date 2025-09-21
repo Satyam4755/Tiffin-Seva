@@ -281,30 +281,26 @@
 
 <div class="mainDabba">
   <div class="cards-container">
-  <div class="card">
-    <a id="link" href="/user/vender-list/<%= vender._id %>" style="text-decoration: none; color: black;">
-      <!-- ✅ Banner Image -->
-      <img src="<%= vender.bannerImage || '/default.jpg' %>" alt="Vendor Banner" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
-
-      <div class="content">
-        <h3><%= vender.serviceName %></h3>
-        <p><strong>Location:</strong> <%= vender.location %></p>
-        <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %></p>
-        <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %></p>
-        
-        <!-- ✅ Ratings -->
-        <p>
-          <strong>Ratings:</strong>
-          <% const fullStars = Math.floor(vender.averageRating || 0); %>
-          <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
-          <span style="margin-left: 5px; font-weight: 700; color: red;">
-            (<%= vender.averageRating || 0 %>/5)
-          </span>
-        </p>
-      </div>
-    </a>
+    <div class="card">
+      <a id="link" href="/user/vender-list/<%= vender._id %>" style="text-decoration: none; color: black;">
+        <img src="<%= vender.bannerImage || '/default.jpg' %>" alt="Vendor Banner" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+        <div class="content">
+          <h3><%= vender.serviceName %></h3>
+          <p><strong>Location:</strong> <%= vender.location %></p>
+          <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %></p>
+          <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %></p>
+          <p>
+            <strong>Ratings:</strong>
+            <% const fullStars = Math.floor(vender.averageRating || 0); %>
+            <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
+            <span style="margin-left: 5px; font-weight: 700; color: red;">
+              (<%= vender.averageRating || 0 %>/5)
+            </span>
+          </p>
+        </div>
+      </a>
+    </div>
   </div>
-</div>
 
   <div class="booking-cards-container">
     <form action="/user/submit_booking/<%=vender._id%>" method="post">
@@ -312,79 +308,65 @@
       <h2>Vender Booking</h2>
 
       <input type="hidden" name="venderId" value="<%= vender._id %>">
+
       <label for="name">Full Name</label>
       <input type="text" id="name" name="name" placeholder="Enter your full name" required>
 
       <label for="phone">Phone Number</label>
       <input type="tel" id="phone" name="phone" placeholder="Enter your phone number (10 digits)" pattern="[0-9]{10}" required>
 
-
-      <!-- Address (from user's profile) -->
-<label for="address">Your Address</label>
-<input 
-  type="text" 
-  name="address" 
-  id="address" 
-  value="<%= user.location || 'No address saved' %>" 
-  readonly 
-  style="background:#f1f1f1; cursor:not-allowed;">
-<p style="font-size: 13px; color: #6c5ce7; margin-top: 4px;">
-  This is your saved address from profile.
-</p>
+      <!-- Address -->
+      <label for="address">Your Address</label>
+      <input type="text" name="address" id="address" value="<%= user.location || 'No address saved' %>" readonly style="background:#f1f1f1; cursor:not-allowed;">
+      <p style="font-size: 13px; color: #6c5ce7; margin-top: 4px;">
+        This is your saved address from profile.
+      </p>
 
       <div class="radio-tile-group">
         <label class="radio-tile" id="perDayTile">
           <input type="radio" id="perday" name="subscription_model" value="Per Day" onclick="toggleTimeOptions()">
           Per Day
         </label>
-        
-        <div id="timeOptions" style="display: none;">
-          <div class="radio-tile-group">
-            <label class="radio-tile" id="lunchTile">
-              <input type="checkbox" name="time_type" value="lunch" onchange="updateTileSelection(); calculateTotal();">
-              Lunch
-            </label>
-            <label class="radio-tile" id="dinnerTile">
-              <input type="checkbox" name="time_type" value="dinner" onchange="updateTileSelection(); calculateTotal();">
-              Dinner
-            </label>
-          </div>
-        </div>
         <label class="radio-tile" id="perMonthTile">
           <input type="radio" id="permonth" name="subscription_model" value="Per Month" onclick="toggleTimeOptions()">
           Per Month
         </label>
       </div>
 
-      <!-- Show this for Per Day -->
-<div id="dateInputs">
-  <label for="startingDate">Starting Date</label>
-  <input type="date" id="startingDate" name="startingDate" min="<%= new Date().toISOString().split('T')[0] %>">
+      <!-- lunch/dinner for both -->
+      <div id="timeOptions" style="display: none;">
+        <div class="radio-tile-group">
+          <label class="radio-tile" id="lunchTile">
+            <input type="checkbox" name="time_type" value="lunch" onchange="updateTileSelection(); calculateTotal();">
+            Lunch
+          </label>
+          <label class="radio-tile" id="dinnerTile">
+            <input type="checkbox" name="time_type" value="dinner" onchange="updateTileSelection(); calculateTotal();">
+            Dinner
+          </label>
+        </div>
+      </div>
 
-  <label for="endingDate">Ending Date</label>
-  <input type="date" id="endingDate" name="endingDate">
-</div>
+      <!-- Per Day dates -->
+      <div id="dateInputs" style="display:none;">
+        <label for="startingDate">Starting Date</label>
+        <input type="date" id="startingDate" name="startingDate" min="<%= new Date().toISOString().split('T')[0] %>">
 
-<script>
-  const startingDateInput = document.getElementById('startingDate');
-  const endingDateInput = document.getElementById('endingDate');
+        <label for="endingDate">Ending Date</label>
+        <input type="date" id="endingDate" name="endingDate">
+      </div>
 
-  startingDateInput.addEventListener('change', function () {
-    endingDateInput.min = this.value;
-  });
-</script>
-
-<!-- Show this for Per Month -->
-<div id="monthGrid" style="display: none;">
-  <label>Select Number of Months</label>
-  <div class="month-buttons">
-    <% for (let i = 1; i <= 12; i++) { %>
-      <button type="button" class="month-btn" data-months="<%= i %>"><%= i %></button>
-    <% } %>
-  </div>
-</div>
-<input type="hidden" id="selectedMonths" name="selectedMonths">
-<p id="calculatedEndDate" style="color: green; font-weight: bold; display: none;"></p>
+      <!-- Per Month -->
+      <div id="monthGrid" style="display: none;">
+        <label>Select Number of Months</label>
+        <div class="month-buttons">
+          <% for (let i = 1; i <= 12; i++) { %>
+            <button type="button" class="month-btn" data-months="<%= i %>"><%= i %></button>
+          <% } %>
+        </div>
+      </div>
+      <input type="hidden" id="selectedMonths" name="selectedMonths">
+      <p id="calculatedEndDate" style="color: green; font-weight: bold; display: none;"></p>
 
       <label for="payment">Payment Method</label>
       <select id="payment" name="payment" required>
@@ -400,22 +382,17 @@
       <input type="hidden" name="totalAmount" id="totalAmountInput">
 
       <h3 style="color: #d6336c; text-align: center;">Total Amount: ₹<span id="totalAmount">0</span></h3>
-
-
       <button class="submit" type="submit" onclick="loading()">Book Now</button>
     </form>
   </div>
 </div>
-</div>
+
 <script>
-  // ---------- helpers ----------
   const pad = n => (n < 10 ? '0' + n : n);
   function formatDateLocal(d) {
-    // produce YYYY-MM-DD using local date parts (no toISOString)
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   }
 
-  // Elements
   const totalElement = document.getElementById('totalAmount');
   const subscriptionRadios = document.getElementsByName('subscription_model');
   const startInput = document.getElementById('startingDate');
@@ -424,69 +401,30 @@
   const display = document.getElementById('calculatedEndDate');
   const monthButtons = document.querySelectorAll(".month-btn");
 
-  // simple message helper
-  const showMessage = msg => alert(msg);
-
-  // time validation
-  function validateTimeSelection(e) {
-    const now = new Date();
-    const hour = now.getHours();
-    const lunchInput = document.querySelector('input[value="lunch"]');
-    const dinnerInput = document.querySelector('input[value="dinner"]');
-
-    const startDateValue = startInput.value ? new Date(startInput.value) : null;
-    const today = new Date(); today.setHours(0,0,0,0);
-
-    // if future start date allow
-    if (startDateValue && startDateValue > today) {
-      updateTileSelection();
-      calculateTotal();
-      return;
-    }
-
-    const lunchAvailable = hour >= 9 && hour < 12;
-    const dinnerAvailable = hour < 18;
-
-    if (e.target.value === "lunch" && !lunchAvailable) {
-      lunchInput.checked = false;
-      showMessage("⏰ Time for ordering lunch is 9AM - 12PM today");
-    }
-    if (e.target.value === "dinner" && !dinnerAvailable) {
-      dinnerInput.checked = false;
-      showMessage("⏰ Time for ordering dinner is before 6PM today");
-    }
-    if (!lunchAvailable && !dinnerAvailable) {
-      lunchInput.checked = false;
-      dinnerInput.checked = false;
-      showMessage("🚫 Today's time for ordering is over! Please select a future date.");
-    }
-
-    updateTileSelection();
-    calculateTotal();
-  }
-
-  // toggle fields
   function toggleTimeOptions() {
-    const isPerDaySelected = document.getElementById('perday').checked;
-    const isPerMonthSelected = document.getElementById('permonth')?.checked;
+    const isPerDay = document.getElementById('perday').checked;
+    const isPerMonth = document.getElementById('permonth').checked;
 
-    document.getElementById('timeOptions').style.display = isPerDaySelected ? 'block' : 'none';
-    document.getElementById('dateInputs').style.display = isPerDaySelected ? 'block' : 'none';
+    document.getElementById('timeOptions').style.display = (isPerDay || isPerMonth) ? 'block' : 'none';
+    document.getElementById('dateInputs').style.display = isPerDay ? 'block' : 'none';
     if (document.getElementById('monthGrid'))
-      document.getElementById('monthGrid').style.display = isPerMonthSelected ? 'block' : 'none';
+      document.getElementById('monthGrid').style.display = isPerMonth ? 'block' : 'none';
 
-    display.style.display = isPerMonthSelected ? 'block' : 'none';
+    display.style.display = isPerMonth ? 'block' : 'none';
     calculateTotal();
   }
 
-  // calc total
   function calculateTotal() {
-    const perDay = Number(document.getElementById('perdayValue')?.value || 0);
-    const perMonth = Number(document.getElementById('permonthValue')?.value || 0);
+    const perDay = Number(document.getElementById('perdayValue').value || 0);
+    const perMonth = Number(document.getElementById('permonthValue').value || 0);
     const selectedModel = Array.from(subscriptionRadios).find(r => r.checked)?.value;
     const startDate = new Date(startInput.value);
     const endDate = new Date(endInput.value);
-    const selectedMonths = Number(document.getElementById('selectedMonths')?.value || 0);
+    const selectedMonths = Number(document.getElementById('selectedMonths').value || 0);
+
+    // how many meal types selected
+    const timeSelections = document.querySelectorAll('input[name="time_type"]:checked').length;
+
     let total = 0;
 
     if (selectedModel === 'Per Day') {
@@ -496,15 +434,26 @@
         return;
       }
       const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-      const multiplier = document.querySelectorAll('input[name="time_type"]:checked').length;
-      total = diffDays * perDay * multiplier;
-    } else if (selectedModel === 'Per Month') {
+      total = diffDays * perDay * timeSelections; // perDay * days * lunch/dinner count
+    } 
+    else if (selectedModel === 'Per Month') {
       if (!selectedMonths) {
         totalElement.textContent = 0;
         totalAmount.value = 0;
         return;
       }
-      total = selectedMonths * perMonth;
+
+      // full price if both lunch & dinner, half price if only one selected
+      let pricePerMonth;
+      if (timeSelections === 1) {
+        pricePerMonth = perMonth / 2;
+      } else if (timeSelections >= 2) {
+        pricePerMonth = perMonth; 
+      } else {
+        pricePerMonth = 0; // nothing selected
+      }
+
+      total = selectedMonths * pricePerMonth;
     }
 
     totalElement.textContent = total;
@@ -513,17 +462,11 @@
 
   function updateTileSelection() {
     document.getElementById('perDayTile').classList.toggle('selected', document.getElementById('perday').checked);
-    if (document.getElementById('perMonthTile'))
-      document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth')?.checked);
-
-    const lunch = document.querySelector('input[value="lunch"]')?.checked;
-    const dinner = document.querySelector('input[value="dinner"]')?.checked;
-
-    document.getElementById('lunchTile').classList.toggle('selected', lunch);
-    document.getElementById('dinnerTile').classList.toggle('selected', dinner);
+    document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth').checked);
+    document.getElementById('lunchTile').classList.toggle('selected', document.querySelector('input[value="lunch"]').checked);
+    document.getElementById('dinnerTile').classList.toggle('selected', document.querySelector('input[value="dinner"]').checked);
   }
 
-  // listeners
   document.querySelectorAll('input[name="subscription_model"]').forEach(input => {
     input.addEventListener('change', () => {
       toggleTimeOptions();
@@ -531,12 +474,14 @@
     });
   });
   document.querySelectorAll('input[name="time_type"]').forEach(input => {
-    input.addEventListener('change', validateTimeSelection);
+    input.addEventListener('change', () => {
+      updateTileSelection();
+      calculateTotal();
+    });
   });
   startInput.addEventListener('change', calculateTotal);
   endInput.addEventListener('change', calculateTotal);
 
-  // month buttons with after-11AM logic + local date format
   monthButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       monthButtons.forEach(b => b.classList.remove("selected"));
@@ -555,7 +500,6 @@
       const end = new Date(start);
       end.setDate(start.getDate() + (30 * months));
 
-      // use local formatted date (fix offset issues)
       startInput.value = formatDateLocal(start);
       endInput.value = formatDateLocal(end);
 
@@ -567,7 +511,6 @@
     });
   });
 </script>
-
   <%-include('../partials/loading')%>
    
 </body>
