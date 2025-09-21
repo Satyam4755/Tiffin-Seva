@@ -328,12 +328,13 @@ h1, h2 {
                 <% } %>
             
                   <!-- ✅ Cancel Booking Button -->
-                  <form action="/user/cancel_booking/<%= order.vender._id %>?location=<%= encodeURIComponent(order.address) %>"
-                    method="post" style="margin-top:10px;">
+                  <form action="/user/cancel_booking/<%= order._id %>?location=<%= encodeURIComponent(order.address) %>" method="post"
+                    style="margin-top:10px;">
                     <% if (order.cancelAllowed) { %>
                       <button type="submit" onclick="loading()" class="cancel-button">Cancel</button>
                       <% } else { %>
-                        <button type="submit" disabled class="cancel-button">Cancel</button>
+                        <!-- use type="button" so it doesn't submit when disabled -->
+                        <button type="button" disabled class="cancel-button" title="Cancellation not allowed">Cancel</button>
                         <% } %>
                   </form>
           </div>
