@@ -393,6 +393,15 @@ exports.Postbooking = [
         return res.redirect('back');
       }
 
+      // ✅ Determine mealsCount for both Per Day and Per Month
+      // (0 if nothing selected, 1 if one selected, 2 if both selected)
+      let mealsCount = 0;
+      if (Array.isArray(time_type)) {
+        mealsCount = time_type.length;
+      } else if (time_type) {
+        mealsCount = 1;
+      }
+
       // ✅ Calculate totalAmount
       let calculatedTotal = 0;
       if (subscription_model === 'Per Day') {
@@ -404,12 +413,13 @@ exports.Postbooking = [
         }
 
         const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        const mealsCount = Array.isArray(time_type)
-          ? time_type.length
-          : (time_type ? 1 : 0);
-        calculatedTotal = days * Selectedvender.pricePerDay * mealsCount;
+        calculatedTotal = days * Selectedvender.pricePerDay * (mealsCount || 1);
       } else if (subscription_model === 'Per Month') {
-        calculatedTotal = Number(selectedMonths) * Selectedvender.pricePerMonth;
+        // halve price if only one meal selected
+        const perMonthBase = Selectedvender.pricePerMonth;
+        const pricePerMonth =
+          mealsCount === 1 ? perMonthBase / 2 : perMonthBase;
+        calculatedTotal = Number(selectedMonths) * pricePerMonth;
       }
 
       // ✅ Calculate startingDate & expireAt
@@ -452,8 +462,8 @@ exports.Postbooking = [
             : undefined,
         payment,
         totalAmount: calculatedTotal,
-        time_type:
-          subscription_model === 'Per Day' ? time_type : undefined,
+        // store time_type for both models now
+        time_type: time_type,
         number_of_months:
           subscription_model === 'Per Month' ? selectedMonths : undefined,
         expireAt,
@@ -480,39 +490,57 @@ exports.Postbooking = [
   },
 ];
 
-// ✅ POST CANCEL BOOKING
+// POST CANCEL BOOKING (updated)
 exports.postCancelBooking = async (req, res, next) => {
   if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
 
-  const venderId = req.params.venderId;
+  const orderId = req.params.orderId;
   const userId = req.session.user._id;
 
   try {
-    // Remove vendor from user's booked list
-    await User.findByIdAndUpdate(userId, { $pull: { booked: venderId } });
-
-    // Fetch vendor from User model
-    const venderh = await User.findById(venderId);
-    if (!venderh || venderh.userType !== 'vender') {
-      req.flash('error', 'Vendor not found');
+    // 1) Find the exact order and ensure it belongs to the logged-in user
+    const order = await Order.findOne({ _id: orderId, guest: userId });
+    if (!order) {
+      req.flash('error', 'Order not found');
       return res.redirect('/user/booked');
     }
 
-    // Delete related order
-    await Order.deleteOne({ guest: userId, vender: venderId });
+    const venderId = order.vender;
 
-    // Clean up related documents
-    await UserOption.deleteMany({ guest: userId, vendor: venderId });
-    await VenderOption.deleteMany({ guest: userId, vendorId: venderId });
-    // No need to delete Message since it's dynamic now
+    // 2) Delete this specific order
+    await Order.deleteOne({ _id: orderId });
+
+    // 3) Decrement vendor's order counter (optional, if you track it)
+    const vendor = await User.findById(venderId);
+    if (vendor) {
+      vendor.orders = Math.max(0, (vendor.orders || 1) - 1);
+      await vendor.save();
+    }
+
+    // 4) If user has no more orders with this vendor, remove vendor from user's booked list
+    const remainingOrdersForThisVendor = await Order.countDocuments({ guest: userId, vender: venderId });
+    if (remainingOrdersForThisVendor === 0) {
+      await User.findByIdAndUpdate(userId, { $pull: { booked: venderId } });
+    }
+
+    // 5) Clean up related option documents **for this order** (best if these docs store orderId)
+    // If your UserOption/VenderOption schemas include an orderId field, this will remove only those tied to this order:
+    await UserOption.deleteMany({ guest: userId, vendor: venderId, orderId: orderId }).catch(() => {});
+    await VenderOption.deleteMany({ guest: userId, vendorId: venderId, orderId: orderId }).catch(() => {});
+
+    // 5b) If your options documents DON'T have orderId yet and you must remove them,
+    // only delete them when there are no remaining orders (otherwise you'd remove options for other active bookings).
+    if (remainingOrdersForThisVendor === 0) {
+      await UserOption.deleteMany({ guest: userId, vendor: venderId }).catch(() => {});
+      await VenderOption.deleteMany({ guest: userId, vendorId: venderId }).catch(() => {});
+    }
 
     req.flash('success', 'Booking cancelled!');
-    res.redirect('/user/booked');
-
+    return res.redirect('/user/booked');
   } catch (err) {
     console.error('Cancel booking error:', err);
     req.flash('error', 'Something went wrong during cancellation');
-    res.redirect('/user/booked');
+    return res.redirect('/user/booked');
   }
 };
 
