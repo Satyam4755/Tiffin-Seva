@@ -279,6 +279,7 @@
 
 <img src="/IMG_3108.jpg" class="img2" alt="image">
 
+
 <div class="mainDabba">
   <div class="cards-container">
     <div class="card">
@@ -384,19 +385,22 @@
 
 
 <script>
+  // === Utility functions ===
   const pad = n => (n < 10 ? '0' + n : n);
-  function formatDateLocal(d) {
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
+  const formatDateLocal = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
+  // === Elements ===
   const totalElement = document.getElementById('totalAmount');
   const subscriptionRadios = document.getElementsByName('subscription_model');
   const startInput = document.getElementById('startingDate');
   const endInput = document.getElementById('endingDate');
   const totalAmount = document.getElementById('totalAmountInput');
   const display = document.getElementById('calculatedEndDate');
-  const monthButtons = document.querySelectorAll(".month-btn");
+  const monthButtons = document.querySelectorAll('.month-btn');
+  const payBtn = document.getElementById('payBtn');
+  const timeTypeCheckboxes = document.querySelectorAll('input[name="time_type"]');
 
+  // === Toggle visibility ===
   function toggleTimeOptions() {
     const isPerDay = document.getElementById('perday').checked;
     const isPerMonth = document.getElementById('permonth').checked;
@@ -408,8 +412,10 @@
 
     display.style.display = isPerMonth ? 'block' : 'none';
     calculateTotal();
+    checkCutoff();
   }
 
+  // === Total calculation ===
   function calculateTotal() {
     const perDay = Number(document.getElementById('perdayValue').value || 0);
     const perMonth = Number(document.getElementById('permonthValue').value || 0);
@@ -417,12 +423,9 @@
     const startDate = new Date(startInput.value);
     const endDate = new Date(endInput.value);
     const selectedMonths = Number(document.getElementById('selectedMonths').value || 0);
-
-    // how many meal types selected
     const timeSelections = document.querySelectorAll('input[name="time_type"]:checked').length;
 
     let total = 0;
-
     if (selectedModel === 'Per Day') {
       if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) {
         totalElement.textContent = 0;
@@ -430,25 +433,15 @@
         return;
       }
       const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-      total = diffDays * perDay * timeSelections; // perDay * days * lunch/dinner count
-    } 
-    else if (selectedModel === 'Per Month') {
+      total = diffDays * perDay * timeSelections;
+    } else if (selectedModel === 'Per Month') {
       if (!selectedMonths) {
         totalElement.textContent = 0;
         totalAmount.value = 0;
         return;
       }
-
-      // full price if both lunch & dinner, half price if only one selected
-      let pricePerMonth;
-      if (timeSelections === 1) {
-        pricePerMonth = perMonth / 2;
-      } else if (timeSelections >= 2) {
-        pricePerMonth = perMonth; 
-      } else {
-        pricePerMonth = 0; // nothing selected
-      }
-
+      let pricePerMonth = timeSelections === 1 ? perMonth / 2 :
+                          timeSelections >= 2 ? perMonth : 0;
       total = selectedMonths * pricePerMonth;
     }
 
@@ -456,6 +449,7 @@
     totalAmount.value = total;
   }
 
+  // === Highlight tiles ===
   function updateTileSelection() {
     document.getElementById('perDayTile').classList.toggle('selected', document.getElementById('perday').checked);
     document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth').checked);
@@ -463,34 +457,58 @@
     document.getElementById('dinnerTile').classList.toggle('selected', document.querySelector('input[value="dinner"]').checked);
   }
 
+  // === Cutoff logic ===
+  function checkCutoff() {
+    let allowed = true;
+    const selectedModel = Array.from(subscriptionRadios).find(r => r.checked)?.value;
+    if (selectedModel === 'Per Day') {
+      const selectedTimes = Array.from(timeTypeCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value.toLowerCase());
+
+      const now = new Date();
+      const hour = now.getHours();
+      const todayStr = formatDateLocal(now);
+      const selectedDate = startInput.value;
+
+      if (selectedDate === todayStr) {
+        if (selectedTimes.includes('lunch') && hour >= 11) allowed = false;
+        if (selectedTimes.includes('dinner') && hour >= 18) allowed = false;
+      }
+    }
+    payBtn.disabled = !allowed;
+    payBtn.title = allowed ? '' : 'Booking closed for today for selected meal time';
+  }
+
+  // === Event listeners ===
   document.querySelectorAll('input[name="subscription_model"]').forEach(input => {
     input.addEventListener('change', () => {
       toggleTimeOptions();
       updateTileSelection();
+      checkCutoff();
     });
   });
   document.querySelectorAll('input[name="time_type"]').forEach(input => {
     input.addEventListener('change', () => {
       updateTileSelection();
       calculateTotal();
+      checkCutoff();
     });
   });
-  startInput.addEventListener('change', calculateTotal);
+  startInput.addEventListener('change', () => { calculateTotal(); checkCutoff(); });
   endInput.addEventListener('change', calculateTotal);
 
   monthButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      monthButtons.forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
+    btn.addEventListener('click', () => {
+      monthButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
 
-      const months = parseInt(btn.getAttribute("data-months"));
-      document.getElementById("selectedMonths").value = months;
+      const months = parseInt(btn.getAttribute('data-months'));
+      document.getElementById('selectedMonths').value = months;
 
       const now = new Date();
       let start = new Date();
-      if (now.getHours() >= 11) {
-        start.setDate(start.getDate() + 1);
-      }
+      if (now.getHours() >= 11) start.setDate(start.getDate() + 1);
       start.setHours(0, 0, 0, 0);
 
       const end = new Date(start);
@@ -499,19 +517,25 @@
       startInput.value = formatDateLocal(start);
       endInput.value = formatDateLocal(end);
 
-      const options = { year: "numeric", month: "short", day: "numeric" };
-      display.textContent = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
-      display.style.display = "block";
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      display.textContent =
+        `Your meal time for this subscription will be from ${start.toLocaleDateString('en-GB', options)} to ${end.toLocaleDateString('en-GB', options)}`;
+      display.style.display = 'block';
 
       calculateTotal();
+      checkCutoff();
     });
   });
+
+  window.addEventListener('DOMContentLoaded', checkCutoff);
 </script>
 
+<!-- Razorpay Checkout -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-  document.getElementById('payBtn').addEventListener('click', async function(e) {
+  payBtn.addEventListener('click', async function (e) {
     e.preventDefault();
+    if (payBtn.disabled) return;
 
     const amount = Number(document.getElementById('totalAmountInput').value || 0);
     if (!amount || amount <= 0) {
@@ -519,10 +543,8 @@
       return;
     }
 
-    // 🔹 get key from hidden input
     const RAZORPAY_KEY_ID = document.getElementById('razorpayKey').value;
-
-    // create order on server
+    // 👇 hit your backend to create order
     const res = await fetch('/payment/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -530,22 +552,28 @@
     });
     const order = await res.json();
 
-    // open Razorpay Checkout
     const options = {
-      key: RAZORPAY_KEY_ID,        // ✅ from hidden input
+      key: RAZORPAY_KEY_ID,
       amount: order.amount,
       currency: order.currency,
       name: 'Tiffin Seva',
       description: 'Meal Subscription Booking',
       order_id: order.id,
-      handler: function (response){
-        fetch('/user/submit_booking/<%=vender._id%>', {
+      handler: function (response) {
+        // after successful payment → post booking to server
+        fetch(`/user/submit_booking/<%=vender._id%>`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
             address: document.getElementById('address').value,
+            subscription_model: Array.from(subscriptionRadios).find(r => r.checked)?.value,
+            startingDate: document.getElementById('startingDate').value,
+            endingDate: document.getElementById('endingDate').value,
+            time_type: Array.from(document.querySelectorAll('input[name="time_type"]:checked')).map(cb => cb.value),
+            selectedMonths: document.getElementById('selectedMonths').value,
+            payment: 'Paid via Razorpay',
             totalAmount: amount,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_order_id: response.razorpay_order_id,
