@@ -340,7 +340,7 @@ exports.booking = async (req, res, next) => {
 
 // POST BOOKING
 exports.Postbooking = [
-  // ✅ Phone validation
+  // Phone validation
   check('phone')
     .isNumeric()
     .withMessage('Phone number should be numeric')
@@ -348,38 +348,50 @@ exports.Postbooking = [
     .withMessage('Phone number should be 10 digits long'),
 
   async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      req.flash('error', errors.array()[0].msg);
-      return res.redirect('back');
-    }
-
-    if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
-
-    const venderId = req.params.venderId;
-    const {
-      name,
-      phone,
-      subscription_model,
-      startingDate,
-      endingDate,
-      payment,
-      time_type,
-      selectedMonths,
-      address,
-    } = req.body;
+    const wantsJSON = req.headers['content-type'] && req.headers['content-type'].includes('application/json');
 
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        if (wantsJSON) return res.status(400).json({ success: false, message: errors.array()[0].msg });
+        req.flash('error', errors.array()[0].msg);
+        return res.redirect('back');
+      }
+
+      if (!req.isLogedIn || !req.session.user) {
+        if (wantsJSON) return res.status(401).json({ success: false, message: 'Login required' });
+        return res.redirect('/login');
+      }
+
+      const venderId = req.params.venderId;
+
+      // accept both form-urlencoded and JSON bodies
+      const {
+        name,
+        phone,
+        subscription_model,
+        startingDate,
+        endingDate,
+        payment,
+        time_type,
+        selectedMonths,
+        address,
+        totalAmount, // from frontend
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature
+      } = req.body;
+
       const guestUser = await User.findById(req.session.user._id);
       const Selectedvender = await User.findById(venderId);
 
-      // ✅ Vendor check
       if (!Selectedvender || Selectedvender.userType !== 'vender') {
+        if (wantsJSON) return res.status(404).json({ success: false, message: 'Vendor not found' });
         req.flash('error', 'Vendor not found');
         return res.redirect('back');
       }
 
-      // ✅ Address verification
+      // Address verification (same as before)
       const vendorLocation = Selectedvender.location || '';
       const locationKeywords = vendorLocation
         .toLowerCase()
@@ -387,72 +399,97 @@ exports.Postbooking = [
         .map(loc => loc.trim())
         .filter(loc => loc.length > 0);
 
-      const userAddress = address.toLowerCase();
-      const isMatch = locationKeywords.some(loc => userAddress.includes(loc));
-
+      const userAddress = (address || '').toLowerCase();
+      const isMatch = locationKeywords.length === 0 ? true : locationKeywords.some(loc => userAddress.includes(loc));
       if (!isMatch) {
-        req.flash(
-          'error',
-          `This vendor is only available for addresses under: "${vendorLocation}"`
-        );
+        if (wantsJSON) return res.status(400).json({ success: false, message: `This vendor is only available for addresses under: "${vendorLocation}"` });
+        req.flash('error', `This vendor is only available for addresses under: "${vendorLocation}"`);
         return res.redirect('back');
       }
 
-      // ✅ Determine mealsCount for both Per Day and Per Month
-      // (0 if nothing selected, 1 if one selected, 2 if both selected)
-      let mealsCount = 0;
-      if (Array.isArray(time_type)) {
-        mealsCount = time_type.length;
-      } else if (time_type) {
-        mealsCount = 1;
-      }
+      // Normalize time_type to array
+      let timeTypeArray = [];
+      if (!time_type) timeTypeArray = [];
+      else if (Array.isArray(time_type)) timeTypeArray = time_type;
+      else timeTypeArray = [time_type];
 
-      // ✅ Calculate totalAmount
+      const mealsCount = timeTypeArray.length || 0;
+
+      // Recalculate total server-side (prevent tampering)
       let calculatedTotal = 0;
       if (subscription_model === 'Per Day') {
         const start = new Date(startingDate);
         const end = new Date(endingDate);
         if (isNaN(start) || isNaN(end) || end < start) {
+          if (wantsJSON) return res.status(400).json({ success: false, message: 'Invalid date selection' });
           req.flash('error', 'Invalid date selection');
           return res.redirect('back');
         }
-
         const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        calculatedTotal = days * Selectedvender.pricePerDay * (mealsCount || 1);
+        calculatedTotal = days * (Selectedvender.pricePerDay || 0) * (mealsCount || 1);
       } else if (subscription_model === 'Per Month') {
-        // halve price if only one meal selected
-        const perMonthBase = Selectedvender.pricePerMonth;
-        const pricePerMonth =
-          mealsCount === 1 ? perMonthBase / 2 : perMonthBase;
-        calculatedTotal = Number(selectedMonths) * pricePerMonth;
+        const perMonthBase = Number(Selectedvender.pricePerMonth || 0);
+        const pricePerMonth = mealsCount === 1 ? perMonthBase / 2 : perMonthBase;
+        calculatedTotal = Number(selectedMonths || 0) * pricePerMonth;
+      } else {
+        // missing subscription model
+        if (wantsJSON) return res.status(400).json({ success: false, message: 'Subscription model required' });
+        req.flash('error', 'Subscription model required');
+        return res.redirect('back');
       }
 
-      // ✅ Calculate startingDate & expireAt
+      // if frontend passed totalAmount, ensure it matches calculatedTotal
+      if (typeof totalAmount !== 'undefined' && Number(totalAmount) !== Number(calculatedTotal)) {
+        // don't allow mismatch
+        if (wantsJSON) return res.status(400).json({ success: false, message: 'Total amount mismatch' });
+        req.flash('error', 'Total amount mismatch');
+        return res.redirect('back');
+      }
+
+      // Compute startingDateForOrder & expireAt
       let startDateForOrder;
       let expireAt;
 
       if (subscription_model === 'Per Month') {
-        // 👇 apply 11 AM rule for monthly subscriptions
         const now = new Date();
         let start = new Date();
-        if (now.getHours() >= 11) {
-          // after 11AM start from next day
-          start.setDate(start.getDate() + 1);
-        }
+        // apply 11 AM rule for monthly subscriptions (same as your logic)
+        if (now.getHours() >= 11) start.setDate(start.getDate() + 1);
         start.setHours(0, 0, 0, 0);
         startDateForOrder = start;
-
-        expireAt = new Date(
-          start.getTime() + Number(selectedMonths) * 30 * 24 * 60 * 60 * 1000
-        );
-      } else if (subscription_model === 'Per Day') {
-        startDateForOrder = new Date(startingDate);
-        expireAt = new Date(
-          new Date(endingDate).setDate(new Date(endingDate).getDate() + 1)
-        );
+        expireAt = new Date(start.getTime() + Number(selectedMonths || 0) * 30 * 24 * 60 * 60 * 1000);
+      } else { // Per Day
+        const start = new Date(startingDate);
+        const end = new Date(endingDate);
+        startDateForOrder = start;
+        // expireAt = end + 1 day (so TTL removes after last day)
+        expireAt = new Date(end);
+        expireAt.setDate(expireAt.getDate() + 1);
       }
 
-      // ✅ Create new order
+      // Verify Razorpay signature (if present)
+      let paymentStatus = payment || 'Pending';
+      if (razorpay_payment_id && razorpay_order_id && razorpay_signature) {
+        const crypto = require('crypto');
+        const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+          .update(razorpay_order_id + '|' + razorpay_payment_id)
+          .digest('hex');
+
+        if (generatedSignature !== razorpay_signature) {
+          if (wantsJSON) return res.status(400).json({ success: false, message: 'Payment verification failed' });
+          req.flash('error', 'Payment verification failed');
+          return res.redirect('back');
+        }
+
+        paymentStatus = 'Paid';
+      } else {
+        // If you expect payment to be done via Razorpay always, reject here.
+        // For now we proceed (you can enforce paid-only if you want).
+        // If you want to force Razorpay, uncomment below:
+        // if (wantsJSON) return res.status(400).json({ success:false, message:'Payment not completed' });
+      }
+
+      // Create the Order
       const newOrder = new Order({
         guest: guestUser._id,
         vender: Selectedvender._id,
@@ -461,38 +498,39 @@ exports.Postbooking = [
         address,
         subscription_model,
         startingDate: startDateForOrder,
-        endingDate:
-          subscription_model === 'Per Day'
-            ? new Date(endingDate)
-            : undefined,
-        payment,
+        endingDate: subscription_model === 'Per Day' ? new Date(endingDate) : undefined,
+        payment: paymentStatus,
         totalAmount: calculatedTotal,
-        // store time_type for both models now
-        time_type: time_type,
-        number_of_months:
-          subscription_model === 'Per Month' ? selectedMonths : undefined,
+        time_type: timeTypeArray,
+        number_of_months: subscription_model === 'Per Month' ? selectedMonths : undefined,
         expireAt,
+        razorpay_payment_id: razorpay_payment_id || undefined,
+        razorpay_order_id: razorpay_order_id || undefined,
+        razorpay_signature: razorpay_signature || undefined
       });
 
       await newOrder.save();
 
-      // ✅ Increment vendor orders
+      // Update vendor stats and user booked
       Selectedvender.orders = (Selectedvender.orders || 0) + 1;
       await Selectedvender.save();
 
-      // ✅ Add to user's booked list if not already included
       if (!guestUser.booked.some(id => id.toString() === venderId)) {
         guestUser.booked.push(venderId);
         await guestUser.save();
       }
 
-      res.redirect('/user/submit_booking');
+      // respond
+      if (wantsJSON) return res.json({ success: true, message: 'Booking created' });
+      return res.redirect('/user/submit_booking');
     } catch (err) {
       console.error('❌ Booking Error:', err);
+      const wantsJSON = req.headers['content-type'] && req.headers['content-type'].includes('application/json');
+      if (wantsJSON) return res.status(500).json({ success: false, message: 'Something went wrong during booking' });
       req.flash('error', 'Something went wrong during booking');
-      res.redirect('back');
+      return res.redirect('back');
     }
-  },
+  }
 ];
 
 // POST CANCEL BOOKING (updated)
