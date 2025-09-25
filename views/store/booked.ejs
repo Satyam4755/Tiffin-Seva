@@ -1,556 +1,349 @@
-<%- include('../partials/head') %>
-<%- include('../partials/background') %>
-<style> 
-  .headings {
-    margin: 10px auto 20px auto;
-    text-align: center;
-    background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
-    padding: 20px 25px;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 40%;
-    max-height: 7%;
-  }
+<%-include('../partials/head')%>
+<%-include('../partials/background')%>
+    
+<style>
+  /* 🌸 Global Styling */
+body {
+  background: linear-gradient(135deg, #fff8f0 0%, #fce4ec 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
-  .headings h1 {
-    font-size: 2em;
-    color: #2c3e50;
-    margin: 0;
-  }
+h1, h2 {
+  text-align: center;
+  color: #6a1b9a;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  animation: bounce 2s infinite;
+}
 
-  .headings h2 {
-    font-size: 1.2em;
-    color: #7f8c8d;
-    margin-top: 10px;
-    font-weight: 500;
-  }
+.badaDabba {
+  margin-bottom: 15%;
+  position: relative;
+  padding-top: 40px;
+}
 
-  .mainDabba {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 30px;
-    padding: 20px;
-    max-width: 100%;
-    margin: 0 auto 60px auto;
-    animation: fadeIn 1s ease;
-  }
+/* Decorative Images */
+.img1, .img2 {
+  position: absolute;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.8;
+}
 
-  .cards-container,
-  .booking-cards-container {
-    flex: 1 1 320px;
-    max-width: 420px;
+.img1 {
+  top: 10%;
+  left: 3%;
+  width: 20vw;
+  aspect-ratio: 1/1;
+  border-radius: 50% 40% 60% 40% / 40% 50% 50% 60%;
+  transition: transform 0.3s ease;
+}
+
+.img2 {
+  top: 40%;
+  right: 3%;
+  width: 22vw;
+  aspect-ratio: 1/1;
+  border-radius: 45% 55% 65% 35% / 50% 30% 70% 60%;
+  transition: transform 0.4s ease;
+}
+
+.img1:hover, .img2:hover {
+  transform: scale(1.05);
+}
+
+/* Cards Container */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  gap: 25px;
+}
+
+/* Individual Card */
+.card {
+  display: flex;
+  flex-direction: row; /* image left, content right on desktop */
+  gap: 20px;
+  width: 620px;
+  border-radius: 18px;
+  background: #f9a4a424;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 24%);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Image container */
+.card .img-container {
+  flex: 0 0 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card .img-container img {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .img-container img {
+  transform: scale(1.1);
+}
+
+/* Card content */
+.card .content {
+  flex: 1;
+  padding: 18px;
+  text-align: left;
+}
+
+.card h3 {
+  margin: 10px 0;
+  color: #8e24aa;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.card p {
+  margin: 6px 0;
+  color: #6a1b9a;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Booked Label */
+.card h3.booked {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #d81b60;
+  padding: 5px 15px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Cancel Button */
+.card button {
+  background-color: #d81b60;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: 10px;
+}
+
+.card button:hover {
+  background-color: #ad1457;
+  transform: scale(1.05);
+}
+
+/* Cancel Notes */
+.cancel-note {
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.cancel-note.allowed {
+  color: #388e3c;
+}
+
+.cancel-note.not-allowed {
+  color: #d32f2f;
+}
+
+/* Cancel Button */
+.cancel-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #f44336;
+  cursor: pointer;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f;
+}
+
+.cancel-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cards-container {
+    flex-direction: column;
+    align-items: center;
   }
 
   .card {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.4s ease, box-shadow 0.3s ease;
-  }
-
-  .card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
-  }
-
-  .card img {
+    flex-direction: column; /* stack image & content vertically */
     width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    transition: transform 0.4s ease;
   }
 
-  .card:hover img {
-    transform: scale(1.05);
-  }
-
-  .content {
-    padding: 15px;
-  }
-
-  .content h3 {
-    color: #ff4e74;
-    margin-bottom: 8px;
-    font-size: 1.3em;
-  }
-
-  .month-btn.selected {
-  background-color: #ffe6ec;
-  border-color: #ff4e74;
-  color: #d6336c;
-}
-  .content p {
-    margin: 5px 0;
-    color: #555;
-    font-size: 0.95em;
-  }
-  .img1 {
-    position: absolute;
-    top: 15%;
-    right: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 42% 58% 65% 35% / 40% 30% 70% 60%;
-    transition: transform 0.4s ease;
-    z-index: -1;
-    }
-    .img2 {
-    position: absolute;
-    top: 40%;
-    left: 2.5%;
-    width: 25vw;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 100% 50% 100% 50% / 60% 40% 60% 40%;
-    transition: transform 0.3s ease;
-    z-index: -1;
-}
-
-  form {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    animation: fadeInUp 1s ease;
-  }
-
-  form h2 {
-    text-align: center;
-    color: #ff4e74;
-    margin-bottom: 20px;
-    font-size: 1.4em;
-  }
-
-  label {
-    font-weight: 500;
-    display: block;
-    margin-bottom: 6px;
-    color: #333;
-  }
-
-  input, select {
+  .card .img-container {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 14px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    transition: border-color 0.3s ease;
-    font-family: inherit;
-    font-size: 0.95em;
+    margin-bottom: 15px;
   }
 
-  input:focus, select:focus {
-    border-color: #ff4e74;
-    outline: none;
+
+  .img1, .img2 {
+    display: none;
   }
 
-  button {
-    width: 100%;
-    padding: 12px;
-    background-color: #ff4e74;
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-weight: bold;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  h1, h2 {
+    font-size: 1.5rem;
   }
-
-  button:hover {
-    background-color: #e53963;
-    transform: scale(1.05);
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 768px) {
-    .mainDabba {
-      flex-direction: row;
-      padding: 15px;
-    }
-    form{
-      width: 87%;
-      padding: 20px;
-    }
-    input, select {
-      width: 90%;
-    }
-
-    .headings {
-      padding: 15px 20px;
-    }
-
-    .cards-container, .booking-cards-container {
-      max-width: 100%;
-    }
-  }
-
-  body {
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  /* Custom Radio Tiles */
-.radio-tile-group {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
 }
-
-.radio-tile {
-  flex: 1 1 45%;
-  background: #fff;
-  border: 2px solid #ccc;
-  border-radius: 12px;
-  padding: 14px 18px;
-  text-align: center;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.3s ease;
-  position: relative;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-}
-
-.radio-tile:hover {
-  border-color: #ff4e74;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-}
-
-.radio-tile input[type="checkbox"],
-.radio-tile input[type="radio"] {
-  display: none;
-}
-
-.radio-tile.selected {
-  border-color: #ff4e74;
-  background-color: #ffe6ec;
-  color: #d6336c;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-.month-buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin: 15px 0;
-}
-
-.month-btn {
-  padding: 10px;
-  border-radius: 8px;
-  background-color: #eee;
-  border: 2px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.month-btn:hover {
-  background-color: #ffe6ec;
-  border-color: #ff4e74;
-}
-
-
-.badaDabba{
-        margin-bottom: 15%;
-    }
 </style>
 
-<%- include('../partials/nav') %>
-
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
+<%-include('../partials/nav')%>
+<h2 style=" color: #d81b60; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); margin-bottom: 30px; animation: bounce 7.5s infinite;">
+    🌸 Your Booked Vender's Meal 🌸
+</h2>
 
 
 <div class="badaDabba">
+  <img src="/IMG_3133.jpg" class="img1" alt="image">
+  <img src="/IMG_3132.jpg" class="img2" alt="image">
 
-<img src="/IMG_3134.jpg" class="img1" alt="image">
-
-<img src="/IMG_3108.jpg" class="img2" alt="image">
-
-<div class="mainDabba">
   <div class="cards-container">
-    <div class="card">
-      <a id="link" href="/user/vender-list/<%= vender._id %>" style="text-decoration: none; color: black;">
-        <img src="<%= vender.bannerImage || '/default.jpg' %>" alt="Vendor Banner" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
-        <div class="content">
-          <h3><%= vender.serviceName %></h3>
-          <p><strong>Location:</strong> <%= vender.location %></p>
-          <p><strong>Price Per Day:</strong> ₹<%= vender.pricePerDay %></p>
-          <p><strong>Price Per Month:</strong> ₹<%= vender.pricePerMonth %></p>
-          <p>
-            <strong>Ratings:</strong>
-            <% const fullStars = Math.floor(vender.averageRating || 0); %>
-            <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
-            <span style="margin-left: 5px; font-weight: 700; color: red;">
-              (<%= vender.averageRating || 0 %>/5)
-            </span>
-          </p>
+    <% orders.forEach(order => { %>
+      <% if (order.vender) { %>
+        <div class="card">
+          <div class="img-container">
+            <!-- ✅ Banner Image -->
+            <img src="<%= order.vender.bannerImage || '/default.jpg' %>" 
+                 alt="Vendor Banner" >
+          </div>
+
+          <div class="content">
+            <!-- ✅ Vendor Service Name -->
+            <h3><%= order.vender.serviceName %></h3>
+
+            <!-- ✅ Subscription & Duration -->
+            <p><strong>Subscription:</strong> <%= order.subscription_model || 'N/A' %></p>
+            <p><strong>Duration:</strong>
+              <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
+                <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
+                (<% if (order.startingDate) { 
+                     const start = new Date(order.startingDate); 
+                     const end = new Date(start);
+                     end.setDate(start.getDate() + 30 * order.number_of_months); %>
+                     <%= start.toDateString() %> - <%= end.toDateString() %>
+                   <% } else { %>
+                     N/A
+                   <% } %>)
+              <% } else { %>
+                <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
+                <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
+              <% } %>
+            </p>
+
+            <!-- ✅ Delivery Address -->
+            <p><strong>Delivering to:</strong> <%= order.address || order.vender.location || 'Not specified' %></p>
+
+            <!-- ✅ Payment Mode -->
+            <p><strong>Payment:</strong> <%= order.payment || 'N/A' %></p>
+
+            <!-- ✅ Total Amount -->
+            <p><strong>Total Amount:</strong> ₹<%= order.totalAmount || 0 %></p>
+
+            <!-- ✅ Vendor Price Info (optional, can remove if not needed) -->
+            <p><strong>Vendor Price Per Day:</strong> ₹<%= order.vender.pricePerDay %></p>
+            <p><strong>Vendor Price Per Month:</strong> ₹<%= order.vender.pricePerMonth %></p>
+
+            <!-- ✅ Ratings -->
+            <p><strong>Ratings:</strong>
+              <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
+              <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
+              <span style="margin-left: 5px; font-weight: 700; color: red;">
+                (<%= order.vender.averageRating || 0 %>/5)
+              </span>
+            </p>
+
+            <!-- ✅ Booked Label -->
+            <h3 class="booked">Booked</h3>
+
+            <!-- ✅ Show Note -->
+            <% if (order.cancelAllowed) { %>
+              <p class="cancel-note allowed">
+                <%= order.cancelNote %>
+              </p>
+              <% } else { %>
+                <p class="cancel-note not-allowed">
+                  <%= order.cancelNote %>
+                </p>
+                <% } %>
+            
+                  <!-- ✅ Cancel Booking Button -->
+                  <form action="/user/cancel_booking/<%= order._id %>?location=<%= encodeURIComponent(order.address) %>" method="post"
+                    style="margin-top:10px;">
+                    <% if (order.cancelAllowed) { %>
+                      <button type="submit" onclick="loading()" class="cancel-button">Cancel</button>
+                      <% } else { %>
+                        <!-- use type="button" so it doesn't submit when disabled -->
+                        <button type="button" disabled class="cancel-button" title="Cancellation not allowed">Cancel</button>
+                        <% } %>
+                  </form>
+          </div>
         </div>
-      </a>
-    </div>
-  </div>
-
-  <div class="booking-cards-container">
-    <form id="bookingForm">
-      <%- include('../partials/errorHandel') %>
-      <h2>Vendor Booking</h2>
-
-      <input type="hidden" name="venderId" value="<%= vender._id %>">
-      <label for="name">Full Name</label>
-      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
-
-      <label for="phone">Phone Number</label>
-      <input type="tel" id="phone" name="phone" placeholder="Enter your phone number (10 digits)" pattern="[0-9]{10}" required>
-
-      <label for="address">Your Address</label>
-      <input type="text" name="address" id="address" value="<%= user.location || 'No address saved' %>" readonly style="background:#f1f1f1; cursor:not-allowed;">
-      <p style="font-size: 13px; color: #6c5ce7; margin-top: 4px;">
-        This is your saved address from profile.
-      </p>
-
-      <div class="radio-tile-group">
-        <label class="radio-tile" id="perDayTile">
-          <input type="radio" id="perday" name="subscription_model" value="Per Day" onclick="toggleTimeOptions()">
-          Per Day
-        </label>
-        <label class="radio-tile" id="perMonthTile">
-          <input type="radio" id="permonth" name="subscription_model" value="Per Month" onclick="toggleTimeOptions()">
-          Per Month
-        </label>
-      </div>
-
-      <div id="timeOptions" style="display: none;">
-        <div class="radio-tile-group">
-          <label class="radio-tile" id="lunchTile">
-            <input type="checkbox" name="time_type" value="lunch" onchange="updateTileSelection(); calculateTotal();"> Lunch
-          </label>
-          <label class="radio-tile" id="dinnerTile">
-            <input type="checkbox" name="time_type" value="dinner" onchange="updateTileSelection(); calculateTotal();"> Dinner
-          </label>
-        </div>
-      </div>
-
-      <div id="dateInputs" style="display:none;">
-        <label for="startingDate">Starting Date</label>
-        <input type="date" id="startingDate" name="startingDate" min="<%= new Date().toISOString().split('T')[0] %>">
-        <label for="endingDate">Ending Date</label>
-        <input type="date" id="endingDate" name="endingDate">
-      </div>
-
-      <div id="monthGrid" style="display: none;">
-        <label>Select Number of Months</label>
-        <div class="month-buttons">
-          <% for (let i = 1; i <= 12; i++) { %>
-            <button type="button" class="month-btn" data-months="<%= i %>"><%= i %></button>
-          <% } %>
-        </div>
-      </div>
-      <input type="hidden" id="selectedMonths" name="selectedMonths">
-
-      <input type="hidden" id="perdayValue" value="<%= vender.pricePerDay %>">
-      <input type="hidden" id="permonthValue" value="<%= vender.pricePerMonth %>">
-      <input type="hidden" name="totalAmount" id="totalAmountInput">
-      <input type="hidden" id="razorpayKey" value="<%= RAZORPAY_KEY_ID %>">
-
-      <h3 style="color: #d6336c; text-align: center;">Total Amount: ₹<span id="totalAmount">0</span></h3>
-      <button class="submit" type="button" id="payBtn">Book & Pay Now</button>
-    </form>
+      <% } %>
+    <% }) %>
   </div>
 </div>
 
-
-<script>
-  const pad = n => (n < 10 ? '0' + n : n);
-  function formatDateLocal(d) {
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-
-  const totalElement = document.getElementById('totalAmount');
-  const subscriptionRadios = document.getElementsByName('subscription_model');
-  const startInput = document.getElementById('startingDate');
-  const endInput = document.getElementById('endingDate');
-  const totalAmount = document.getElementById('totalAmountInput');
-  const display = document.getElementById('calculatedEndDate');
-  const monthButtons = document.querySelectorAll(".month-btn");
-
-  function toggleTimeOptions() {
-    const isPerDay = document.getElementById('perday').checked;
-    const isPerMonth = document.getElementById('permonth').checked;
-
-    document.getElementById('timeOptions').style.display = (isPerDay || isPerMonth) ? 'block' : 'none';
-    document.getElementById('dateInputs').style.display = isPerDay ? 'block' : 'none';
-    if (document.getElementById('monthGrid'))
-      document.getElementById('monthGrid').style.display = isPerMonth ? 'block' : 'none';
-
-    display.style.display = isPerMonth ? 'block' : 'none';
-    calculateTotal();
-  }
-
-  function calculateTotal() {
-    const perDay = Number(document.getElementById('perdayValue').value || 0);
-    const perMonth = Number(document.getElementById('permonthValue').value || 0);
-    const selectedModel = Array.from(subscriptionRadios).find(r => r.checked)?.value;
-    const startDate = new Date(startInput.value);
-    const endDate = new Date(endInput.value);
-    const selectedMonths = Number(document.getElementById('selectedMonths').value || 0);
-
-    // how many meal types selected
-    const timeSelections = document.querySelectorAll('input[name="time_type"]:checked').length;
-
-    let total = 0;
-
-    if (selectedModel === 'Per Day') {
-      if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) {
-        totalElement.textContent = 0;
-        totalAmount.value = 0;
-        return;
-      }
-      const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-      total = diffDays * perDay * timeSelections; // perDay * days * lunch/dinner count
-    } 
-    else if (selectedModel === 'Per Month') {
-      if (!selectedMonths) {
-        totalElement.textContent = 0;
-        totalAmount.value = 0;
-        return;
-      }
-
-      // full price if both lunch & dinner, half price if only one selected
-      let pricePerMonth;
-      if (timeSelections === 1) {
-        pricePerMonth = perMonth / 2;
-      } else if (timeSelections >= 2) {
-        pricePerMonth = perMonth; 
-      } else {
-        pricePerMonth = 0; // nothing selected
-      }
-
-      total = selectedMonths * pricePerMonth;
-    }
-
-    totalElement.textContent = total;
-    totalAmount.value = total;
-  }
-
-  function updateTileSelection() {
-    document.getElementById('perDayTile').classList.toggle('selected', document.getElementById('perday').checked);
-    document.getElementById('perMonthTile').classList.toggle('selected', document.getElementById('permonth').checked);
-    document.getElementById('lunchTile').classList.toggle('selected', document.querySelector('input[value="lunch"]').checked);
-    document.getElementById('dinnerTile').classList.toggle('selected', document.querySelector('input[value="dinner"]').checked);
-  }
-
-  document.querySelectorAll('input[name="subscription_model"]').forEach(input => {
-    input.addEventListener('change', () => {
-      toggleTimeOptions();
-      updateTileSelection();
-    });
-  });
-  document.querySelectorAll('input[name="time_type"]').forEach(input => {
-    input.addEventListener('change', () => {
-      updateTileSelection();
-      calculateTotal();
-    });
-  });
-  startInput.addEventListener('change', calculateTotal);
-  endInput.addEventListener('change', calculateTotal);
-
-  monthButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      monthButtons.forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-
-      const months = parseInt(btn.getAttribute("data-months"));
-      document.getElementById("selectedMonths").value = months;
-
-      const now = new Date();
-      let start = new Date();
-      if (now.getHours() >= 11) {
-        start.setDate(start.getDate() + 1);
-      }
-      start.setHours(0, 0, 0, 0);
-
-      const end = new Date(start);
-      end.setDate(start.getDate() + (30 * months));
-
-      startInput.value = formatDateLocal(start);
-      endInput.value = formatDateLocal(end);
-
-      const options = { year: "numeric", month: "short", day: "numeric" };
-      display.textContent = `Your meal time for this subscription will be from ${start.toLocaleDateString("en-GB", options)} to ${end.toLocaleDateString("en-GB", options)}`;
-      display.style.display = "block";
-
-      calculateTotal();
-    });
-  });
-</script>
-
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-  document.getElementById('payBtn').addEventListener('click', async function(e) {
-    e.preventDefault();
-
-    const amount = Number(document.getElementById('totalAmountInput').value || 0);
-    if (!amount || amount <= 0) {
-      alert('Please select a valid plan first');
-      return;
-    }
-
-    // 🔹 get key from hidden input
-    const RAZORPAY_KEY_ID = document.getElementById('razorpayKey').value;
-
-    // create order on server
-    const res = await fetch('/payment/create-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount })
-    });
-    const order = await res.json();
-
-    // open Razorpay Checkout
-    const options = {
-      key: RAZORPAY_KEY_ID,        // ✅ from hidden input
-      amount: order.amount,
-      currency: order.currency,
-      name: 'Tiffin Seva',
-      description: 'Meal Subscription Booking',
-      order_id: order.id,
-      handler: function (response){
-        fetch('/user/submit_booking/<%=vender._id%>', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: document.getElementById('name').value,
-            phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value,
-            totalAmount: amount,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_signature: response.razorpay_signature
-          })
-        }).then(() => {
-          window.location.href = '/user/submit_booking';
-        });
-      },
-      theme: { color: '#3399cc' }
-    };
-    const rzp = new Razorpay(options);
-    rzp.open();
-  });
-</script>
-  <%-include('../partials/loading')%>
-   
+<%- include('../partials/loading') %>
 </body>
 </html>
- 
