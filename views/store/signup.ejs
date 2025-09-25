@@ -190,18 +190,15 @@
       <%- include('../partials/errorHandel') %>
 
       <!-- Profile Picture -->
-<div class="input-group">
-  <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
-  <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
-
-  <!-- Hidden fields to retain uploaded image if validation fails -->
-  <input type="hidden" name="oldProfilePicture" value="<%= oldInput?.profilePicture || '' %>">
-<input type="hidden" name="oldProfilePicturePublicId" value="<%= oldInput?.profilePicturePublicId || '' %>">
-
-  <% if (oldInput?.profilePicture) { %>
-    <img src="<%= oldInput.profilePicture %>" alt="Profile Preview" style="max-height:100px; margin-top:10px;">
-  <% } %>
-</div>
+      <div class="input-group">
+        <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
+        <label style="color: maroon; font-weight: 800;" for="profilePicture">Profile Picture</label>
+        <input type="hidden" name="oldProfilePicture" value="<%= oldInput?.profilePicture || '' %>">
+        <input type="hidden" name="oldProfilePicturePublicId" value="<%= oldInput?.profilePicturePublicId || '' %>">
+        <% if (oldInput?.profilePicture) { %>
+          <img src="<%= oldInput.profilePicture %>" alt="Profile Preview" style="max-height:100px; margin-top:10px;">
+        <% } %>
+      </div>
 
       <h3>Are you Customer or Vendor?</h3>
       <div class="input-group">
@@ -212,7 +209,9 @@
             <option value="vender" <%= (oldInput?.userType==='vender') ? 'selected' : '' %>>Vendor</option>
           </select>
         <% } else { %>
-          <select id="userType" name="userType" disabled>
+          <!-- hidden keeps value in form post -->
+          <input type="hidden" name="userType" value="<%= user.userType %>">
+          <select id="userType" disabled>
             <option value="<%= user.userType %>" selected>
               <%= user.userType.charAt(0).toUpperCase() + user.userType.slice(1) %>
             </option>
@@ -227,7 +226,6 @@
         <input type="hidden" id="lat" name="lat" value="<%= editing ? user.lat : (oldInput?.lat || '') %>" />
         <input type="hidden" id="lng" name="lng" value="<%= editing ? user.lng : (oldInput?.lng || '') %>" />
       </div>
-      
       <div class="input-group" style="margin-top:6px; text-align:center;">
         <button type="button" id="useCurrentBtn" class="btn btn-secondary">
           Use my current location
@@ -236,35 +234,27 @@
 
       <!-- Vendor-only fields -->
       <div id="vendorFields" style="display:none;">
-        <!-- Vendor Banner -->
-<div class="input-group">
-  <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
-  <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
-
-  <!-- Hidden fields -->
-  <input type="hidden" name="oldBannerImage" value="<%= oldInput?.bannerImage || '' %>">
-<input type="hidden" name="oldBannerImagePublicId" value="<%= oldInput?.bannerImagePublicId || '' %>">
-
-  <% if (oldInput?.bannerImage) { %>
-    <img src="<%= oldInput.bannerImage %>" alt="Banner Preview" style="max-height:100px; margin-top:10px;">
-  <% } %>
-</div>
-
+        <div class="input-group">
+          <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
+          <label style="color: maroon; font-weight: 800;" for="bannerImage">Banner Image</label>
+          <input type="hidden" name="oldBannerImage" value="<%= oldInput?.bannerImage || '' %>">
+          <input type="hidden" name="oldBannerImagePublicId" value="<%= oldInput?.bannerImagePublicId || '' %>">
+          <% if (oldInput?.bannerImage) { %>
+            <img src="<%= oldInput.bannerImage %>" alt="Banner Preview" style="max-height:100px; margin-top:10px;">
+          <% } %>
+        </div>
         <div class="input-group">
           <input type="text" id="serviceName" name="serviceName" placeholder="Enter your Service Name"
             value="<%= editing ? user.serviceName : (oldInput?.serviceName || '') %>" />
         </div>
-
         <div class="input-group">
           <input type="number" id="serviceRadius" name="serviceRadius" min="1" placeholder="Max delivery area in km"
             value="<%= editing ? user.serviceRadius : (oldInput?.serviceRadius || '') %>" />
         </div>
-
         <div class="input-group">
           <input type="number" id="pricePerDay" name="pricePerDay" min="0" placeholder="Price per Day"
             value="<%= editing ? user.pricePerDay : (oldInput?.pricePerDay || '') %>" />
         </div>
-
         <div class="input-group">
           <input type="number" id="pricePerMonth" name="pricePerMonth" min="0" placeholder="Price per Month"
             value="<%= editing ? user.pricePerMonth : (oldInput?.pricePerMonth || '') %>" />
@@ -276,62 +266,43 @@
         <input type="text" id="firstName" name="firstName" placeholder="firstName"
           value="<%= editing ? user.firstName : (oldInput?.firstName || '') %>" required />
       </div>
-
       <!-- Last Name -->
       <div class="input-group">
         <input type="text" id="lastName" name="lastName" placeholder="lastName"
           value="<%= editing ? user.lastName : (oldInput?.lastName || '') %>" required />
       </div>
-
       <!-- DOB -->
       <div class="input-group">
         D.O.B
         <input type="date" id="dob" name="dob"
           value="<%= editing && user.dob ? user.dob.toISOString().split('T')[0] : (oldInput?.dob || '') %>" required />
       </div>
-
       <!-- Email -->
-<div class="input-group">
-  <input 
-    type="email" 
-    id="email" 
-    name="email"
-    placeholder="Enter your email"
-    value="<%= editing ? user.email : (oldInput?.email || '') %>" 
-    <%= editing ? 'disabled' : 'required' %>
-  />
-</div>
+      <div class="input-group">
+        <input type="email" id="email" name="email"
+          placeholder="Enter your email"
+          value="<%= editing ? user.email : (oldInput?.email || '') %>"
+          <%= editing ? 'disabled' : 'required' %> />
+      </div>
 
       <% if (!editing) { %>
-  <!-- Password -->
-  <div class="input-group">
-    <input 
-      type="password" 
-      id="password" 
-      name="password" 
-      minlength="6"
-      value="<%= oldInput && oldInput.password ? oldInput.password : '' %>"
-      placeholder="Enter your password" />
-    <label for="password">Password</label>
-    <small id="passwordHelp" style="color:red; display:none; font-weight:600;">
-      Password must be at least 6 characters.
-    </small>
-  </div>
-
-  <!-- Confirm Password -->
-  <div class="input-group">
-    <input 
-      type="password" 
-      id="confirmPassword" 
-      name="confirmPassword" 
-      minlength="6"
-      value="<%= oldInput && oldInput.confirmPassword ? oldInput.confirmPassword : '' %>"
-      placeholder="Confirm your password" />
-    <label for="confirmPassword">Confirm Password</label>
-  </div>
-<% } %>
-
-      <% if (!editing) { %>
+        <!-- Password -->
+        <div class="input-group">
+          <input type="password" id="password" name="password" minlength="6"
+            value="<%= oldInput && oldInput.password ? oldInput.password : '' %>"
+            placeholder="Enter your password" />
+          <label for="password">Password</label>
+          <small id="passwordHelp" style="color:red; display:none; font-weight:600;">
+            Password must be at least 6 characters.
+          </small>
+        </div>
+        <!-- Confirm Password -->
+        <div class="input-group">
+          <input type="password" id="confirmPassword" name="confirmPassword" minlength="6"
+            value="<%= oldInput && oldInput.confirmPassword ? oldInput.confirmPassword : '' %>"
+            placeholder="Confirm your password" />
+          <label for="confirmPassword">Confirm Password</label>
+        </div>
         <div class="checkbox-group">
           <input type="checkbox" id="terms" name="terms" required />
           <label for="terms">I agree to the <a href="#">terms and conditions</a></label>
@@ -352,29 +323,23 @@
     <% } %>
   </div>
 
-  <!-- Google Maps Places API -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
     // Password validation
     const passwordInput = document.getElementById("password");
     const passwordHelp = document.getElementById("passwordHelp");
-    passwordInput.addEventListener("input", () => {
-        const value = passwordInput.value;
-        // Show help if password length is less than 6
-        passwordHelp.style.display = value && value.length < 6 ? "block" : "none";
+    passwordInput?.addEventListener("input", () => {
+      passwordHelp.style.display = passwordInput.value && passwordInput.value.length < 6 ? "block" : "none";
     });
 
-    // Vendor fields toggle & pre-fill
+    // Vendor fields toggle
     const userTypeSelect = document.getElementById("userType");
     const vendorFields = document.getElementById("vendorFields");
     function toggleVendorFields() {
-      const val = userTypeSelect.value || "<%= editing ? user.userType : '' %>";
+      const val = "<%= editing ? user.userType : '' %>" || userTypeSelect.value;
       if (val === "vender") {
         vendorFields.style.display = "block";
-        ["bannerImage","serviceName","serviceRadius","pricePerDay","pricePerMonth"].forEach(id => {
-          document.getElementById(id)?.setAttribute("required", "true");
-        });
       } else {
         vendorFields.style.display = "none";
       }
@@ -397,51 +362,44 @@
   </script>
 
   <!-- script for current location -->
-   <script>
-  // existing initAutocomplete etc...
+  <script>
+    const useCurrentBtn = document.getElementById('useCurrentBtn');
+    const locationInput = document.getElementById('location');
+    const latInput = document.getElementById('lat');
+    const lngInput = document.getElementById('lng');
 
-  // Use Current Location
-  const useCurrentBtn = document.getElementById('useCurrentBtn');
-  const locationInput = document.getElementById('location');
-  const latInput = document.getElementById('lat');
-  const lngInput = document.getElementById('lng');
-
-  useCurrentBtn?.addEventListener('click', () => {
-    if (navigator.geolocation) {
-      useCurrentBtn.disabled = true;
-      useCurrentBtn.textContent = 'Detecting…';
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          latInput.value = lat;
-          lngInput.value = lng;
-
-          // reverse geocode lat/lng to address
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-              locationInput.value = results[0].formatted_address;
-            } else {
-              locationInput.value = '';
-            }
+    useCurrentBtn?.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        useCurrentBtn.disabled = true;
+        useCurrentBtn.textContent = 'Detecting…';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            latInput.value = lat;
+            lngInput.value = lng;
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+              if (status === 'OK' && results[0]) {
+                locationInput.value = results[0].formatted_address;
+              }
+              useCurrentBtn.disabled = false;
+              useCurrentBtn.textContent = 'Use my current location';
+            });
+          },
+          (err) => {
+            alert('Could not get your location: ' + err.message);
             useCurrentBtn.disabled = false;
             useCurrentBtn.textContent = 'Use my current location';
-          });
-        },
-        (err) => {
-          alert('Could not get your location: ' + err.message);
-          useCurrentBtn.disabled = false;
-          useCurrentBtn.textContent = 'Use my current location';
-        }
-      );
-    } else {
-      alert('Geolocation is not supported by your browser.');
-    }
-  });
-</script>
+          }
+        );
+      } else {
+        alert('Geolocation is not supported by your browser.');
+      }
+    });
+  </script>
 
   <%- include('../partials/loading') %>
 </body>
 </html>
+ 
