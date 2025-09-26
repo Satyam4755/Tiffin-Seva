@@ -16,7 +16,8 @@ const {
   getMessage,
   postvenderDetails,
   postDeleteReview,
-  postHomePage
+  postHomePage,
+  postProblem
 } = require('../controller/user');
 
 // GET routes
@@ -34,6 +35,7 @@ userRouter.post('/user/favourite_list', postfavouriteList);
 userRouter.post('/user/unfavourite/:venderId', postUnfavourite);
 userRouter.post('/user/submit_booking/:venderId', Postbooking);
 userRouter.post('/user/cancel_booking/:orderId', postCancelBooking); // ✅ added
+userRouter.post('/user/report_problem/:orderId', postProblem);
 userRouter.post('/user/options',postOption)
 userRouter.post('/user/vender-list/:venderId', postvenderDetails); 
 userRouter.post('/user/delete-review/:venderId', postDeleteReview);
