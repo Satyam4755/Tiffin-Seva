@@ -4,8 +4,9 @@ const { fileUploadInCloudinary } = require('../utils/cloudinary');
 const User = require('../models/user');
 const venderOption = require('../models/venderOption');
 const GuestOption = require('../models/userOption');
-const Message = require('../models/message');
 const Order = require('../models/orders');
+const Problem = require('../models/problem'); // adjust path if needed
+
 const { error } = require('console');
 
 // for twillio
@@ -519,6 +520,38 @@ exports.deleteMedia = async (req, res) => {
   } catch (err) {
     console.error(err);
     req.flash('error', 'Failed to delete media');
+    res.redirect('/vender/add_details');
+  }
+};
+
+exports.getProblems = async (req, res) => {
+  if (!req.isLogedIn || !req.session.user) return res.redirect('/login');
+  try {
+    const vendorId = req.session.user._id; // vendor session
+
+    // Fetch all problems related to orders of this vendor
+    const problems = await Problem.find()
+      .populate({
+        path: 'order',
+        match: { vender: vendorId }, // only orders of this vendor
+      })
+      .populate('user', 'name email') // optional, get customer name/email
+      .sort({ createdAt: -1 });
+
+    const vendorProblems = problems.filter(p => p.order);
+
+    // Pass title to EJS
+    res.render('admin/problems_list', { 
+      problems: vendorProblems, 
+      currentPage: 'problems',
+      messages: req.flash(),
+      isLogedIn: req.isLogedIn,
+      user: req.session.user,
+      title: "Problems List" // <-- this fixes the error
+    });
+  } catch (err) {
+    console.error('Error fetching problems:', err);
+    req.flash('error', 'Failed to load problems');
     res.redirect('/vender/add_details');
   }
 };
