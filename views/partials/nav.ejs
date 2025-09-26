@@ -289,99 +289,69 @@
 </style>
 <header>
     <nav class="navbar">
-        <!-- Brand Logo -->
-        <a href="/" id="logo" class="<%= currentPage === 'home' ? 'selected' : '' %>" style="display: flex; align-items: center; height: 48px;">
-            <img class="homeImg" src="/home.jpeg" alt="">
-        </a>
+    <!-- Brand Logo -->
+    <a href="/" id="logo" class="<%= currentPage === 'home' ? 'selected' : '' %>" style="display: flex; align-items: center; height: 48px;">
+        <img class="homeImg" src="/home.jpeg" alt="">
+    </a>
 
-        <!-- Navigation Links (including Logout now) -->
-        <div class="nav-links" id="nav-links"> 
-            <% if (isLogedIn) { %>
-                <% if (user && user.userType==='guest' ) { %>
-
-                    <a href="/user/favourite_list" class="<%= currentPage === 'favourite' ? 'selected' : '' %>">Favorites</a>
-                    <a href="/user/booked" class="<%= currentPage === 'reserve' ? 'selected' : '' %>">My Meals</a>
-                    <a href="/user/options" class="<%= currentPage === 'options' ? 'selected' : '' %>">Check Options</a>
-
-                    <a href="/user/message" class="<%= currentPage === 'message' ? 'selected' : '' %>">Message</a>
-                <% } else if (user && user.userType==='vender') { %>
-                    <a href="/vender/add_meals" class="<%= currentPage === 'admin' ? 'selected' : '' %>">Add Your Meals</a>
-                    <a href="/vender/meals_list" class="<%= currentPage === 'adminMeals' ? 'selected' : '' %>">My Meals</a>
-                    <a href="/vender/orders" class="<%= currentPage === 'orders' ? 'selected' : '' %>">Orders</a>
-                    <a href="/vender/add_details" class="<%= currentPage === 'addDetails' ? 'selected' : '' %>">Add More Details</a>
-                    <a href="/vender/customerChoice" class="<%= currentPage === 'customerChoice' ? 'selected' : '' %>">Modifications</a>
-                <% } %>
-            <% } else { %>
-                <a href="/logIn" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Log In</a>
+    <!-- Navigation Links -->
+    <div class="nav-links" id="nav-links"> 
+        <% if (isLogedIn) { %>
+            <% if (user && user.userType === 'guest') { %>
+                <a href="/user/favourite_list" class="<%= currentPage === 'favourite' ? 'selected' : '' %>">Favorites</a>
+                <a href="/user/booked" class="<%= currentPage === 'reserve' ? 'selected' : '' %>">My Meals</a>
+                <a href="/user/options" class="<%= currentPage === 'options' ? 'selected' : '' %>">Check Options</a>
+                <a href="/user/message" class="<%= currentPage === 'message' ? 'selected' : '' %>">Message</a>
+            <% } else if (user && user.userType === 'vender') { %>
+                <a href="/vender/add_meals" class="<%= currentPage === 'admin' ? 'selected' : '' %>">Add Your Meals</a>
+                <a href="/vender/meals_list" class="<%= currentPage === 'adminMeals' ? 'selected' : '' %>">My Meals</a>
+                <a href="/vender/orders" class="<%= currentPage === 'orders' ? 'selected' : '' %>">Orders</a>
+                <a href="/vender/add_details" class="<%= currentPage === 'addDetails' ? 'selected' : '' %>">Add More Details</a>
+                <a href="/vender/customerChoice" class="<%= currentPage === 'customerChoice' ? 'selected' : '' %>">Modifications</a>
+                <a href="/vender/problems" class="<%= currentPage === 'problems' ? 'selected' : '' %>">Customer Problems</a>
             <% } %>
-        </div>
+        <% } else { %>
+            <a href="/logIn" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Log In</a>
+        <% } %>
+    </div>
 
-        <!-- Right Side (username + hamburger) -->
-        <div class="nav-right">
-            <% if (isLogedIn && user) { %>
-                <div class="user-menu-wrapper">
-                    <div class="user-menu" id="user-menu-btn">
-                        <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image">
-                        <span>
-                            <%= user.firstName %>
-                        </span>
-                        <i class="fas fa-caret-down"></i>
-                    </div>
-                    <div class="user-dropdown" id="user-dropdown">
-                        <div style="display: flex; flex-direction: column; align-items: center;padding-bottom: 0;">
-                            <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #eee; display:block;">
-                        </div>
-
-                        <div class="day-night-toggle" data-theme="<%= user.theme %>">
-                            <input type="checkbox" id="theme-toggle" <%=user.theme ? 'checked' : '' %> />
-                            <label for="theme-toggle" class="toggle-label">
-                                <span class="toggle-ball"></span>
-                                <span class="label-text day">🌞</span>
-                                <span class="label-text night">🌙</span>
-                            </label>
-                        
-                            <form style="display: none;"  id="theme-form" action="/" method="POST">
-                                <input type="hidden" id="theme-input" name="theme" value="<%= user.theme %>" />
-                            </form>
-                        </div>
-                        
-                        <script>
-                            const themeToggle = document.getElementById('theme-toggle');
-                            const themeInput = document.getElementById('theme-input');
-                            const themeForm = document.getElementById('theme-form');
-                            const themeWrapper = document.querySelector('.day-night-toggle');
-
-                            themeToggle.addEventListener('change', () => {
-                                const isNight = themeToggle.checked;
-                                themeInput.value = isNight;
-                                themeForm.submit();
-                            });
-
-                            // ✅ Get server-side theme from data attribute
-                            const isNightTheme = themeWrapper.dataset.theme === 'true';
-
-                            if (isNightTheme) {
-                                document.body.style.background = '#000001';
-                                const header = document.querySelector('header');
-                                if (header) header.style.background = 'peachpuff';
-                            } else {
-                                document.body.style.background = 'peachpuff';
-                                const header = document.querySelector('header');
-                                if (header) header.style.background = 'white';
-                            }
-                        </script>
-                        
-                    <a href="/login" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Logout</a>
-                        <a href="/edit_details/<%=user._id%>?editing=true">Edit Profile</a>
-                        <a href="/delete_user/<%=user._id%>">Delete Account</a>
-                    </div>
+    <!-- Right Side (username + hamburger) -->
+    <div class="nav-right">
+        <% if (isLogedIn && user) { %>
+            <div class="user-menu-wrapper">
+                <div class="user-menu" id="user-menu-btn">
+                    <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image">
+                    <span><%= user.firstName %></span>
+                    <i class="fas fa-caret-down"></i>
                 </div>
-            <% } %>
-            <div class="hamburger" id="hamburger-btn">
-                <img src="/list.png" alt="Menu">
+                <div class="user-dropdown" id="user-dropdown">
+                    <div style="display: flex; flex-direction: column; align-items: center; padding-bottom: 0;">
+                        <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="User Image" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #eee;">
+                    </div>
+
+                    <div class="day-night-toggle" data-theme="<%= user.theme %>">
+                        <input type="checkbox" id="theme-toggle" <%= user.theme ? 'checked' : '' %> />
+                        <label for="theme-toggle" class="toggle-label">
+                            <span class="toggle-ball"></span>
+                            <span class="label-text day">🌞</span>
+                            <span class="label-text night">🌙</span>
+                        </label>
+                        <form style="display: none;" id="theme-form" action="/" method="POST">
+                            <input type="hidden" id="theme-input" name="theme" value="<%= user.theme %>" />
+                        </form>
+                    </div>
+
+                    <a href="/login" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Logout</a>
+                    <a href="/edit_details/<%=user._id%>?editing=true">Edit Profile</a>
+                    <a href="/delete_user/<%=user._id%>">Delete Account</a>
+                </div>
             </div>
+        <% } %>
+        <div class="hamburger" id="hamburger-btn">
+            <img src="/list.png" alt="Menu">
         </div>
-    </nav>
+    </div>
+</nav>
 </header>
 <script>
   let rotated = false;
