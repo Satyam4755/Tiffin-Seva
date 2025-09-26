@@ -111,6 +111,28 @@ h1 {
 .empty-message a button:hover {
     background: linear-gradient(45deg, #e0484d, #ff5a5f);
 }
+/* Style for the Edit Meals button */
+.edit-meals-btn {
+  background-color: #4CAF50; /* fresh green for contrast */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.edit-meals-btn:hover {
+  background-color: #43a047; /* darker green on hover */
+  transform: translateY(-2px);
+}
+
+.edit-meals-btn:active {
+  transform: translateY(0);
+}
 </style>
 
 <%-include('../partials/nav')%>
@@ -124,6 +146,13 @@ h1 {
     </a>
   </div>
 <% } else { %>
+
+  <!-- ✏️ Edit button for the first meals doc -->
+  <div style="text-align:right; margin-bottom:15px;">
+    <a href="/vender/<%= mealsList[0]._id %>/edit_meals?editing=true">
+      <button class="edit-meals-btn">✏️ Edit Meals</button>
+    </a>
+  </div>
 
   <!-- Single Grid for all 7 days -->
   <div class="grid-container">
@@ -139,7 +168,7 @@ h1 {
         <div class="meal-section">
             <h4>Lunch</h4>
             <div class="meal-content">
-                <img src="<%= lunchMeal.image || '/tiffin.png' %>" alt="<%= day %> Lunch">
+                <img src="<%= lunchMeal.image || '/tiffin.png' %>" alt="<%= day %> Lunch" style="width:60px;height:60px;border-radius:6px;">
                 <p><%= lunchMeal.items?.join(", ") || "Not Available" %></p>
             </div>
             <hr>
@@ -149,7 +178,7 @@ h1 {
         <div class="meal-section">
             <h4>Dinner</h4>
             <div class="meal-content">
-                <img src="<%= dinnerMeal.image || '/tiffin.png' %>" alt="<%= day %> Dinner">
+                <img src="<%= dinnerMeal.image || '/tiffin.png' %>" alt="<%= day %> Dinner" style="width:60px;height:60px;border-radius:6px;">
                 <p><%= dinnerMeal.items?.join(", ") || "Not Available" %></p>
             </div>
         </div>
