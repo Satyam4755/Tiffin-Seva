@@ -5,6 +5,8 @@ const UserOption = require('../models/userOption');
 const VenderOption = require('../models/venderOption'); 
 const Message = require('../models/message');
 const Order = require('../models/orders');
+const Problem = require('../models/problem'); // import schema
+
 
 // Utility: Haversine formula to calculate distance in km
 function getDistanceKm(lat1, lng1, lat2, lng2) {
@@ -687,6 +689,28 @@ exports.booked = async (req, res, next) => {
   }
 };
 
+// for postProblem
+exports.postProblem = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { problemText } = req.body;
+
+    // Save problem to DB
+    const newProblem = new Problem({
+      order: orderId,
+      user: req.session.user._id, // assuming you're using authentication
+      description: problemText
+    });
+
+    await newProblem.save();
+    req.flash('success', 'Your problem has been submitted successfully.');
+    res.redirect('back'); // go back to the same page
+  } catch (error) {
+    console.error('Error saving problem:', error);
+    req.flash('error', 'Failed to submit problem. Try again.');
+    res.redirect('back');
+  }
+};
 
 // ✅ Get Options
 exports.getOption = async (req, res, next) => {
