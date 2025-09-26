@@ -63,6 +63,13 @@ h1, h2 {
   gap: 25px;
 }
 
+/* Link wrapper */
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 /* Individual Card */
 .card {
   display: flex;
@@ -76,6 +83,7 @@ h1, h2 {
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   animation: fadeIn 0.8s ease-in-out;
+  cursor: pointer;
 }
 
 .card:hover {
@@ -232,7 +240,6 @@ h1, h2 {
     margin-bottom: 15px;
   }
 
-
   .img1, .img2 {
     display: none;
   }
@@ -240,6 +247,52 @@ h1, h2 {
   h1, h2 {
     font-size: 1.5rem;
   }
+}
+
+.problem-form {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.problem-form label {
+  font-weight: 600;
+  color: #6a1b9a;
+  font-size: 0.95rem;
+}
+
+.problem-form textarea {
+  resize: none;
+  padding: 10px;
+  border: 2px solid #f8bbd0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.problem-form textarea:focus {
+  outline: none;
+  border-color: #d81b60;
+  box-shadow: 0 0 5px rgba(216, 27, 96, 0.3);
+}
+
+.problem-btn {
+  align-self: flex-start;
+  background-color: #6a1b9a;
+  color: #fff;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.problem-btn:hover {
+  background-color: #4a148c;
+  transform: scale(1.05);
 }
 </style>
 
@@ -253,7 +306,6 @@ h1, h2 {
     🌸 Your Booked Vender's Meal 🌸
 </h2>
 
-
 <div class="badaDabba">
   <img src="/IMG_3133.jpg" class="img1" alt="image">
   <img src="/IMG_3132.jpg" class="img2" alt="image">
@@ -261,87 +313,101 @@ h1, h2 {
   <div class="cards-container">
     <% orders.forEach(order => { %>
       <% if (order.vender) { %>
-        <div class="card">
-          <div class="img-container">
-            <!-- ✅ Banner Image -->
-            <img src="<%= order.vender.bannerImage || '/default.jpg' %>" 
-                 alt="Vendor Banner" >
-          </div>
+        <a href="/user/vender-list/<%= order.vender._id %>" class="card-link">
+          <div class="card">
+            <div class="img-container">
+              <!-- ✅ Banner Image -->
+              <img src="<%= order.vender.bannerImage || '/default.jpg' %>" 
+                   alt="Vendor Banner" >
+            </div>
 
-          <div class="content">
-            <!-- ✅ Vendor Service Name -->
-            <h3><%= order.vender.serviceName %></h3>
+            <div class="content">
+              <!-- ✅ Vendor Service Name -->
+              <h3><%= order.vender.serviceName %></h3>
 
-            <!-- ✅ Subscription & Duration -->
-            <p><strong>Subscription:</strong> <%= order.subscription_model || 'N/A' %></p>
-            <p><strong>Duration:</strong>
-              <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
-                <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
-                (<% if (order.startingDate) { 
-                     const start = new Date(order.startingDate); 
-                     const end = new Date(start);
-                     end.setDate(start.getDate() + 30 * order.number_of_months); %>
-                     <%= start.toDateString() %> - <%= end.toDateString() %>
-                   <% } else { %>
-                     N/A
-                   <% } %>)
-              <% } else { %>
-                <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
-                <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
-              <% } %>
-            </p>
-
-            <!-- ✅ Delivery Address -->
-            <p><strong>Delivering to:</strong> <%= order.address || order.vender.location || 'Not specified' %></p>
-
-            <!-- ✅ Payment Mode -->
-            <p><strong>Payment:</strong> <%= order.payment || 'N/A' %></p>
-
-            <!-- ✅ Total Amount -->
-            <p><strong>Total Amount:</strong> ₹<%= order.totalAmount || 0 %></p>
-
-            <!-- ✅ Vendor Price Info (optional, can remove if not needed) -->
-            <p><strong>Vendor Price Per Day:</strong> ₹<%= order.vender.pricePerDay %></p>
-            <p><strong>Vendor Price Per Month:</strong> ₹<%= order.vender.pricePerMonth %></p>
-
-            <!-- ✅ Ratings -->
-            <p><strong>Ratings:</strong>
-              <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
-              <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
-              <span style="margin-left: 5px; font-weight: 700; color: red;">
-                (<%= order.vender.averageRating || 0 %>/5)
-              </span>
-            </p>
-
-            <!-- ✅ Booked Label -->
-            <h3 class="booked">Booked</h3>
-
-            <!-- ✅ Show Note -->
-            <% if (order.cancelAllowed) { %>
-              <p class="cancel-note allowed">
-                <%= order.cancelNote %>
+              <!-- ✅ Subscription & Duration -->
+              <p><strong>Subscription:</strong> <%= order.subscription_model || 'N/A' %></p>
+              <p><strong>Duration:</strong>
+                <% if (order.subscription_model==='Per Month' && order.number_of_months) { %>
+                  <%= order.number_of_months %> month<%= order.number_of_months > 1 ? 's' : '' %>
+                  (<% if (order.startingDate) { 
+                       const start = new Date(order.startingDate); 
+                       const end = new Date(start);
+                       end.setDate(start.getDate() + 30 * order.number_of_months); %>
+                       <%= start.toDateString() %> - <%= end.toDateString() %>
+                     <% } else { %>
+                       N/A
+                     <% } %>)
+                <% } else { %>
+                  <%= order.startingDate ? order.startingDate.toDateString() : 'N/A' %> /
+                  <%= order.endingDate ? order.endingDate.toDateString() : 'N/A' %>
+                <% } %>
               </p>
-              <% } else { %>
-                <p class="cancel-note not-allowed">
+
+              <!-- ✅ Delivery Address -->
+              <p><strong>Delivering to:</strong> <%= order.address || order.vender.location || 'Not specified' %></p>
+
+              <!-- ✅ Payment Mode -->
+              <p><strong>Payment:</strong> <%= order.payment || 'N/A' %></p>
+
+              <!-- ✅ Total Amount -->
+              <p><strong>Total Amount:</strong> ₹<%= order.totalAmount || 0 %></p>
+
+              <!-- ✅ Vendor Price Info -->
+              <p><strong>Vendor Price Per Day:</strong> ₹<%= order.vender.pricePerDay %></p>
+              <p><strong>Vendor Price Per Month:</strong> ₹<%= order.vender.pricePerMonth %></p>
+
+              <!-- ✅ Ratings -->
+              <p><strong>Ratings:</strong>
+                <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
+                <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
+                <span style="margin-left: 5px; font-weight: 700; color: red;">
+                  (<%= order.vender.averageRating || 0 %>/5)
+                </span>
+              </p>
+
+              <!-- ✅ Booked Label -->
+              <h3 class="booked">Booked</h3>
+
+              <!-- ✅ Show Note -->
+              <% if (order.cancelAllowed) { %>
+                <p class="cancel-note allowed">
                   <%= order.cancelNote %>
                 </p>
-                <% } %>
-            
-                  <!-- ✅ Cancel Booking Button -->
-                  <form action="/user/cancel_booking/<%= order._id %>?location=<%= encodeURIComponent(order.address) %>" method="post"
-                    style="margin-top:10px;">
-                    <% if (order.cancelAllowed) { %>
-                      <button type="submit" onclick="loading()" class="cancel-button">Cancel</button>
-                      <% } else { %>
-                        <!-- use type="button" so it doesn't submit when disabled -->
-                        <button type="button" disabled class="cancel-button" title="Cancellation not allowed">Cancel</button>
-                        <% } %>
-                  </form>
+                <% } else { %>
+                  <p class="cancel-note not-allowed">
+                    <%= order.cancelNote %>
+                  </p>
+                  <% } %>
+
+              <!-- ✅ Cancel Booking Button -->
+              <form action="/user/cancel_booking/<%= order._id %>?location=<%= encodeURIComponent(order.address) %>" method="post"
+                style="margin-top:10px;">
+                <% if (order.cancelAllowed) { %>
+                  <button type="submit" onclick="loading()" class="cancel-button">Cancel</button>
+                  <% } else { %>
+                    <!-- use type="button" so it doesn't submit when disabled -->
+                    <button type="button" disabled class="cancel-button" title="Cancellation not allowed">Cancel</button>
+                    <% } %>
+              </form>
+            </div>
           </div>
-        </div>
+        </a>
       <% } %>
+  <!-- ✅ Problem Reporting Form -->
+<form action="/user/report_problem/<%= order._id %>" method="post" class="problem-form">
+  <label for="problem-<%= order._id %>">Facing an issue? Tell us:</label>
+  <textarea 
+    name="problemText" 
+    id="problem-<%= order._id %>" 
+    rows="3" 
+    placeholder="Describe your problem..."
+    required></textarea>
+  <button type="submit" class="problem-btn">Submit Problem</button>
+</form>
     <% }) %>
   </div>
+
 </div>
 
 <%- include('../partials/loading') %>
