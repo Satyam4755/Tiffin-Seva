@@ -1,0 +1,107 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<style>
+body {
+  background: linear-gradient(135deg, #fff8f0 0%, #fce4ec 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0; padding: 0;
+}
+
+h2 {
+  text-align: center;
+  color: #6a1b9a;
+  margin: 25px 0;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.problems-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.problem-card {
+  background-color: #fff0f5;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.problem-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+.problem-card h3 {
+  margin: 0 0 8px 0;
+  color: #d81b60;
+  font-size: 1.2rem;
+}
+
+.problem-card p {
+  margin: 4px 0;
+  color: #6a1b9a;
+}
+
+.problem-card .customer-info {
+  font-weight: 600;
+  color: #8e24aa;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.flash-message {
+  text-align: center;
+  margin: 10px 0;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+.flash-success {
+  background-color: #d0f0c0;
+  color: #388e3c;
+}
+
+.flash-error {
+  background-color: #f8d7da;
+  color: #d32f2f;
+}
+</style>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <div class="flash-message flash-success"><%= messages.success[0] %></div>
+<% } %>
+
+<% if (messages.error && messages.error.length > 0) { %>
+  <div class="flash-message flash-error"><%= messages.error[0] %></div>
+<% } %>
+
+<h2>Customer Problems / Feedback</h2>
+
+<div class="problems-container">
+  <% if (problems.length === 0) { %>
+    <p style="text-align:center; color:#6a1b9a;">No problems submitted yet.</p>
+  <% } else { %>
+    <% problems.forEach(p => { %>
+      <div class="problem-card">
+        <div class="customer-info">
+          Customer: <%= p.user?.name || 'Anonymous' %> | Email: <%= p.user?.email || 'N/A' %>
+        </div>
+        <p><strong>Order ID:</strong> <%= p.order._id %></p>
+        <p><strong>Problem:</strong> <%= p.description %></p>
+        <p style="font-size:0.85rem; color:#888;">
+          Submitted: <%= new Date(p.createdAt).toLocaleString() %>
+        </p>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<%- include('../partials/loading') %>
+</body>
+</html>
