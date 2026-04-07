@@ -1,0 +1,282 @@
+{
+  "customer": {
+    "greeting": {
+      "keywords": ["hi", "hello", "hey", "namaste", "good morning", "good evening", "start", "help", "support", "get started", "menu", "how are you"],
+      "message": "Hello! 👋 Welcome to Tiffin Seva. How can I help you today?",
+      "options": [
+        { "text": "View Available Meals", "link": "/" },
+        { "text": "My Favourites ❤️", "link": "/user/favourite_list" },
+        { "text": "My Bookings", "link": "/user/booked" },
+        { "text": "Meal Options", "link": "/user/options" },
+        { "text": "Messages 💬", "link": "/user/message" },
+        { "text": "Referral Program 🎁", "link": "/user/referral" }
+      ]
+    },
+
+    "about_tiffin_seva": {
+      "keywords": ["tiffin seva", "about tiffin seva", "what is tiffin seva", "mission", "vision", "our goal", "company info", "who are you"],
+      "message": "Tiffin Seva is an online meal delivery and vendor management system designed to connect customers with trusted local tiffin vendors. 🍱 Our mission is to make healthy, home-style meals accessible and convenient for everyone, while helping vendors expand their business digitally.",
+      "options": [
+        { "text": "Our Mission", "value": "mission" },
+        { "text": "Our Vision", "value": "vision" },
+        { "text": "Explore Vendors", "link": "/" },
+        { "text": "Contact Support", "link": "/contact-us" }
+      ],
+      "sub_responses": {
+        "mission": {
+          "message": "Our mission is to provide healthy, affordable, and timely meal services for students, professionals, and families — bringing the comfort of homemade food to everyone, everywhere."
+        },
+        "vision": {
+          "message": "Our vision is to build India’s most trusted and tech-driven tiffin ecosystem where every vendor can grow their business and every customer can enjoy reliable, personalized meal experiences."
+        }
+      }
+    },
+
+    "meal_related": {
+      "keywords": ["meal", "menu", "food", "tiffin", "today's meal", "lunch", "dinner", "what's available", "meal plan", "available tiffin", "meal list", "today menu", "see meals", "available meals", "meal schedule", "current menu"],
+      "message": "Here’s how you can check or manage available meals:",
+      "options": [
+        { "text": "Home (Available Meals)", "link": "/" },
+        { "text": "My Booked Meals", "link": "/user/booked" },
+        { "text": "Favourite Meals ❤️", "link": "/user/favourite_list" },
+        { "text": "Meal Options", "link": "/user/options" }
+      ]
+    },
+
+    "booking_related": {
+      "keywords": ["book", "booking", "reserve", "subscribe", "order meal", "place order", "tiffin booking", "how to order", "daily meal", "monthly plan", "book now", "start service", "create booking", "buy meal", "reserve lunch"],
+      "message": "You can easily manage your tiffin bookings here:",
+      "options": [
+        { "text": "Book New Meal", "link": "/" },
+        { "text": "My Current Bookings", "link": "/user/booked" },
+        { "text": "Meal Options", "link": "/user/options" }
+      ]
+    },
+
+    "pricing_related": {
+      "keywords": ["price", "cost", "rate", "how much", "charges", "pricing", "plan cost", "tiffin price", "subscription rate", "what is the price", "meal charge", "amount", "affordable plan"],
+      "message": "Our prices depend on the plan you choose. You can explore details below:",
+      "options": [
+        { "text": "Available Vendors (With Prices)", "link": "/" },
+        { "text": "Meal Options", "link": "/user/options" }
+      ]
+    },
+
+    "favourite_related": {
+      "keywords": ["favourite", "wishlist", "liked", "saved", "my fav", "my liked", "best meals", "save meal", "heart icon", "bookmark"],
+      "message": "Here’s how you can manage your favourite meals:",
+      "options": [
+        { "text": "My Favourites ❤️", "link": "/user/favourite_list" },
+        { "text": "Explore More Meals", "link": "/" }
+      ]
+    },
+
+    "options_related": {
+      "keywords": ["meal option", "customize", "preferences", "choose", "options", "selection", "choice", "meal preference", "single meal", "double meal", "update choice", "custom tiffin"],
+      "message": "You can customize your tiffin options below:",
+      "options": [
+        { "text": "My Meal Options", "link": "/user/options" },
+        { "text": "My Booked Meals", "link": "/user/booked" }
+      ]
+    },
+
+    "delivery_related": {
+      "keywords": ["delivery", "time", "when will it arrive", "delay", "delivery boy", "tiffin arrived", "delivery status", "track order", "arrival", "delivery timing"],
+      "message": "Deliveries depend on your selected vendor’s schedule. You can check status here:",
+      "options": [
+        { "text": "View My Bookings", "link": "/user/booked" },
+        { "text": "Message Vendor", "link": "/user/message" }
+      ]
+    },
+
+    "message_related": {
+      "keywords": ["message", "chat", "talk", "vendor chat", "contact", "conversation", "inbox", "send message", "vendor help", "ask vendor", "reach vendor"],
+      "message": "You can message your vendor directly through our chat system:",
+      "options": [
+        { "text": "Open Messages 💬", "link": "/user/message" },
+        { "text": "Go to My Bookings", "link": "/user/booked" }
+      ]
+    },
+
+    "referral_related": {
+      "keywords": ["referral", "refer", "gift", "invite", "refer and earn", "reward", "bonus", "code", "promo", "offer", "discount"],
+      "message": "Invite friends and earn ₹100 bonus using your referral code:",
+      "options": [
+        { "text": "Referral Program 🎁", "link": "/user/referral" }
+      ]
+    },
+
+    "account_related": {
+      "keywords": ["profile", "account", "edit profile", "change password", "logout", "delete account", "settings", "manage account", "update name", "update info"],
+      "message": "Manage your account or logout using these options:",
+      "options": [
+        { "text": "Go to Home", "link": "/" },
+        { "text": "Logout", "link": "/logout" }
+      ]
+    },
+
+    "support_related": {
+      "keywords": ["help", "support", "problem", "issue", "complaint", "contact support", "technical issue", "bug", "feedback", "not working", "error", "crash"],
+      "message": "Need assistance? You can reach us using these options:",
+      "options": [
+        { "text": "Contact Vendor", "link": "/user/message" },
+        { "text": "Raise Complaint", "link": "/user/message" },
+        { "text": "Go to Home", "link": "/" }
+      ]
+    }
+  },
+
+  "vendor": {
+    "greeting": {
+      "keywords": ["hi", "hello", "hey", "good morning", "good evening", "vendor", "dashboard", "start", "help"],
+      "message": "Welcome Vendor 👋 What would you like to do today?",
+      "options": [
+        { "text": "Add Meals", "link": "/vender/add_meals" },
+        { "text": "My Meals List", "link": "/vender/meals_list" },
+        { "text": "Customer Orders", "link": "/vender/orders" },
+        { "text": "Add/Update Details", "link": "/vender/add_details" },
+        { "text": "Customer Choices", "link": "/vender/customerChoice" },
+        { "text": "Customer Problems", "link": "/vender/problems" }
+      ]
+    },
+
+    "about_tiffin_seva": {
+  "keywords": [
+    "tiffin seva",
+    "about tiffin seva",
+    "our mission",
+    "our vision",
+    "company info",
+    "goal",
+    "who are you",
+    "business aim",
+    "what is tiffin seva"
+  ],
+  "message": "Tiffin Seva is a digital bridge between food vendors and customers, helping vendors grow their home-cooked meal services online with ease. 🥗 We focus on connecting quality homemade food with those who seek healthy, affordable, and timely meals every day.",
+  "options": [
+    { "text": "Our Mission", "value": "mission" },
+    { "text": "Our Vision", "value": "vision" },
+    { "text": "Vendor Dashboard", "link": "/vender/orders" },
+    { "text": "Add Meals", "link": "/vender/add_meals" },
+    { "text": "Contact Support", "link": "/vender/problems" }
+  ],
+  "subtopics": {
+    "mission": {
+      "message": "🎯 Our mission is to empower small and local food vendors by providing them with a digital platform to manage customers, handle orders, and expand reach easily."
+    },
+    "vision": {
+      "message": "🌍 Our vision is to revolutionize the tiffin industry by creating a transparent, scalable, and reliable system that benefits both vendors and customers equally."
+    }
+  }
+},
+
+    "meal_management": {
+      "keywords": ["add meal","add a meal","adding meals", "upload meal", "new dish", "menu", "add tiffin", "add service", "create meal", "edit meal", "meal photo", "update food"],
+      "message": "You can manage your offered meals here:",
+      "options": [
+        { "text": "Add Meals", "link": "/vender/add_meals" },
+        { "text": "My Meals List", "link": "/vender/meals_list" }
+      ]
+    },
+
+    "order_management": {
+      "keywords": ["order", "booking", "customer order", "recent order", "view orders", "all bookings", "tiffin orders", "manage orders", "order list"],
+      "message": "Manage your customer orders easily here:",
+      "options": [
+        { "text": "View Orders", "link": "/vender/orders" },
+        { "text": "Customer Problems", "link": "/vender/problems" }
+      ]
+    },
+
+    "pricing_management": {
+      "keywords": ["price", "update price", "rate", "cost", "service charge", "pricing plan", "edit price", "update rate"],
+      "message": "You can manage your tiffin pricing details here:",
+      "options": [
+        { "text": "Add Meals (Set Prices)", "link": "/vender/add_meals" },
+        { "text": "My Meals List", "link": "/vender/meals_list" }
+      ]
+    },
+
+    "details_management": {
+      "keywords": ["details", "update details", "address", "map area", "service info", "location", "update address", "area coverage"],
+      "message": "Update your business information from here:",
+      "options": [
+        { "text": "Add/Update Details", "link": "/vender/add_details" }
+      ]
+    },
+
+    "customer_preferences": {
+      "keywords": ["customer choice", "modifications", "preferences", "requests", "custom order", "client request"],
+      "message": "You can review customer meal preferences below:",
+      "options": [
+        { "text": "Customer Choices", "link": "/vender/customerChoice" }
+      ]
+    },
+
+    "problems_handling": {
+      "keywords": ["complaint", "issue", "problem", "customer feedback", "report", "customer problem", "query", "support request"],
+      "message": "Resolve your customer complaints from here:",
+      "options": [
+        { "text": "Customer Problems", "link": "/vender/problems" }
+      ]
+    },
+
+    "earnings_related": {
+      "keywords": ["earnings", "payout", "revenue", "money", "payment", "income", "withdraw", "mark paid", "transaction"],
+      "message": "You can track or manage your earnings here:",
+      "options": [
+        { "text": "View Orders (Earnings)", "link": "/vender/orders" }
+      ]
+    },
+
+    "account_management": {
+      "keywords": ["logout", "profile", "account", "vendor account", "delete account", "remove account"],
+      "message": "Manage or logout from your vendor account below:",
+      "options": [
+        { "text": "Home", "link": "/" },
+        { "text": "Logout", "link": "/logout" }
+      ]
+    },
+
+    "support_related": {
+      "keywords": ["help", "support", "issue", "technical", "error", "not working", "contact support"],
+      "message": "Need help with your vendor account?",
+      "options": [
+        { "text": "Report Problem", "link": "/vender/problems" },
+        { "text": "Go to Orders", "link": "/vender/orders" }
+      ]
+    }
+  },
+
+"about_tiffin_seva": {
+  "keywords": [
+    "tiffin seva",
+    "about tiffin seva",
+    "our mission",
+    "our vision",
+    "company info",
+    "goal",
+    "who are you",
+    "business aim",
+    "what is tiffin seva"
+  ],
+  "message": "Tiffin Seva is a digital bridge between food vendors and customers, helping vendors grow their home-cooked meal services online with ease. 🥗 We focus on connecting quality homemade food with those who seek healthy, affordable, and timely meals every day.",
+  "options": [
+    { "text": "Our Mission", "value": "mission" },
+    { "text": "Our Vision", "value": "vision" },
+    { "text": "Login", "link": "/logIn" },
+    { "text": "SignUp", "link": "/signup-customer" },
+    { "text": "Contact Support", "link": "/contact-us" }
+  ],
+  "subtopics": {
+    "mission": {
+      "message": "🎯 Our mission is to empower small and local food vendors by providing them with a digital platform to manage customers, handle orders, and expand reach easily."
+    },
+    "vision": {
+      "message": "🌍 Our vision is to revolutionize the tiffin industry by creating a transparent, scalable, and reliable system that benefits both vendors and customers equally."
+    }
+  }
+}
+  
+}
+

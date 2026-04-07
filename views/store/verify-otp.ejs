@@ -1,0 +1,178 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<style>
+
+  .mainDabba {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80vh;
+  }
+
+  .form-container {
+    background: #fff;
+    padding: 48px 38px 38px 38px;
+    border-radius: 18px;
+    box-shadow: 0 12px 32px rgba(106, 17, 203, 0.12), 0 2px 8px rgba(0,0,0,0.08);
+    width: 400px;
+    max-width: 95vw;
+    text-align: center;
+    position: relative;
+    transition: box-shadow 0.3s;
+  }
+
+  .form-container::before {
+    content: "";
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border-radius: 50%;
+    opacity: 0.13;
+    z-index: 0;
+  }
+
+  .form-container h2 {
+    color: #6a11cb;
+    font-weight: 700;
+    margin-bottom: 28px;
+    letter-spacing: 1px;
+    font-size: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  form {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 28px;
+    width: 100%;
+  }
+
+  .input-group input {
+    width: 90%;
+    padding: 14px 14px 14px 12px;
+    font-size: 1.1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    text-align: center;
+    letter-spacing: 4px;
+    background: #f8f9fa;
+    color: #333;
+  }
+
+  .input-group label {
+    position: absolute;
+    left: 18px;
+    top: 14px;
+    background: transparent;
+    padding: 0 6px;
+    color: #888;
+    font-size: 1rem;
+    transition: 0.3s;
+    pointer-events: none;
+  }
+
+  .input-group input:focus {
+    border-color: #6a11cb;
+    box-shadow: 0 0 8px rgba(106, 17, 203, 0.18);
+    background: #fff;
+  }
+
+  .input-group input:focus + label,
+  .input-group input:valid + label {
+    top: -12px;
+    left: 12px;
+    color: #6a11cb;
+    font-size: 0.92rem;
+    background: #fff;
+    padding: 0 4px;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(106, 17, 203, 0.10);
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    margin-top: 8px;
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, #5b0fbd, #1f6cf0);
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(106, 17, 203, 0.18);
+  }
+
+  .resend {
+    display: block;
+    margin-top: 18px;
+    color: #2575fc;
+    font-size: 1rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    letter-spacing: 0.5px;
+  }
+
+  .resend:hover {
+    color: #6a11cb;
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .form-container {
+      width: 98vw;
+      padding: 28px 10px 24px 10px;
+      border-radius: 12px;
+    }
+    .form-container h2 {
+      font-size: 1.3rem;
+    }
+    .input-group input {
+      font-size: 1rem;
+      padding: 12px 10px 12px 8px;
+    }
+    button {
+      font-size: 1rem;
+      padding: 12px;
+    }
+  }
+</style>
+
+<div class="mainDabba">
+  <div class="form-container">
+    <h2>Verify OTP</h2>
+    <form action="/verify-otp" method="POST">
+      <%- include('../partials/errorHandel') %>
+      <input type="hidden" name="email" value="<%= email %>">
+
+      <div class="input-group">
+        <input type="text" id="otp" name="otp" maxlength="6" required>
+        <label for="otp">Enter OTP</label>
+      </div>
+
+      <button type="submit">Verify OTP</button>
+    </form>
+
+    <a href="/forgot-password" class="resend">Didn’t receive OTP? Resend</a>
+  </div>
+</div>

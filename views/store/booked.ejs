@@ -1,0 +1,656 @@
+<%-include('../partials/head')%>
+<%-include('../partials/background')%>
+    
+<style>
+
+
+/* Move popup above bottom nav */
+.swal2-container.swal2-center {
+  align-items: flex-start !important; 
+  padding-top: 60px !important;
+}
+
+/* Add your custom margin-bottom to the popup */
+.swal2-container.swal2-center > .swal2-popup {
+  margin-bottom: 200px !important;
+}
+  /* 🌸 Global Styling */
+body {
+  background: linear-gradient(135deg, #fff8f0 0%, #fce4ec 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2 {
+  text-align: center;
+  color: #6a1b9a;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  animation: bounce 2s infinite;
+}
+
+.badaDabba {
+  margin-bottom: 15%;
+  position: relative;
+  padding-top: 40px;
+}
+
+/* Decorative Images */
+.img1, .img2 {
+  position: absolute;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.8;
+}
+
+.img1 {
+  top: 10%;
+  left: 3%;
+  width: 20vw;
+  aspect-ratio: 1/1;
+  border-radius: 50% 40% 60% 40% / 40% 50% 50% 60%;
+  transition: transform 0.3s ease;
+}
+
+.img2 {
+  top: 40%;
+  right: 3%;
+  width: 22vw;
+  aspect-ratio: 1/1;
+  border-radius: 45% 55% 65% 35% / 50% 30% 70% 60%;
+  transition: transform 0.4s ease;
+}
+
+.img1:hover, .img2:hover {
+  transform: scale(1.05);
+}
+
+/* Cards Container */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  gap: 25px;
+}
+
+/* Link wrapper */
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* Individual Card */
+.card {
+  display: flex;
+  flex-direction: row; /* image left, content right on desktop */
+  gap: 20px;
+  width: 620px;
+  border-radius: 18px;
+  background: #f9a4a424;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 24%);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.8s ease-in-out;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Image container */
+.card .img-container {
+  flex: 0 0 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card .img-container img {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .img-container img {
+  transform: scale(1.1);
+}
+
+/* Card content */
+.card .content {
+  flex: 1;
+  padding: 18px;
+  text-align: left;
+}
+
+.card h3 {
+  margin: 10px 0;
+  color: #8e24aa;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.card p {
+  margin: 6px 0;
+  color: #6a1b9a;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Booked Label */
+.card h3.booked {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #d81b60;
+  padding: 5px 15px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Cancel Button */
+.card button {
+  background-color: #d81b60;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: 10px;
+}
+
+.card button:hover {
+  background-color: #ad1457;
+  transform: scale(1.05);
+}
+
+/* Cancel Notes */
+.cancel-note {
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.cancel-note.allowed {
+  color: #388e3c;
+}
+
+.cancel-note.not-allowed {
+  color: #d32f2f;
+}
+
+/* Cancel Button */
+.cancel-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #f44336;
+  cursor: pointer;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f;
+}
+
+.cancel-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cards-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    flex-direction: column; /* stack image & content vertically */
+    width: 100%;
+  }
+
+  .card .img-container {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .img1, .img2 {
+    display: none;
+  }
+
+  h1, h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.problem-form {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.problem-form label {
+  font-weight: 600;
+  color: #6a1b9a;
+  font-size: 0.95rem;
+}
+
+.problem-form textarea {
+  resize: none;
+  padding: 10px;
+  border: 2px solid #f8bbd0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.problem-form textarea:focus {
+  outline: none;
+  border-color: #d81b60;
+  box-shadow: 0 0 5px rgba(216, 27, 96, 0.3);
+}
+
+.problem-btn {
+  align-self: flex-start;
+  background-color: #6a1b9a;
+  color: #fff;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.problem-btn:hover {
+  background-color: #4a148c;
+  transform: scale(1.05);
+}
+</style>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
+<%-include('../partials/nav')%>
+<h2 style=" color: #d81b60; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); margin-bottom: 30px; animation: bounce 7.5s infinite;">
+    🌸 Your Booked Vender's Meal 🌸
+</h2>
+
+<div class="badaDabba">
+  <img src="/IMG_3133.jpg" class="img1" alt="image">
+  <img src="/IMG_3132.jpg" class="img2" alt="image">
+
+  <div class="cards-container">
+    <% orders.forEach(order => { %>
+
+      <% if (!order.vender) return; %>
+
+      <!-- SHOW ONLY ACTIVE OR EXPIRED IN CUSTOMER SECTION -->
+      <% if (order.status === 'active' || order.status === 'expired') { %>
+
+        <a href="/user/vender-list/<%= order.vender._id %>" class="card-link">
+          <div class="card">
+            <div class="img-container">
+              <img src="<%= order.vender.bannerImage || '/tiffin.png' %>" alt="Vendor Banner">
+            </div>
+
+            <div class="content">
+              <h3><%= order.vender.serviceName %></h3>
+
+              <p><strong>Subscription:</strong> <%= order.subscription_model %></p>
+
+              <p><strong>Duration:</strong>
+                <%= order.startingDate.toDateString() %> -
+                <%= order.endingDate.toDateString() %>
+              </p>
+              <p><strong>Quantity:</strong> <%= order.quantity %></p>
+
+              <p><strong>Delivering to:</strong> <%= order.address %></p>
+
+              <p><strong>Payment:</strong> <%= order.payment %></p>
+
+              <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %></p>
+
+              <p><strong>Vendor Price Per Meal:</strong> ₹<%= order.vender.pricePerDay %></p>
+
+              <% if (order.time_type?.length === 1) { %>
+                <p><strong>Meal Type:</strong> <%= order.time_type[0] %></p>
+              <% } else if (order.time_type?.length === 2) { %>
+                <p><strong>Meal Types:</strong> <%= order.time_type.join(' & ') %></p>
+              <% } %>
+
+              <p><strong>Ratings:</strong>
+                <% const fullStars = Math.floor(order.vender.averageRating || 0); %>
+                <% for (let i = 0; i < fullStars; i++) { %> ⭐ <% } %>
+                <span style="margin-left:5px; font-weight:700; color:red;">
+                  (<%= order.vender.averageRating || 0 %>/5)
+                </span>
+              </p>
+
+              <!-- STATUS LABEL -->
+              <% if (order.status === 'active') { %>
+                <h3 class="booked">Booked</h3>
+              <% } else if (order.status === 'expired') { %>
+                <h3 class="booked" style="color:grey;">Expired</h3>
+              <% } %>
+
+              <% if (order.status === 'active') { %>
+
+                <!-- CANCEL INFO -->
+                <% if (order.cancelAllowed) { %>
+                  <p class="cancel-note allowed"><%= order.cancelNote %></p>
+                <% } else { %>
+                  <p class="cancel-note not-allowed"><%= order.cancelNote %></p>
+                <% } %>
+
+                <!-- HIDDEN FIELDS FOR CANCEL POPUP -->
+                <input type="hidden" class="order-start-date" value="<%= order.startingDate.toISOString() %>">
+                <input type="hidden" class="order-end-date" value="<%= order.endingDate.toISOString() %>">
+                <input type="hidden" class="order-total-amount" value="<%= order.totalAmount %>">
+                <input type="hidden" class="order-perday-price" value="<%= order.vender.pricePerDay %>">
+
+                <!-- Cancel button only when ACTIVE -->
+                <form action="/user/cancel_booking/<%= order._id %>?location=<%= encodeURIComponent(order.address) %>" 
+                      method="post" style="margin-top:10px;">
+                  
+                  <% if (order.cancelAllowed) { %>
+                    <button type="submit" class="cancel-button">Cancel</button>
+                  <% } else { %>
+                    <button type="button" disabled class="cancel-button" title="Cancellation not allowed">Cancel</button>
+                  <% } %>
+
+
+                <input type="hidden" class="order-quantity" name="quantity" value="<%= order.quantity %>">
+                </form>
+
+              <% } else if (order.status === 'expired') { %>
+
+                <!-- If expired → do NOT show cancel button -->
+                <p style="color:#888; font-weight:bold; margin-top:10px;">
+                  This subscription has ended.
+                </p>
+
+              <% } %>
+
+            </div>
+          </div>
+        </a>
+
+        <!-- REPORT PROBLEM Section (only when active) -->
+        <% if (order.status === 'active') { %>
+          <form action="/user/report_problem/<%= order._id %>" method="post" class="problem-form">
+            <label for="problem-<%= order._id %>">Facing an issue? Tell us:</label>
+            <textarea name="problemText" id="problem-<%= order._id %>" rows="3"
+                     placeholder="Describe your problem..." required></textarea>
+            <button type="submit" class="problem-btn">Submit Problem</button>
+          </form>
+        <% } %>
+
+      <% } %> <!-- STATUS FILTER ENDS HERE -->
+
+    <% }) %>
+  </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Find all cancel forms
+  const cancelForms = document.querySelectorAll('form[action^="/user/cancel_booking/"]');
+  const loadingOverlay = document.getElementById("loadingOverlay");
+
+  // helper to show loader (matches your loading partial)
+  function showLoader() {
+    if (!loadingOverlay) return;
+    loadingOverlay.style.display = "flex";
+    loadingOverlay.style.position = "fixed";
+    loadingOverlay.style.inset = 0;
+    loadingOverlay.style.background = "rgba(255,255,255,0.8)";
+    loadingOverlay.style.zIndex = 9999;
+    loadingOverlay.style.justifyContent = "center";
+    loadingOverlay.style.alignItems = "center";
+    loadingOverlay.style.flexDirection = "column";
+    document.body.style.overflow = "hidden";
+    document.body.style.pointerEvents = "none";
+  }
+
+  // helper to hide loader & restore page interactivity
+  function hideLoader() {
+    if (!loadingOverlay) return;
+    loadingOverlay.style.display = "none";
+    document.body.style.overflow = "";
+    document.body.style.pointerEvents = "";
+  }
+
+  // utility: try to parse mealsCount from DOM
+  function detectMealsCount(card) {
+    // 1) prefer explicit hidden input .order-meal-count (if you add it later)
+    const hiddenCount = card.querySelector('.order-meal-count');
+    if (hiddenCount && hiddenCount.value) {
+      const n = parseInt(hiddenCount.value, 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+
+    // 2) try to parse visible texts inside card (Meal Type(s): Lunch / Dinner)
+    const contentText = (card.querySelector('.content')?.innerText || '').toLowerCase();
+    const hasLunch = contentText.includes('lunch');
+    const hasDinner = contentText.includes('dinner');
+
+    if (hasLunch && hasDinner) return 2;
+    if (hasLunch || hasDinner) return 1;
+
+    // 3) fallback to 1
+    return 1;
+  }
+
+  cancelForms.forEach(form => {
+    const cancelBtn = form.querySelector('.cancel-button');
+    if (!cancelBtn) return;
+
+    // Remove any inline loading onclick to prevent early trigger
+    cancelBtn.removeAttribute("onclick");
+
+    cancelBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const card = form.closest('.card');
+      if (!card) return;
+
+      // Extract hidden values (robustly)
+      const startDateInput = card.querySelector('.order-start-date');
+      const endDateInput = card.querySelector('.order-end-date');
+      const perDayInput = card.querySelector('.order-perday-price');
+      const totalAmountInput = card.querySelector('.order-total-amount');
+      const quantityInput = card.querySelector('.order-quantity');
+
+      // parse with fallbacks
+      const startDate = startDateInput ? new Date(startDateInput.value) : null;
+      const endDate = endDateInput ? new Date(endDateInput.value) : null;
+      const perDayPrice = perDayInput ? Number(perDayInput.value || 0) : 0;
+      const totalAmount = totalAmountInput ? Number(totalAmountInput.value || 0) : 0;
+      const quantity = quantityInput ? Math.max(1, Number(quantityInput.value || 1)) : 1;
+
+      // meals count detection (1 or 2)
+      const mealsCount = detectMealsCount(card);
+
+      // Time logic - use local time of browser (assumes server stored startDate in same timezone or ISO)
+      const now = new Date();
+      // We'll compare date-only portions for "today"
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let passedDays = 0;
+
+      if (!startDate || isNaN(startDate.getTime())) {
+        // If start date missing, fallback to zero used days to avoid blocking cancellation UI
+        passedDays = 0;
+      } else {
+        const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+
+        // CASE 1: cancellation BEFORE starting date -> 0 days used
+        if (today < startDay) {
+          passedDays = 0;
+        }
+        // CASE 2: cancellation ON starting date -> cutoff check (12:30)
+        else if (today.getTime() === startDay.getTime()) {
+          // Build cutoff time on today's date at 12:30 local
+          const cutoff = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 30, 0, 0);
+          // use full 'now' (not today 00:00) to check actual hour/minute
+          passedDays = now > cutoff ? 1 : 0;
+        }
+        // CASE 3: cancellation AFTER start date -> days passed (ceil)
+        else {
+          const msPerDay = 24 * 60 * 60 * 1000;
+          // compute diff in days using UTC to avoid DST issues: use time difference divided by msPerDay,
+          // then ceil to count any partial day as a full passed day (consistent with previous logic)
+          const diff = Math.ceil((today.getTime() - startDay.getTime()) / msPerDay);
+          passedDays = Math.max(0, diff);
+        }
+      }
+
+      // mealCostTillNow now includes mealsCount and quantity
+      const mealCostTillNowRaw = passedDays * perDayPrice * mealsCount * quantity;
+      // Keep two decimals
+      const mealCostTillNow = Number(mealCostTillNowRaw.toFixed(2));
+
+      // 2% cancellation charge (rounded to 2 decimals)
+      const lateCharges = Number((totalAmount * 0.02).toFixed(2));
+
+      // Final totals
+      const totalDeductions = Number((mealCostTillNow + lateCharges).toFixed(2));
+      const refundAmount = Number(Math.max(0, totalAmount - totalDeductions).toFixed(2));
+
+      // Build clear breakdown html
+      const breakdownHtml = `
+        <div style="text-align:left; font-size:15px; color:#444; line-height:1.6;">
+          <p style="font-weight:700; color:#e91e63; font-size:18px; margin:0 0 8px;">Are you sure you want to cancel?</p>
+          <p style="margin:6px 0 10px; color:#e91e63;">After cancelling, you'll receive a refund added to your wallet.</p>
+
+          <p><b>Days counted as used:</b> ${passedDays} day(s)</p>
+          <p><b>Quantity:</b> ${quantity}</p>
+          <p><b>Meals/day counted:</b> ${mealsCount}</p>
+
+          <hr style="margin:8px 0; border:none; border-top:1px solid #eee;" />
+
+          <p><b>Per-day price:</b> ₹${perDayPrice.toFixed(2)}</p>
+          <p><b>Used amount:</b> ${passedDays} × ₹${perDayPrice.toFixed(2)} × ${mealsCount} × ${quantity} = <b>₹${mealCostTillNow.toFixed(2)}</b></p>
+          <p><b>Cancellation charge (2%):</b> ₹${lateCharges.toFixed(2)}</p>
+
+          <div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd;">
+            <p><b>Total Deduction:</b> ₹${totalDeductions.toFixed(2)}</p>
+            <p style="color:#27ae60; font-size:16px;"><b>Refund Amount: ₹${refundAmount.toFixed(2)}</b></p>
+          </div>
+        </div>
+      `;
+
+      // SweetAlert with calculation breakdown
+      const result = await Swal.fire({
+        title: 'Confirm Cancellation',
+        html: breakdownHtml,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Cancel',
+        cancelButtonText: 'No, Keep It',
+        confirmButtonColor: '#e91e63',
+        cancelButtonColor: '#6c757d',
+        background: '#fff',
+        reverseButtons: true,
+        customClass: { popup: 'swal-popup-rounded' }
+      });
+
+      if (result.isConfirmed) {
+        // Optionally: before submit, you might want to set hidden inputs so server gets usedDays/usedAmount/refund
+        // If those fields exist on server side, you can append them here to the form:
+        const usedDaysInput = form.querySelector('input[name="daysUsed"]') || document.createElement('input');
+        usedDaysInput.type = 'hidden';
+        usedDaysInput.name = 'daysUsed';
+        usedDaysInput.value = String(passedDays);
+        form.appendChild(usedDaysInput);
+
+        const usedAmountInput = form.querySelector('input[name="usedAmount"]') || document.createElement('input');
+        usedAmountInput.type = 'hidden';
+        usedAmountInput.name = 'usedAmount';
+        usedAmountInput.value = String(mealCostTillNow.toFixed(2));
+        form.appendChild(usedAmountInput);
+
+        const refundInput = form.querySelector('input[name="refundAmount"]') || document.createElement('input');
+        refundInput.type = 'hidden';
+        refundInput.name = 'refundAmount';
+        refundInput.value = String(refundAmount.toFixed(2));
+        form.appendChild(refundInput);
+
+        showLoader();
+        // small delay so loader becomes visible before navigation
+        setTimeout(() => form.submit(), 300);
+        return;
+      } else {
+        // do nothing, user kept the order
+        return;
+      }
+    });
+  });
+
+});
+</script>
+
+<style>
+/* match your theme - optional */
+.swal-popup-rounded {
+  border-radius: 1rem !important;
+  padding: 20px !important;
+  background: #fff0f6 !important;
+  box-shadow: 0 6px 25px rgba(233, 30, 99, 0.15);
+}
+.swal2-title {
+  color: #e91e63 !important;
+  font-weight: 700;
+}
+
+
+</style>
+
+<%- include('../partials/loading') %>
+</body>
+</html>

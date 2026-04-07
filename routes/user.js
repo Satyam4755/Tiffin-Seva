@@ -1,0 +1,51 @@
+const express = require('express');
+const userRouter = express.Router();
+const {
+  homePage,
+  venderDetails,
+  favouriteList,
+  booking,
+  booked,
+  postfavouriteList,
+  postUnfavourite,
+  Postbooking,
+  submitBooking,
+  postCancelBooking,
+  getOption,
+  postOption,
+  getMessage,
+  postvenderDetails,
+  postDeleteReview,
+  postHomePage,
+  postProblem,
+  deleteProfilePicture,
+  deleteBannerPicture,
+  getReferral
+} = require('../controller/user');
+
+// GET routes
+userRouter.get('/', homePage);
+userRouter.get('/user/vender-list/:venderId', venderDetails);
+userRouter.get('/user/favourite_list', favouriteList);
+userRouter.get('/user/booking/:venderId', booking);
+userRouter.get('/user/booked', booked);
+userRouter.get('/user/submit_booking', submitBooking);
+userRouter.get('/user/options',getOption)
+userRouter.get('/user/message', getMessage); // ✅ added
+userRouter.get('/user/referral', getReferral); // ✅ added
+
+// POST routes
+userRouter.post('/user/favourite_list', postfavouriteList);
+userRouter.post('/user/unfavourite/:venderId', postUnfavourite);
+userRouter.post('/user/submit_booking/:venderId', Postbooking);
+userRouter.post('/user/cancel_booking/:orderId', postCancelBooking); // ✅ added
+userRouter.post('/user/report_problem/:orderId', postProblem);
+userRouter.post('/user/options',postOption)
+userRouter.post('/user/vender-list/:venderId', postvenderDetails); 
+userRouter.post('/user/delete-review/:venderId', postDeleteReview);
+userRouter.post('/',postHomePage); // ✅ added
+
+userRouter.delete("/delete-profile-pic/:id",deleteProfilePicture);
+userRouter.delete("/delete-banner-pic/:id",deleteBannerPicture);
+
+module.exports = userRouter;

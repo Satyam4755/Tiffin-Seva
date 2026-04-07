@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      padding: 20px;
+    }
+
+    .login-card, .admin-card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+
+    input {
+      padding: 10px;
+      width: 80%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table th, table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    table th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .paid {
+      color: green;
+      font-weight: bold;
+    }
+
+    .pending {
+      color: red;
+      font-weight: bold;
+    }
+    /* Paid / unpaid indicators */
+  .paid-indicator {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+
+  .paid-indicator.paid {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .paid-indicator.unpaid {
+    background-color: #ccc;
+    color: #777;
+  }
+
+  /* Optional: Hover effect for unpaid (to show it’s clickable) */
+  .paid-indicator.unpaid:hover {
+    background-color: #aaa;
+    cursor: pointer;
+  }
+
+  /* Remove default checkbox styling */
+  .toggle-checkbox input {
+    display: none;
+  }
+
+  .toggle-checkbox span {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .toggle-checkbox input:checked + span {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .toggle-checkbox input:not(:checked) + span {
+    background-color: #ccc;
+    color: #777;
+  }
+  </style>
+</head>
+<body>
+  <% if (!isAuthorised) { %>
+    <div class="login-card">
+      <h2>Admin Login</h2>
+      <form method="POST" action="/admin">
+        <input type="password" name="password" placeholder="Enter Admin Password" required />
+        <br />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="admin-card">
+  <h1>Admin Portal ✅</h1>
+
+  <% if (adminData && adminData.length > 0) { %>
+    <% adminData.forEach(vendor => { %>
+
+      <h2>Vendor: <%= vendor.vendorName %></h2>
+
+      <p>
+        <strong>Total Vendor Share:</strong> ₹<%= vendor.totalVendorShare %> |
+        <strong>Total Paid:</strong> ₹<%= vendor.totalPaid %> |
+        <strong>Total Remaining:</strong> ₹<%= vendor.totalRemaining %>
+      </p>
+
+      <p>
+        <strong>Phone:</strong> <%= vendor.phoneNumber %> |
+        <strong>Bank:</strong> <%= vendor.bankName %> |
+        <strong>Account No:</strong> <%= vendor.bankAccountNumber %> |
+        <strong>IFSC:</strong> <%= vendor.bankIFSC %> |
+        <strong>Holder:</strong> <%= vendor.accountHolderName %>
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Guest Name</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Paid</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% vendor.payouts.forEach(payout => { %>
+
+            <tr>
+              <!-- Order ID -->
+              <td><%= payout.orderId %></td>
+
+              <!-- Guest -->
+              <td><%= payout.guestName %></td>
+
+              <!-- Amount -->
+              <td>₹<%= payout.vendorShare %></td>
+
+              <!-- Status -->
+              <td class="<%= payout.status %>">
+                <%= payout.status.toUpperCase() %>
+              </td>
+
+              <!-- DUE DATE -->
+              <td>
+                <% if (payout.subscription_model === 'Per Month') { %>
+                  <!-- Per-month = start + 7 days -->
+                  <%= new Date(
+                        new Date(payout.startingDate).getTime() + 7 * 24 * 60 * 60 * 1000
+                      ).toLocaleDateString() %>
+                <% } else { %>
+                  <!-- Per-day = startingDate -->
+                  <%= new Date(payout.startingDate).toLocaleDateString() %>
+                <% } %>
+              </td>
+
+              <!-- Payment Checkbox -->
+              <td>
+                <form action="/admin/mark-paid/<%= payout.orderId %>" 
+                      method="POST" 
+                      style="display:inline;">
+
+                  <label class="toggle-checkbox">
+                    <input type="checkbox"
+                           name="paid"
+                           <%= payout.status === 'paid' ? 'checked disabled' : '' %>
+                           onchange="this.form.submit()" />
+
+                    <span class="paid-indicator <%= payout.status === 'paid' ? 'paid' : 'unpaid' %>">
+                      <%= payout.status === 'paid' ? '✅' : '⏳' %>
+                    </span>
+                  </label>
+
+                </form>
+              </td>
+            </tr>
+
+          <% }) %>
+        </tbody>
+      </table>
+
+      <hr style="margin:40px 0; border:1px dashed #ccc;">
+
+    <% }) %>
+  <% } else { %>
+
+    <p>No vendors or payouts found.</p>
+
+  <% } %>
+
+</div>
+  <% } %>
+</body>
+</html>

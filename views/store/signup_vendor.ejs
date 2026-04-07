@@ -1,0 +1,835 @@
+<%- include('../partials/head') %>
+  <style>
+    .swal-popup-rounded {
+      border-radius: 1rem !important;
+      padding: 20px !important;
+    }
+
+    .certificate-actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-start;
+    }
+
+    .view-link {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1.5px solid #4CAF50;
+      border-radius: 8px;
+      background: #E8F5E9;
+      color: #2E7D32;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .view-link:hover {
+      background: #4CAF50;
+      color: #fff;
+      transform: scale(1.03);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* reuse the same look but vendor page slightly wider */
+    body {
+      background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      /* display: flex; */
+      /* justify-content: center; */
+      /* align-items: center; */
+      min-height: 100vh;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 560px;
+      margin: 20px auto;
+      border: 2px solid #f8bbd0;
+    }
+
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #e91e63;
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    select {
+      width: 92.5%;
+      padding: 12px 15px;
+      border: 2px solid #f8bbd0;
+      border-radius: 1rem;
+      outline: none;
+      font-size: 1rem;
+      background: #fce4ec;
+    }
+
+    input[type="file"] {
+      width: 95%;
+      padding: 8px 10px;
+      border: 2px solid #f8bbd0;
+      border-radius: 1rem;
+      background: #fce4ec;
+      cursor: pointer;
+    }
+
+    label {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 1rem;
+      pointer-events: none;
+      background: #fce4ec;
+      padding: 0 5px;
+      border-radius: 0.5rem;
+    }
+
+    input:focus+label {
+      top: -10px;
+      font-size: 0.85rem;
+      color: #e91e63;
+      background: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #e91e63, #f06292);
+      color: #fff;
+      border: none;
+      border-radius: 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    @media (max-width: 768px) {
+      .form-container {
+        width: 92%;
+        padding: 1.3rem;
+      }
+    }
+
+
+    .swal2-popup {
+      border-radius: 1rem !important;
+      background: #fff0f6 !important;
+      animation: fadeUp 0.3s ease-in-out;
+      box-shadow: 0 6px 25px rgba(233, 30, 99, 0.2);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .swal2-title {
+      color: #e91e63 !important;
+      font-weight: 600 !important;
+    }
+
+    .swal2-confirm {
+      background: #e91e63 !important;
+      border: none !important;
+    }
+
+    .swal2-cancel {
+      background: #999 !important;
+      border: none !important;
+    }
+  </style>
+
+  <!-- SweetAlert2 CSS & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <body>
+    <%- include('../partials/nav') %>
+
+      <div class="form-container" role="main" aria-labelledby="form-title">
+        <h2 id="form-title">
+          <%= editing ? 'Edit Vendor Profile' : 'Vendor Sign Up' %>
+        </h2>
+
+        <!-- Hidden flags -->
+        <input type="hidden" id="isEditing" value="<%= editing ? 'true' : 'false' %>">
+        <input type="hidden" id="skipOtpStage" value="<%= skipOtpStage ? 'true' : 'false' %>">
+
+        <% if (!editing) { %>
+          <!-- Stage 1: Email input for OTP -->
+          <div id="emailStage" class="<%= skipOtpStage ? 'hidden' : '' %>">
+            <div class="input-group">
+              <input type="email" id="emailOnly" placeholder="Enter your email" value="<%= oldInput?.email || '' %>"
+                required />
+            </div>
+            <button id="sendOtpBtn" class="btn-primary">Send OTP</button>
+          </div>
+
+          <!-- Stage 2: OTP input -->
+          <div id="otpStage" class="hidden">
+            <div class="input-group">
+              <input type="text" id="otpInput" placeholder="Enter OTP" required />
+            </div>
+            <button id="verifyOtpBtn" class="btn-secondary">Verify OTP</button>
+          </div>
+          <% } %>
+
+            <!-- Stage 3: Full vendor form -->
+            <form id="vendorForm" action="<%= editing ? '/edit_details' : '/signup-vendor' %>" method="post"
+              enctype="multipart/form-data" class="<%= editing || skipOtpStage ? '' : 'hidden' %>" novalidate>
+
+              <input type="hidden" name="id" value="<%= editing ? user._id : '' %>">
+              <input type="hidden" name="userType" value="vender">
+
+              <!-- Preserve oldInput email for OTP skip -->
+              <% if (oldInput?.email) { %>
+                <input type="hidden" name="email" value="<%= oldInput.email %>">
+                <% } %>
+
+
+                  <%- include('../partials/errorHandel') %>
+
+                    <!-- Profile Picture -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Profile Picture</b>
+                      <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
+                      <input type="hidden" name="oldProfilePicture"
+                        value="<%= oldInput?.profilePicture || (editing ? user.profilePicture : '') %>">
+                      <input type="hidden" name="oldProfilePicturePublicId"
+                        value="<%= oldInput?.profilePicturePublicId || (editing ? user.profilePicturePublicId : '') %>">
+                      <% if (oldInput?.profilePicture || (editing && user.profilePicture)) { %>
+                        <img src="<%= oldInput?.profilePicture || user.profilePicture %>" alt="Profile Preview"
+                          style="max-height:100px; margin-top:10px;">
+                        <button type="button" id="deleteProfilePicBtn"
+                          style="margin-left:10px; color:#fff; background:red; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">
+                          Delete
+                        </button>
+                        <% } %>
+                    </div>
+
+                    <!-- Banner Image -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Banner Image</b>
+                      <input type="file" id="bannerImage" name="bannerImage" accept="image/*" />
+                      <input type="hidden" name="oldBannerImage"
+                        value="<%= oldInput?.bannerImage || (editing ? user.bannerImage : '') %>">
+                      <input type="hidden" name="oldBannerImagePublicId"
+                        value="<%= oldInput?.bannerImagePublicId || (editing ? user.bannerImagePublicId : '') %>">
+                      <% if (oldInput?.bannerImage || (editing && user.bannerImage)) { %>
+                        <img src="<%= oldInput?.bannerImage || user.bannerImage %>" alt="Banner Preview"
+                          style="max-height:100px; margin-top:10px;">
+                        <button type="button" id="deleteBannerPicBtn"
+                          style="margin-left:10px; color:#fff; background:red; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">
+                          Delete
+                        </button>
+                        <% } %>
+                    </div>
+
+                    <!-- Aadhaar Card Upload -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Important Document</b>
+                      <input type="file" id="aadhaarCard" name="aadhaarCard" accept="image/png, image/jpeg, image/jpg"
+                        required />
+
+                      <!-- Preserve old file info -->
+                      <input type="hidden" name="oldAadhaarCard"
+                        value="<%= oldInput?.aadhaarCard?.url || (editing ? user.aadhaarCard?.url : '') %>">
+                      <input type="hidden" name="oldAadhaarCardPublicId"
+                        value="<%= oldInput?.aadhaarCard?.publicId || (editing ? user.aadhaarCard?.publicId : '') %>">
+
+                      <% const aadhaarUrl=oldInput?.aadhaarCard?.url || (editing ? user.aadhaarCard?.url : '' ); %>
+
+                        <% if (aadhaarUrl) { %>
+                          <div class="certificate-actions">
+                            <img src="<%= aadhaarUrl %>" alt="Aadhaar Preview"
+                              style="max-height:120px; margin-top:10px; border:1px solid #ccc; border-radius:8px;">
+                            <a href="<%= aadhaarUrl %>" target="_blank" class="view-link"
+                              style="display:block; margin-top:5px;">
+                              🔍 View Important Document
+                            </a>
+                          </div>
+                          <% } %>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Full Name</b>
+                      <input type="text" id="firstName" name="firstName" placeholder="Full name"
+                        value="<%= oldInput?.firstName || (editing ? user.firstName : '') %>" required />
+                    </div>
+
+                    <!-- Service Name -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Service Name</b>
+                      <input type="text" id="serviceName" name="serviceName" placeholder="Enter your Service Name"
+                        value="<%= oldInput?.serviceName || (editing ? user.serviceName : '') %>" required />
+                    </div>
+
+                    <!-- Location -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Location</b>
+                      <input type="text" id="location" name="location" placeholder="Enter your location"
+                        value="<%= oldInput?.location || (editing ? user.location : '') %>" required />
+                      <input type="hidden" id="lat" name="lat"
+                        value="<%= oldInput?.lat || (editing ? user.lat : '') %>">
+                      <input type="hidden" id="lng" name="lng"
+                        value="<%= oldInput?.lng || (editing ? user.lng : '') %>">
+                    </div>
+
+                    <div class="input-group"
+                      style="text-align:center; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                      <button type="button" id="useCurrentBtn" class="btn-primary">Use my current location</button>
+                      <button type="button" id="pinFromMapBtn" class="btn-secondary">📍 Pin from Map</button>
+                    </div>
+
+                    <!-- ✅ Service Area Config (New Radius Logic) -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Delivery Radius (KM)</b>
+                      <input type="number" id="deliveryRadius" name="deliveryRadius" min="0" step="0.1"
+                        placeholder="e.g. 5"
+                        value="<%= (typeof oldInput?.deliveryRadius !== 'undefined' ? oldInput.deliveryRadius : (editing && typeof user.deliveryRadius !== 'undefined' ? user.deliveryRadius : '')) %>"
+                        required />
+                      <small style="color: #666; display:block; margin-top:4px;">Enter the maximum distance you deliver
+                        to.</small>
+                    </div>
+
+                    <div class="input-group"
+                      style="background:#fff0f6; padding:15px; border-radius:10px; border:1px solid #f8bbd0;">
+                      <b style="color: #e91e63;">Directional Limits (Optional)</b>
+                      <p style="font-size:13px; color:#555; margin-top:2px;">
+                        Set limits for specific directions. Leave <b>0</b> or empty to follow the main radius.
+                      </p>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+                        <div>
+                          <label
+                            style="position:static; transform:none; background:none; color:#333; font-size:0.9rem;">North
+                            Limit (KM)</label>
+                          <input type="number" id="limitNorth" name="limitNorth" min="0" step="0.1" placeholder="North"
+                            value="<%= (typeof oldInput?.limitNorth !== 'undefined' ? oldInput.limitNorth : (editing && typeof user.limitNorth !== 'undefined' ? user.limitNorth : '')) %>"
+                            style="width:100%;">
+                        </div>
+                        <div>
+                          <label
+                            style="position:static; transform:none; background:none; color:#333; font-size:0.9rem;">South
+                            Limit (KM)</label>
+                          <input type="number" id="limitSouth" name="limitSouth" min="0" step="0.1" placeholder="South"
+                            value="<%= (typeof oldInput?.limitSouth !== 'undefined' ? oldInput.limitSouth : (editing && typeof user.limitSouth !== 'undefined' ? user.limitSouth : '')) %>"
+                            style="width:100%;">
+                        </div>
+                        <div>
+                          <label
+                            style="position:static; transform:none; background:none; color:#333; font-size:0.9rem;">East
+                            Limit (KM)</label>
+                          <input type="number" id="limitEast" name="limitEast" min="0" step="0.1" placeholder="East"
+                            value="<%= (typeof oldInput?.limitEast !== 'undefined' ? oldInput.limitEast : (editing && typeof user.limitEast !== 'undefined' ? user.limitEast : '')) %>"
+                            style="width:100%;">
+                        </div>
+                        <div>
+                          <label
+                            style="position:static; transform:none; background:none; color:#333; font-size:0.9rem;">West
+                            Limit (KM)</label>
+                          <input type="number" id="limitWest" name="limitWest" min="0" step="0.1" placeholder="West"
+                            value="<%= (typeof oldInput?.limitWest !== 'undefined' ? oldInput.limitWest : (editing && typeof user.limitWest !== 'undefined' ? user.limitWest : '')) %>"
+                            style="width:100%;">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Preview Map -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Service Area Preview</b>
+                      <div id="previewMap"
+                        style="height: 300px; width: 100%; border-radius: 10px; margin-top:10px; border:2px solid #ddd;">
+                      </div>
+                    </div>
+
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+                    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+                    <script>
+                      (function () {
+                        let previewMap, circleLayer, markerLayer, directionGroup;
+
+                        // Initialize Map
+                        function initPreviewMap() {
+                          const latEl = document.getElementById('lat');
+                          const lngEl = document.getElementById('lng');
+                          const initialLat = parseFloat(latEl?.value) || 26.8467;
+                          const initialLng = parseFloat(lngEl?.value) || 80.9462;
+
+                          if (!previewMap) {
+                            previewMap = L.map('previewMap').setView([initialLat, initialLng], 12);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(previewMap);
+                            markerLayer = L.marker([initialLat, initialLng]).addTo(previewMap);
+                            directionGroup = L.layerGroup().addTo(previewMap);
+                          }
+                          updateCircle();
+                        }
+
+                        function updateCircle() {
+                          const radiusKM = parseFloat(document.getElementById('deliveryRadius').value) || 0;
+                          const lat = parseFloat(document.getElementById('lat').value);
+                          const lng = parseFloat(document.getElementById('lng').value);
+
+                          if (markerLayer && !isNaN(lat) && !isNaN(lng)) {
+                            const newLatLng = new L.LatLng(lat, lng);
+                            markerLayer.setLatLng(newLatLng);
+                            previewMap.panTo(newLatLng);
+                          }
+
+                          if (circleLayer) previewMap.removeLayer(circleLayer);
+                          directionGroup.clearLayers(); // Clear old lines/labels
+
+                          if (!isNaN(lat) && !isNaN(lng)) {
+                            const radiusMeters = (radiusKM > 0 ? radiusKM : 1) * 1000; // default 1km if 0 for visibility
+
+                            // Draw Circle
+                            if (radiusKM > 0) {
+                              circleLayer = L.circle([lat, lng], {
+                                color: '#e91e63',
+                                fillColor: '#f48fb1',
+                                fillOpacity: 0.3,
+                                radius: radiusMeters
+                              }).addTo(previewMap);
+                              previewMap.fitBounds(circleLayer.getBounds());
+                            }
+
+                            // --- Draw Direction Lines & Labels ---
+                            const lineDistance = radiusMeters * 1.2; // extending slightly beyond radius
+
+                            // Helpers to calculate destination points
+                            const toRad = (d) => d * Math.PI / 180;
+                            const toDeg = (r) => r * 180 / Math.PI;
+                            const R = 6371e3; // Earth radius in meters
+
+                            const getPoint = (lat, lng, bearing, dist) => {
+                              const φ1 = toRad(lat), λ1 = toRad(lng);
+                              const brng = toRad(bearing);
+                              const φ2 = Math.asin(Math.sin(φ1) * Math.cos(dist / R) + Math.cos(φ1) * Math.sin(dist / R) * Math.cos(brng));
+                              const λ2 = λ1 + Math.atan2(Math.sin(brng) * Math.sin(dist / R) * Math.cos(φ1), Math.cos(dist / R) - Math.sin(φ1) * Math.sin(φ2));
+                              return [toDeg(φ2), toDeg(λ2)];
+                            };
+
+                            const dirs = [
+                              { label: 'N', angle: 0, color: 'blue' },
+                              { label: 'E', angle: 90, color: 'green' },
+                              { label: 'S', angle: 180, color: 'blue' },
+                              { label: 'W', angle: 270, color: 'green' }
+                            ];
+
+                            dirs.forEach(d => {
+                              const endPoint = getPoint(lat, lng, d.angle, lineDistance);
+
+                              // Line
+                              L.polyline([[lat, lng], endPoint], {
+                                color: d.color,
+                                weight: 2,
+                                opacity: 0.6,
+                                dashArray: '5, 5'
+                              }).addTo(directionGroup);
+
+                              // Label
+                              L.marker(endPoint, {
+                                icon: L.divIcon({
+                                  className: 'direction-label',
+                                  html: `<b style="color:${d.color}; font-size:16px; background:white; padding:2px 5px; border-radius:4px; border:1px solid ${d.color};">${d.label}</b>`,
+                                  iconSize: [30, 20],
+                                  iconAnchor: [15, 10]
+                                })
+                              }).addTo(directionGroup);
+                            });
+                          }
+                        }
+
+                        // Watch for inputs
+                        document.getElementById('deliveryRadius')?.addEventListener('input', updateCircle);
+
+                        const observer = new MutationObserver(updateCircle);
+                        const lLatInput = document.getElementById('lat');
+                        const lLngInput = document.getElementById('lng');
+                        if (lLatInput) observer.observe(lLatInput, { attributes: true, attributeFilter: ['value'] });
+                        if (lLngInput) observer.observe(lLngInput, { attributes: true, attributeFilter: ['value'] });
+
+                        document.addEventListener('DOMContentLoaded', () => { setTimeout(initPreviewMap, 500); });
+                      })();
+                    </script>
+
+                    <div class="input-group">
+                      <b style="color: maroon;">Price per Day</b>
+                      <input type="number" id="pricePerDay" name="pricePerDay" min="0" placeholder="Price per Meal"
+                        value="<%= oldInput?.pricePerDay || (editing ? user.pricePerDay : '') %>" required />
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="input-group">
+
+                      <b style="color: maroon;">Price per Month</b>
+
+                      <!-- Both time -->
+                      <br>
+
+                      <b style="color: rgb(0, 45, 128); font-size: small;">Both Time</b>
+                      <input type="number" id="pricePerMonthBoth" name="pricePerMonthBoth" min="0"
+                        placeholder="Price per Month (Both Meals)"
+                        value="<%= oldInput?.pricePerMonthBoth || (editing ? user.pricePerMonthBoth : '') %>"
+                        required />
+
+                      <!-- Single time -->
+
+                      <b style="color: rgb(0, 45, 128); font-size: small;">Single Time</b>
+                      <input type="number" id="pricePerMonthSingle" name="pricePerMonthSingle" min="0"
+                        placeholder="Price per Month (Single Meal)"
+                        value="<%= oldInput?.pricePerMonthSingle || (editing ? user.pricePerMonthSingle : '') %>"
+                        required />
+                    </div>
+
+                    <!-- 📞 Phone Number (Mandatory) -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Phone Number</b>
+                      <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number"
+                        value="<%= oldInput?.phoneNumber || (editing ? user.phoneNumber : '') %>" required />
+                    </div>
+
+                    <!-- 🏦 Bank Details (Optional) -->
+                    <div class="input-group">
+                      <b style="color: maroon;">Bank Details (Optional)</b>
+                      <p style="font-size:14px; color:#555; margin-top:6px;">
+                        💡 If you have your UPI registered with this mobile number, you can leave these fields blank.
+                        Otherwise, please fill in your bank details below.
+                      </p>
+                    </div>
+
+                    <div class="input-group">
+                      <b style="color: maroon;">Bank Account Number</b>
+                      <input type="text" id="bankAccountNumber" name="bankAccountNumber"
+                        placeholder="Bank Account Number"
+                        value="<%= oldInput?.bankAccountNumber || (editing ? user.bankAccountNumber : '') %>">
+                    </div>
+
+                    <div class="input-group">
+                      <b style="color: maroon;">Bank IFSC Code</b>
+                      <input type="text" id="bankIFSC" name="bankIFSC" placeholder="Bank IFSC Code"
+                        value="<%= oldInput?.bankIFSC || (editing ? user.bankIFSC : '') %>">
+                    </div>
+
+                    <div class="input-group">
+                      <b style="color: maroon;">Bank Name</b>
+                      <input type="text" id="bankName" name="bankName" placeholder="Bank Name"
+                        value="<%= oldInput?.bankName || (editing ? user.bankName : '') %>">
+                    </div>
+
+                    <div class="input-group">
+                      <b style="color: maroon;">Account Holder Name</b>
+                      <input type="text" id="accountHolderName" name="accountHolderName"
+                        placeholder="Account Holder Name"
+                        value="<%= oldInput?.accountHolderName || (editing ? user.accountHolderName : '') %>">
+                    </div>
+
+                    <% if (!editing) { %>
+                      <div class="input-group">
+                        <b style="color: maroon;">Password</b>
+                        <input type="password" id="password" name="password" minlength="6"
+                          placeholder="Enter your password" required />
+                      </div>
+                      <div class="input-group">
+                        <b style="color: maroon;">Confirm Password</b>
+                        <input type="password" id="confirmPassword" name="confirmPassword" minlength="6"
+                          placeholder="Confirm your password" required />
+                      </div>
+                      <% } %>
+
+                        <button type="submit" id="submitBtn">
+                          <%= editing ? 'Update Profile' : 'Create Vendor Account' %>
+                        </button>
+
+                        <input type="hidden" name="profilePictureUrl" value="<%= profilePictureUrl || '' %>">
+                        <input type="hidden" name="profilePicturePublicId" value="<%= profilePicturePublicId || '' %>">
+                        <input type="hidden" name="bannerImageUrl" value="<%= bannerImageUrl || '' %>">
+                        <input type="hidden" name="bannerImagePublicId" value="<%= bannerImagePublicId || '' %>">
+
+
+            </form>
+
+            <% if (!editing) { %>
+              <div class="login-link">Already have an account? <a href="/login"><strong>Log In</strong></a></div>
+              <% } %>
+      </div>
+
+
+      <!-- Google Maps Pin Modal -->
+      <div id="mapModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+        <div
+          style="width:90%; max-width:600px; height:70%; background:#fff; border-radius:12px; overflow:hidden; position:relative;">
+          <div id="map" style="width:100%; height:100%;"></div>
+          <button id="closeMap"
+            style="position:absolute;top:12px;right:12px;background:#ffffff;color:#007bff;font-weight:600;font-size:15px;border:1.5px solid #007bff;border-radius:8px;padding:6px 14px;cursor:pointer;"
+            onmouseover="this.style.background='#007bff'; this.style.color='#fff'"
+            onmouseout="this.style.background='#fff'; this.style.color='#007bff'">Select</button>
+        </div>
+      </div>
+
+
+      <!-- Google Maps -->
+      <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete"
+        async defer></script>
+
+      <script>
+
+        // Delete Profile Picture
+        const deleteProfileBtn = document.getElementById("deleteProfilePicBtn");
+        deleteProfileBtn?.addEventListener("click", async () => {
+          if (!confirm("Are you sure you want to delete your profile picture?")) return;
+          try {
+            const res = await fetch(`/delete-profile-pic/<%= user._id %>`, { method: "DELETE" });
+            const data = await res.json();
+            if (data.success) {
+              alert("Profile picture deleted successfully!");
+              location.reload();
+            } else alert(data.message || "Could not delete profile picture.");
+          } catch (err) { alert("Error deleting profile picture."); console.error(err); }
+        });
+
+        // Delete Banner Image
+        const deleteBannerBtn = document.getElementById("deleteBannerPicBtn");
+        deleteBannerBtn?.addEventListener("click", async () => {
+          if (!confirm("Are you sure you want to delete your banner image?")) return;
+          try {
+            const res = await fetch(`/delete-banner-pic/<%= user._id %>`, { method: "DELETE" });
+            const data = await res.json();
+            if (data.success) {
+              alert("Banner image deleted successfully!");
+              location.reload();
+            } else alert(data.message || "Could not delete banner image.");
+          } catch (err) { alert("Error deleting profile picture."); console.error(err); }
+        });
+
+
+        const isEditing = document.getElementById("isEditing")?.value === "true";
+
+        // ===== OTP flow =====
+        if (!isEditing) {
+          const emailStage = document.getElementById("emailStage");
+          const otpStage = document.getElementById("otpStage");
+          const vendorForm = document.getElementById("vendorForm");
+          const sendOtpBtn = document.getElementById("sendOtpBtn");
+          const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+          let verifiedEmail = "";
+
+          sendOtpBtn?.addEventListener("click", async () => {
+            const email = document.getElementById("emailOnly").value;
+            if (!email) return alert("Enter email");
+            sendOtpBtn.textContent = "Sending OTP…";
+            sendOtpBtn.disabled = true;
+
+            try {
+              const res = await fetch("/api/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+              });
+              const data = await res.json();
+              if (data.success) {
+                verifiedEmail = email;
+                emailStage.classList.add("hidden");
+                otpStage.classList.remove("hidden");
+              } else alert(data.message);
+            } catch {
+              alert("Error sending OTP");
+            } finally {
+              sendOtpBtn.textContent = "Send OTP";
+              sendOtpBtn.disabled = false;
+            }
+          });
+
+          verifyOtpBtn?.addEventListener("click", async () => {
+            const otp = document.getElementById("otpInput").value;
+            if (!otp) return alert("Enter OTP");
+            verifyOtpBtn.textContent = "Verifying…";
+            verifyOtpBtn.disabled = true;
+
+            try {
+              const res = await fetch("/api/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ otp })
+              });
+              const data = await res.json();
+              if (data.success) {
+                otpStage.classList.add("hidden");
+                vendorForm.classList.remove("hidden");
+
+                if (!vendorForm.querySelector('input[name="email"]')) {
+                  const hiddenEmail = document.createElement("input");
+                  hiddenEmail.type = "hidden";
+                  hiddenEmail.name = "email";
+                  hiddenEmail.value = verifiedEmail;
+                  vendorForm.prepend(hiddenEmail);
+                }
+              } else alert(data.message);
+            } catch { alert("Error verifying OTP"); }
+            finally { verifyOtpBtn.textContent = "Verify OTP"; verifyOtpBtn.disabled = false; }
+          });
+        }
+
+        // ===== Google Maps autocomplete & location logic =====
+        function initAutocomplete() {
+          const input = document.getElementById("location");
+          if (!window.google || !input) return;
+          const autocomplete = new google.maps.places.Autocomplete(input);
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.geometry) {
+              document.getElementById("lat").value = place.geometry.location.lat();
+              document.getElementById("lng").value = place.geometry.location.lng();
+            }
+          });
+        }
+
+        const useCurrentBtn = document.getElementById("useCurrentBtn");
+        const pinFromMapBtn = document.getElementById("pinFromMapBtn");
+        const mapModal = document.getElementById("mapModal");
+        const closeMap = document.getElementById("closeMap");
+        const locationInput = document.getElementById("location");
+        const latInput = document.getElementById("lat");
+        const lngInput = document.getElementById("lng");
+
+        useCurrentBtn?.addEventListener("click", () => {
+          if (!navigator.geolocation) return alert("Geolocation not supported.");
+          useCurrentBtn.disabled = true;
+          useCurrentBtn.textContent = "Detecting…";
+          navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude, lng = pos.coords.longitude;
+            latInput.value = lat; lngInput.value = lng;
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+              if (status === "OK" && results[0]) locationInput.value = results[0].formatted_address;
+              useCurrentBtn.disabled = false; useCurrentBtn.textContent = "Use my current location";
+            });
+          }, (err) => {
+            alert("Could not get your location: " + err.message);
+            useCurrentBtn.disabled = false; useCurrentBtn.textContent = "Use my current location";
+          });
+        });
+
+        pinFromMapBtn?.addEventListener("click", () => {
+          mapModal.style.display = "flex";
+          if (navigator.geolocation)
+            navigator.geolocation.getCurrentPosition((pos) => initMap(pos.coords.latitude, pos.coords.longitude),
+              () => initMap(26.8467, 80.9462));
+          else initMap(26.8467, 80.9462);
+        });
+
+        function initMap(lat, lng) {
+          setTimeout(() => {
+            const map = new google.maps.Map(document.getElementById("map"), { center: { lat, lng }, zoom: 14 });
+            const marker = new google.maps.Marker({ position: { lat, lng }, map, draggable: true });
+            const geocoder = new google.maps.Geocoder();
+            updateLocation(geocoder, lat, lng);
+            map.addListener("click", (event) => {
+              const selectedLat = event.latLng.lat();
+              const selectedLng = event.latLng.lng();
+              marker.setPosition(event.latLng);
+              updateLocation(geocoder, selectedLat, selectedLng);
+            });
+          }, 200);
+        }
+
+        function updateLocation(geocoder, lat, lng) {
+          latInput.value = lat; lngInput.value = lng;
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === "OK" && results[0]) locationInput.value = results[0].formatted_address;
+          });
+        }
+
+        closeMap?.addEventListener("click", () => { mapModal.style.display = "none"; });
+      </script>
+
+
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const form = document.getElementById("vendorForm");
+          const submitBtn = document.getElementById("submitBtn");
+          const isEditing = document.getElementById("isEditing")?.value === "true";
+
+          if (form && submitBtn) {
+            submitBtn.addEventListener("click", async (e) => {
+              if (isEditing) return; // skip popup on edit
+              e.preventDefault(); // stop immediate submission
+
+              // ✅ Show simple Terms popup
+              const result = await Swal.fire({
+                title: 'Terms & Conditions',
+                html: `
+          <div style="text-align:left; font-size:15px; color:#444;">
+            <p style="margin-bottom:10px;">
+              Before creating your vendor account, please confirm that you have read and accepted our
+              <a href="/terms-and-conditions" target="_blank" style="color:#007bff; font-weight:500; text-decoration:underline;">
+                Terms & Conditions
+              </a>.
+            </p>
+          </div>
+        `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Accept & Continue',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#e91e63',
+                cancelButtonColor: '#6c757d',
+                background: '#fff',
+                focusConfirm: false,
+                customClass: { popup: 'swal-popup-rounded' },
+              });
+
+              if (result.isConfirmed) {
+                // ✅ Properly trigger native form submission (so loader works)
+                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                if (form.dispatchEvent(submitEvent)) {
+                  // The form's "submit" listener runs → loader shows
+                  form.submit(); // Continue with actual submission
+                }
+              }
+            });
+          }
+        });
+      </script>
+
+      <%- include('../partials/loading') %>
+  </body>
+
+  </html>

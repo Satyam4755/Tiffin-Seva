@@ -1,0 +1,975 @@
+<%- include('../partials/head') %>
+  <%- include('../partials/nav') %>
+
+
+    <style>
+      /* --- Reset & Global Variables --- */
+      :root {
+        --primary: #4f46e5;
+        /* Modern indigo/blue */
+        --primary-dark: #4338ca;
+        --secondary: #ec4899;
+        /* Pink for accents/hearts */
+        --bg-light: #f3f4f6;
+        /* Light gray background */
+        --white: #ffffff;
+        --text-dark: #1f2937;
+        --text-muted: #6b7280;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --radius: 12px;
+      }
+
+      body {
+        background-color: var(--bg-light);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-dark);
+        margin: 0;
+        padding: 0;
+      }
+
+      /* --- Layout & Container --- */
+      .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* --- Hero / Banner Section --- */
+      .profile-header {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: 24px;
+        position: relative;
+      }
+
+      .banner-wrapper {
+        height: 340px;
+        width: 100%;
+        background: linear-gradient(45deg, #e2e8f0, #cbd5e1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .banner-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+
+      /* Subtle zoom effect on hover */
+      .profile-header:hover .banner-img {
+        transform: scale(1.03);
+      }
+
+      .banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.1) 0%,
+            rgba(0, 0, 0, 0) 40%,
+            rgba(0, 0, 0, 0.5) 100%);
+        z-index: 1;
+      }
+
+      .profile-content {
+        position: relative;
+        z-index: 5;
+        padding: 0 30px 30px 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        align-items: flex-end;
+        margin-top: -60px;
+        /* Overlap banner */
+      }
+
+      .avatar-container {
+        flex-shrink: 0;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 5px solid var(--white);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        position: relative;
+        z-index: 10;
+        background: var(--white);
+      }
+
+      .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .vendor-details {
+        flex: 1;
+        padding-top: 65px;
+        /* space for overlapping avatar */
+        min-width: 300px;
+      }
+
+      .vendor-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .vendor-name {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      .vendor-location {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .rating-pill {
+        background: #fffbeb;
+        color: #b45309;
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid #fcd34d;
+        margin-top: 8px;
+      }
+
+      /* --- Action Buttons --- */
+      .action-bar {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 10px rgba(79, 70, 229, 0.3);
+      }
+
+      .btn-secondary {
+        background-color: white;
+        color: var(--text-dark);
+        border: 1px solid #e5e7eb;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+      }
+
+      .btn-secondary:hover {
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      .like-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .like-btn:hover {
+        background-color: #fef2f2;
+        border-color: #fecaca;
+      }
+
+      .like-btn img {
+        width: 24px;
+        height: 24px;
+        transition: transform 0.2s;
+      }
+
+      .like-btn:active img {
+        transform: scale(1.2);
+      }
+
+      /* --- Grid Layout --- */
+      .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+      }
+
+      @media (max-width: 900px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* --- Cards --- */
+      .card {
+        background: var(--white);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 24px;
+        border: 1px solid #f3f4f6;
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card-title i {
+        color: var(--primary);
+      }
+
+      /* --- Info Grid (Price & Stats) --- */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+      }
+
+      .stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      /* --- Description --- */
+      .description-text {
+        line-height: 1.7;
+        color: #4b5563;
+        font-size: 1rem;
+      }
+
+      /* --- Gallery --- */
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+      }
+
+      .gallery-item {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .gallery-item img,
+      .gallery-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+      }
+
+      .gallery-item:hover img {
+        transform: scale(1.05);
+      }
+
+      /* --- Right Sidebar Items --- */
+      .sidebar-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      .sidebar-info-row:last-child {
+        border-bottom: none;
+      }
+
+      .sidebar-label {
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+
+      .sidebar-value {
+        color: var(--text-muted);
+        text-align: right;
+      }
+
+      /* --- Socials --- */
+      .social-links {
+        display: flex;
+        gap: 12px;
+      }
+
+      .social-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        color: var(--text-dark);
+        text-decoration: none;
+        font-size: 1.2rem;
+      }
+
+      .social-btn.facebook:hover {
+        background: #1877f2;
+        color: white;
+      }
+
+      .social-btn.instagram:hover {
+        background: #e1306c;
+        color: white;
+      }
+
+      .social-btn.twitter:hover {
+        background: #1da1f2;
+        color: white;
+      }
+
+      /* --- Active Customers --- */
+      .customer-faces {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .face-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
+
+      .face-img:hover {
+        transform: scale(1.1);
+        z-index: 5;
+      }
+
+      /* --- Modal Styles --- */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 16px;
+        padding: 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-overlay.active .modal-content {
+        transform: translateY(0);
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #9ca3af;
+      }
+
+      .modal-body {
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      /* --- Review Items --- */
+      .review-card {
+        padding: 16px;
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .reviewer-name {
+        font-weight: 600;
+      }
+
+      .review-stars {
+        color: #f59e0b;
+      }
+
+      .review-text {
+        color: #4b5563;
+        font-size: 0.95rem;
+      }
+
+      /* --- Menu Grid --- */
+      .menu-day {
+        margin-bottom: 24px;
+        background: #f9fafb;
+        border-radius: 10px;
+        padding: 16px;
+      }
+
+      .menu-day h4 {
+        margin: 0 0 12px 0;
+        color: var(--primary);
+        text-transform: capitalize;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+      }
+
+      .menu-items-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .menu-item-box {
+        display: flex;
+        gap: 12px;
+      }
+
+      .menu-thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #e2e8f0;
+      }
+
+      .menu-details {
+        flex: 1;
+      }
+
+      .menu-type {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .menu-desc {
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        margin: 0;
+      }
+
+      @media (max-width: 600px) {
+        .menu-items-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .banner-wrapper {
+          height: auto !important;
+          aspect-ratio: 16/9;
+        }
+
+        .profile-content {
+          padding: 0 16px 20px 16px;
+          margin-top: -40px;
+        }
+
+        .avatar-container {
+          width: 120px;
+          height: 120px;
+        }
+
+        .vendor-details {
+          padding-top: 10px;
+        }
+
+        .vendor-name {
+          font-size: 1.5rem;
+        }
+
+        .avatar-container {
+          margin: 0 auto;
+          display: block;
+          border-width: 4px;
+        }
+
+        .profile-content {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .vendor-title-row {
+          justify-content: center;
+        }
+
+        .vendor-location {
+          justify-content: center;
+        }
+
+        .action-bar {
+          justify-content: center;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+
+    <!-- Page Content -->
+    <div class="page-container">
+
+      <!-- 1. Profile Header -->
+      <div class="profile-header">
+        <div class="banner-wrapper">
+          <img src="<%= vender.bannerImage || '/banner-placeholder.jpg' %>" alt="Banner" class="banner-img"
+            onerror="this.src='/tiffin.png'">
+          <div class="banner-overlay"></div>
+        </div>
+
+        <div class="profile-content">
+          <div class="avatar-container">
+            <img src="<%= vender.profilePicture || '/user.jpeg' %>" alt="<%= vender.firstName %>" class="avatar-img">
+          </div>
+
+          <div class="vendor-details">
+            <div class="vendor-title-row">
+              <div>
+                <h1 class="vendor-name">
+                  <%= vender.serviceName %>
+                </h1>
+                <div class="vendor-location">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <%= vender.location %>
+                </div>
+                <div class="rating-pill">
+                  <i class="fas fa-star"></i>
+                  <%= averageRating %> / 5 (<%= (reviews || []).length %> reviews)
+                </div>
+              </div>
+
+              <div class="action-bar">
+                <% if (showOptions) { %>
+                  <a href="/user/booking/<%= vender._id %>" class="btn-primary">
+                    Order Now <i class="fas fa-arrow-right"></i>
+                  </a>
+
+                  <form action="/user/favourite_list" method="post" style="display:inline;">
+                    <input type="hidden" name="venderId" value="<%= vender._id %>">
+                    <button type="submit" class="like-btn" title="Add to Favorites" onclick="loading()">
+                      <% if (opacity[vender._id]==10) { %>
+                        <img src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Liked">
+                        <% } else { %>
+                          <img src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Like"
+                            style="filter: grayscale(100%); opacity: 0.6;">
+                          <% } %>
+                    </button>
+                  </form>
+                  <% } else if (!isLogedIn) { %>
+                    <a href="/logIn" class="btn-primary">Login to Order</a>
+                    <% } %>
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Main Grid Layout -->
+      <div class="content-grid">
+
+        <!-- Left Column: Stats, About, Gallery -->
+        <div class="main-column">
+
+          <!-- Quick Stats Row -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-value">₹<%= vender.pricePerDay || 0 %></span>
+              <span class="stat-label">Per Meal</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">
+                <%= numberOfOrders %>+
+              </span>
+              <span class="stat-label">Happy Customers </span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">
+                <% if (vender.pricePerMonthSingle) { %>
+                  ₹<%= vender.pricePerMonthSingle %>
+                    <% } else { %>
+                      --
+                      <% } %>
+              </span>
+              <span class="stat-label">Monthly (1 Meal)</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">
+                <% if (vender.pricePerMonthBoth) { %>
+                  ₹<%= vender.pricePerMonthBoth %>
+                    <% } else { %>
+                      --
+                      <% } %>
+              </span>
+              <span class="stat-label">Monthly (2 Meals)</span>
+            </div>
+          </div>
+
+          <!-- About Section -->
+          <div class="card">
+            <h3 class="card-title"><i class="fas fa-info-circle"></i> About This Kitchen</h3>
+            <div class="description-text">
+              <% if (vender.detailedDescription) { %>
+                <p>
+                  <%= vender.detailedDescription %>
+                </p>
+                <% } else { %>
+                  <p>Welcome to <%= vender.serviceName %>! We serve fresh, hygienic, and delicious home-cooked meals
+                      delivered right to your doorstep. We take pride in our quality and timely service.</p>
+                  <% } %>
+            </div>
+          </div>
+
+          <!-- Gallery -->
+          <% if ((vender.photos && vender.photos.length) || vender.videoDescription) { %>
+            <div class="card">
+              <h3 class="card-title"><i class="fas fa-images"></i> Food Gallery</h3>
+              <div class="gallery-grid">
+                <% if (vender.photos) { %>
+                  <% vender.photos.forEach(photo=> { %>
+                    <div class="gallery-item">
+                      <img src="<%= photo %>" alt="Food Item" loading="lazy">
+                    </div>
+                    <% }) %>
+                      <% } %>
+                        <% if (vender.videoDescription) { %>
+                          <div class="gallery-item" style="grid-column: span 2;">
+                            <video controls style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                              <source src="<%= vender.videoDescription %>">
+                            </video>
+                          </div>
+                          <% } %>
+              </div>
+            </div>
+            <% } %>
+
+              <!-- Menu Section (Moved from Modal) -->
+              <div class="card" id="menu-section">
+                <h3 class="card-title"><i class="fas fa-utensils"></i> Weekly Menu</h3>
+
+                <% if (menuByDay && Object.keys(menuByDay).length> 0) { %>
+                  <% const daysOrder=["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]; %>
+                    <% daysOrder.forEach(day=> { %>
+                      <div class="menu-day">
+                        <h4>
+                          <%= day %>
+                        </h4>
+                        <div class="menu-items-grid">
+                          <!-- Lunch -->
+                          <% if(menuByDay[day] && menuByDay[day].lunch && menuByDay[day].lunch.items?.length) { %>
+                            <div class="menu-item-box">
+                              <img src="<%= menuByDay[day].lunch.image || '/tiffin.png' %>" class="menu-thumb"
+                                onerror="this.src='/tiffin.png'">
+                              <div class="menu-details">
+                                <div class="menu-type">Lunch</div>
+                                <p class="menu-desc">
+                                  <%= menuByDay[day].lunch.items.join(', ') %></p>
+                          </div>
+                        </div>
+                      <% } else { %>
+                         <div class="menu-item-box"><div class="menu-details"><span class="menu-type">Lunch</span><p class="menu-desc" style="color:#9ca3af;">Not available</p></div></div>
+                      <% } %>
+      
+                      <!-- Dinner -->
+                      <% if(menuByDay[day] && menuByDay[day].dinner && menuByDay[day].dinner.items?.length) { %>
+                        <div class="menu-item-box">
+                          <img src="<%= menuByDay[day].dinner.image || ' /tiffin.png' %>" class="menu-thumb"
+                                    onerror="this.src='/tiffin.png'">
+                                    <div class="menu-details">
+                                      <div class="menu-type">Dinner</div>
+                                      <p class="menu-desc">
+                                        <%=
+                                          menuByDay[day].dinner.items.join(', ') %></p>
+                          </div>
+                        </div>
+                      <% } else { %>
+                         <div class="menu-item-box"><div class="menu-details"><span class="menu-type">Dinner</span><p class="menu-desc" style="color:#9ca3af;">Not available</p></div></div>
+                      <% } %>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <div style="text-align:center; padding:40px;">
+                  <img src="/list.png" style="width:60px; opacity:0.5; margin-bottom:15px;" onerror="this.style.display='
+                                          none'">
+                                          <p style="color:#6b7280;">No menu has been uploaded by this vendor yet.</p>
+                                    </div>
+                                    <% } %>
+                              </div>
+
+
+
+                            </div>
+
+                            <!-- Right Column: Sidebar Info -->
+                            <div class="sidebar-column">
+
+                              <!-- Owner Info -->
+                              <div class="card">
+                                <h3 class="card-title"><i class="fas fa-user-circle"></i> Owner Details</h3>
+                                <div class="sidebar-info-row">
+                                  <span class="sidebar-label">Name</span>
+                                  <span class="sidebar-value">
+                                    <%= vender.firstName %>
+                                  </span>
+                                </div>
+                                <div class="sidebar-info-row">
+                                  <span class="sidebar-label">Email</span>
+                                  <span class="sidebar-value" style="font-size:0.9rem;">
+                                    <%= vender.email %>
+                                  </span>
+                                </div>
+
+                                <div style="margin-top: 20px;">
+                                  <h4 style="font-size:0.9rem; margin-bottom:10px; color:var(--text-muted);">Social
+                                    Profiles</h4>
+                                  <div class="social-links">
+                                    <% if (vender.socialMediaLinks?.facebook) { %>
+                                      <a href="<%= vender.socialMediaLinks.facebook %>" target="_blank"
+                                        class="social-btn facebook"><i class="fab fa-facebook-f"></i></a>
+                                      <% } %>
+                                        <% if (vender.socialMediaLinks?.instagram) { %>
+                                          <a href="<%= vender.socialMediaLinks.instagram %>" target="_blank"
+                                            class="social-btn instagram"><i class="fab fa-instagram"></i></a>
+                                          <% } %>
+                                            <% if (vender.socialMediaLinks?.twitter) { %>
+                                              <a href="<%= vender.socialMediaLinks.twitter %>" target="_blank"
+                                                class="social-btn twitter"><i class="fab fa-twitter"></i></a>
+                                              <% } %>
+                                                <!-- Default placeholders if empty for design preview -->
+                                                <% if (!vender.socialMediaLinks?.facebook &&
+                                                  !vender.socialMediaLinks?.instagram) { %>
+                                                  <span style="font-size:0.9rem; color:#9ca3af;">No social links
+                                                    added.</span>
+                                                  <% } %>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Timings -->
+                              <div class="card" style="background: #fff8f6; border-color: #ffedd5;">
+                                <h3 class="card-title" style="color:#c2410c;"><i class="fas fa-clock"></i> Delivery
+                                  Times</h3>
+                                <div class="sidebar-info-row" style="border-bottom-color: #ffedd5;">
+                                  <span class="sidebar-label">Lunch</span>
+                                  <span class="sidebar-value">12:00 PM – 3:00 PM</span>
+                                </div>
+                                <div class="sidebar-info-row" style="border-bottom:none;">
+                                  <span class="sidebar-label">Dinner</span>
+                                  <span class="sidebar-value">8:00 PM – 10:00 PM</span>
+                                </div>
+                              </div>
+
+                              <!-- Reviews Section (Moved to Sidebar) -->
+                              <div class="card" id="reviews-section">
+                                <h3 class="card-title"><i class="fas fa-star"></i> Customer Reviews</h3>
+                                <!-- Review Input Area -->
+                                <% let userReview=null; if (user && reviews && reviews.length> 0) {
+                                  userReview = reviews.find(r => r.user?._id?.toString() === user?._id?.toString());
+                                  } %>
+
+                                  <% if (isLogedIn) { %>
+                                    <div
+                                      style="background:#f9fafb; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #e5e7eb;">
+                                      <% if (userReview) { %>
+                                        <p style="margin:0 0 10px 0; font-weight:600; color:#065f46;">You have already
+                                          reviewed this vendor.</p>
+                                        <form action="/user/delete-review/<%= vender._id %>" method="POST">
+                                          <input type="hidden" name="reviewId" value="<%= userReview._id %>">
+                                          <button type="submit" class="btn-secondary"
+                                            style="border-color:#fca5a5; color:#b91c1c;">
+                                            <i class="fas fa-trash-alt"></i> Delete My Review
+                                          </button>
+                                        </form>
+                                        <% } else { %>
+                                          <h4 style="margin:0 0 10px 0;">Write a Review</h4>
+                                          <form action="/user/vender-list/<%= vender._id %>" method="POST">
+                                            <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+                                              <input type="number" name="Rating" min="1" max="5"
+                                                placeholder="Rating (1-5)" required
+                                                style="width:120px; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
+                                              <input type="text" name="Review" placeholder="Share your experience..."
+                                                required
+                                                style="flex:1; padding:10px; border-radius:8px; border:1px solid #d1d5db; min-width: 200px;">
+                                            </div>
+                                            <button type="submit" class="btn-primary"
+                                              style="width:100%; justify-content:center;">Post Review</button>
+                                          </form>
+                                          <% } %>
+                                    </div>
+                                    <% } else { %>
+                                      <div
+                                        style="text-align:center; padding:15px; background:#f0f9ff; border-radius:8px; margin-bottom:20px;">
+                                        <a href="/logIn"
+                                          style="color:#0284c7; font-weight:600; text-decoration:none;">Log in to write
+                                          a review</a>
+                                      </div>
+                                      <% } %>
+
+                                        <!-- Reviews List -->
+                                        <div class="reviews-list">
+                                          <% if (reviews && reviews.length> 0) { %>
+                                            <% reviews.forEach(review=> { %>
+                                              <div class="review-card">
+                                                <div class="review-header">
+                                                  <span class="reviewer-name">
+                                                    <%= review.user ? review.user.firstName : 'Anonymous User' %>
+                                                  </span>
+                                                  <span class="review-stars">
+                                                    <% for(let i=0; i<review.rating; i++) { %>★<% } %>
+                                                  </span>
+                                                </div>
+                                                <p class="review-text">
+                                                  <%= review.comment %>
+                                                </p>
+                                              </div>
+                                              <% }) %>
+                                                <% } else { %>
+                                                  <p style="text-align:center; color:#6b7280; padding:20px;">No reviews
+                                                    yet. Be the first to share your thoughts!</p>
+                                                  <% } %>
+                                        </div>
+                              </div>
+
+                              <!-- Active Users Social Proof -->
+                              <% if (guestUsers && guestUsers.length> 0) { %>
+                                <div class="card">
+                                  <h3 class="card-title"><i class="fas fa-users"></i> Active Eaters</h3>
+                                  <div class="customer-faces">
+                                    <% guestUsers.filter(g=> g.status === 'active').slice(0, 10).forEach(guest => { %>
+                                      <img src="<%= guest.profilePicture || '/user.jpeg' %>" class="face-img"
+                                        title="<%= guest.firstName %>">
+                                      <% }) %>
+                                        <% if (guestUsers.length> 10) { %>
+                                          <div class="face-img"
+                                            style="background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-size:0.8rem; border:none;">
+                                            +<%= guestUsers.length - 10 %>
+                                          </div>
+                                          <% } %>
+                                  </div>
+                                  <p style="font-size:0.9rem; color:var(--text-muted); margin-top:12px;">
+                                    Join <strong>
+                                      <%= guestUsers.length %>
+                                    </strong> others enjoying these meals!
+                                  </p>
+                                </div>
+                                <% } %>
+
+                            </div>
+                        </div>
+
+                      </div>
+
+
+                      <%- include('../partials/loading') %>
+                        <%- include('../partials/footer') %>
+                          <%- include('../partials/_chatbot') %>

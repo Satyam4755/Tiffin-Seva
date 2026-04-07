@@ -1,0 +1,203 @@
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+  }
+
+  @keyframes morph {
+    0% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+    50% {
+      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+    100% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+  }
+
+  .delivery-scene {
+    width: 120px;
+    height: 120px;
+    background: #cceeff;
+    overflow: hidden;
+    position: relative;
+    animation: morph 6s ease-in-out infinite;
+  }
+
+  .road {
+    position: absolute;
+    left: 0;
+    width: 400%;
+    height: 100%;
+    background-image: url('/road1.jpg');
+    background-repeat: repeat-x;
+    background-size: contain;
+    animation: roadScroll 4.0s linear infinite;
+    z-index: 1;
+  }
+
+  .delivery-man {
+    position: absolute;
+    bottom: 12.5px;
+    left: 25%;
+    width: 60px;
+    height: auto;
+    z-index: 2;
+  }
+
+  @keyframes roadScroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .mobile-spinner {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid transparent;
+    border-top: 6px solid rgb(228, 11, 145);
+    border-bottom: 6px solid rgb(11, 186, 228);
+    border-radius: 50%;
+    animation: spin 0.8s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 👇 Media query to handle visibility */
+  @media (max-width: 760px) {
+    .delivery-scene {
+      display: none;
+    }
+    .mobile-spinner {
+      display: flex;
+    }
+  }
+
+  /* 👇 Message styling under loader */
+  .loading-messages {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+    min-height: 60px;
+    line-height: 1.6;
+    transition: opacity 0.5s ease-in-out;
+  }
+</style>
+</head>
+
+<body>
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" style="display: none;">
+    <!-- For large screens -->
+    <div class="delivery-scene">
+      <div class="road"></div>
+      <img src="/delivery.png" alt="Delivery Boy" class="delivery-man" />
+    </div>
+
+    <!-- For mobile (≤760px) -->
+    <div class="mobile-spinner">
+      <div class="spinner"></div>
+      <p style="margin-top: 10px; font-weight: 500;">Loading...</p>
+    </div>
+
+    <!-- Dynamic messages will appear here -->
+    <div id="loadingMessages" class="loading-messages"></div>
+  </div>
+
+  <script>
+    const allForms = document.querySelectorAll("form");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const loadingMessages = document.getElementById("loadingMessages");
+
+    const messages = [
+      "It might take a moment...",
+      "Wait for a while...",
+      "Files are being uploaded...",
+      "Almost there, hang tight!",
+      "Thank you for your patience!",
+      "Thank you for your patience!",
+      "Your internet may be slow...",
+      "if it takes 1 more minute, then refresh the page & start again",
+      "sorry for inconvenience"
+    ];
+
+    let messageTimer;
+    let messageIndex = 0;
+
+    function showLoaderIfValid(form) {
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      // ✅ Show loading overlay
+      loadingOverlay.style.display = "flex";
+      loadingOverlay.style.position = "fixed";
+      loadingOverlay.style.inset = 0;
+      loadingOverlay.style.background = "rgba(255, 255, 255, 0.8)";
+      loadingOverlay.style.zIndex = 9999;
+      loadingOverlay.style.justifyContent = "center";
+      loadingOverlay.style.alignItems = "center";
+      loadingOverlay.style.flexDirection = "column";
+
+      // Disable interaction
+      document.body.style.overflow = "hidden";
+      document.body.style.pointerEvents = "none";
+
+      // ⏳ Start message sequence after 10 seconds
+      clearTimeout(messageTimer);
+      messageTimer = setTimeout(() => showSequentialMessages(), 10000);
+    }
+
+    function showSequentialMessages() {
+      loadingMessages.innerHTML = ""; // Clear any previous messages
+      messageIndex = 0;
+      showNextMessage();
+    }
+
+    function showNextMessage() {
+      if (messageIndex >= messages.length) return;
+      loadingMessages.textContent = messages[messageIndex];
+      messageIndex++;
+      setTimeout(showNextMessage, 7000); // Show next every 3 sec
+    }
+
+    allForms.forEach((form) => {
+      form.addEventListener("submit", (e) => {
+        if (!form.checkValidity()) return;
+        showLoaderIfValid(form);
+      });
+    });
+
+    function loading() {
+      const form = event.target.closest("form");
+      if (form) showLoaderIfValid(form);
+    }
+
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) {
+        loadingOverlay.style.display = "none";
+        document.body.style.overflow = "";
+        document.body.style.pointerEvents = "";
+        clearTimeout(messageTimer);
+      }
+    });
+  </script>
+</body>

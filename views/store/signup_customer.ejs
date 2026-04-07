@@ -1,0 +1,528 @@
+<%- include('../partials/head') %>
+<style>
+
+  .swal-popup-rounded {
+  border-radius: 1rem !important;
+  padding: 20px !important;
+}
+
+
+  .swal2-popup {
+  border-radius: 1rem !important;
+  background: #fff0f6 !important;
+  animation: fadeUp 0.3s ease-in-out;
+  box-shadow: 0 6px 25px rgba(233, 30, 99, 0.2);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.swal2-title {
+  color: #e91e63 !important;
+  font-weight: 600 !important;
+}
+.swal2-confirm {
+  background: #e91e63 !important;
+  border: none !important;
+}
+.swal2-cancel {
+  background: #999 !important;
+  border: none !important;
+}
+  body {
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .form-container {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 2rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 500px;
+    margin: 20px auto;
+    border: 2px solid #f8bbd0;
+  }
+
+  .form-container h2 {
+    text-align:center;
+    margin-bottom:1.5rem;
+    color:#e91e63;
+    font-size:1.8rem;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom:1.2rem;
+  }
+
+  input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], select {
+    width:92.5%;
+    padding:12px 15px;
+    border:2px solid #f8bbd0;
+    border-radius:1rem;
+    outline:none;
+    font-size:1rem;
+    background:#fce4ec;
+    transition:border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+
+  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, select:focus {
+    border-color:#e91e63;
+    box-shadow:0 0 10px #e91e63;
+    background:#fff;
+  }
+
+  input[type="file"] {
+    width:95%;
+    padding:8px 10px;
+    border:2px solid #f8bbd0;
+    border-radius:1rem;
+    background:#fce4ec;
+    cursor:pointer;
+    transition:border-color 0.3s, box-shadow 0.3s;
+  }
+
+  input[type="file"]:focus {
+    border-color:#e91e63;
+    box-shadow:0 0 10px #e91e63;
+    background:#fff;
+  }
+
+  label {
+    margin-top:20px;
+    transform:translateY(-50%);
+    color:#aaa;
+    font-size:1rem;
+    pointer-events:none;
+    background:#fce4ec;
+    padding:0 5px;
+    border-radius:0.5rem;
+    transition:all 0.3s ease;
+  }
+
+  input:focus + label, input:valid + label, select:focus + label {
+    top:-10px;
+    font-size:0.85rem;
+    color:#e91e63;
+    background:#fff;
+  }
+
+  input[type="file"] + label {
+    position: static;
+    transform:none;
+    color:#555;
+    font-size:1rem;
+    padding:0 0 5px 0;
+    margin-bottom:5px;
+    background:transparent;
+    border-radius:0;
+  }
+
+  .btn-primary, .btn-secondary {
+    width:100%;
+    padding:12px;
+    font-size:1rem;
+    text-transform:uppercase;
+    border:none;
+    border-radius:1rem;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    color:#fff;
+  }
+
+  .btn-primary { background: linear-gradient(135deg, #e91e63, #f06292); }
+  .btn-primary:hover { background: linear-gradient(135deg, #f06292, #e91e63); }
+
+  .btn-secondary { background: linear-gradient(135deg, #4CAF50, #66BB6A); }
+  .btn-secondary:hover { background: linear-gradient(135deg, #66BB6A, #4CAF50); }
+
+  .checkbox-group {
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    font-size:0.9rem;
+    margin-bottom:1rem;
+    color:#555;
+    padding-left:5px;
+    width:100%;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    transform:scale(1.1);
+    accent-color:#e91e63;
+    cursor:pointer;
+  }
+
+  .login-link {
+    text-align:center;
+    margin-top:1rem;
+  }
+
+  .login-link a {
+    color:#e91e63;
+    text-decoration:none;
+    font-size:1rem;
+    transition:all 0.3s ease;
+  }
+
+  .login-link a:hover {
+    color:#fff;
+    background-color:#e91e63;
+    padding:6px 12px;
+    border-radius:12px;
+  }
+
+  @media (max-width:768px) {
+    .form-container { width:90%; padding:1.5rem; border-radius:1.5rem; }
+    .form-container h2 { font-size:1.6rem; }
+  }
+
+  .hidden { display:none; }
+</style>
+
+
+
+<!-- SweetAlert2 CSS & JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<body>
+  <%- include('../partials/nav') %>
+
+  <div class="form-container" role="main" aria-labelledby="form-title">
+    <h2 id="form-title"><%= editing ? "Edit Profile" : "Sign Up" %></h2>
+
+    <!-- Hidden flags -->
+    <input type="hidden" id="isEditing" value="<%= editing ? 'true' : 'false' %>">
+    <input type="hidden" id="skipOtpStage" value="<%= skipOtpStage ? 'true' : 'false' %>">
+
+    <% if (!editing) { %>
+      <!-- Stage 1: Email input for OTP -->
+      <div id="emailStage" class="<%= skipOtpStage ? 'hidden' : '' %>">
+        <div class="input-group">
+          <input type="email" id="email" name="email" placeholder="Enter your email" 
+                 value="<%= oldInput?.email || '' %>" required />
+        </div>
+        <button id="sendOtpBtn" class="btn-primary">Send OTP</button>
+      </div>
+      
+      <!-- Stage 2: OTP input -->
+      <div id="otpStage" class="hidden">
+        <div class="input-group">
+          <input type="text" id="otpInput" placeholder="Enter OTP" required />
+        </div>
+        <button id="verifyOtpBtn" class="btn-secondary">Verify OTP</button>
+      </div>
+    <% } %>
+
+    <!-- Stage 3: Full customer form -->
+    <form id="customerForm" 
+          action="<%= editing ? '/edit_details' : '/signup-customer' %>" 
+          method="post" enctype="multipart/form-data" 
+          class="<%= editing || skipOtpStage ? '' : 'hidden' %>" 
+          novalidate>
+
+      <input type="hidden" name="userType" value="customer">
+
+      <% if (editing) { %>
+        <input type="hidden" name="id" value="<%= user._id %>">
+      <% } %>
+
+      <!-- Always include email as hidden to preserve OTP skip -->
+      <% if (oldInput?.email) { %>
+        <input type="hidden" name="email" value="<%= oldInput.email %>">
+      <% } %>
+
+      <%- include('../partials/errorHandel') %>
+
+      <!-- Profile Picture -->
+      <div class="input-group">
+        <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
+        <label for="profilePicture" style="color: maroon; font-weight: 800;">Profile Picture</label>
+        <% if (editing) { %>
+          <div style="margin-top:8px;">
+            <img src="<%= oldInput.profilePicture || '/user.jpeg' %>" alt="Profile Picture"
+                 style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #ccc;">
+            <button type="button" id="deleteProfilePicBtn" style="margin-left:10px; color:#fff; background:red; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">
+              Delete
+            </button>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Full Name -->
+      <div class="input-group">
+        <input type="text" id="firstName" name="firstName" placeholder="Full Name" 
+               value="<%= oldInput?.firstName || user?.firstName || '' %>" required />
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="input-group">
+        D.O.B
+        <input type="date" id="dob" name="dob" value="<%= oldInput?.dob || user?.dob || '' %>" required />
+      </div>
+
+      <!-- Location -->
+      <div class="input-group">
+
+        <b style="color: maroon;">Location</b>
+        <input type="text" id="location" name="location" placeholder="Enter your location" 
+               value="<%= oldInput?.location || user?.location || '' %>" required />
+        <input type="hidden" id="lat" name="lat" value="<%= oldInput?.lat || user?.lat || '' %>">
+        <input type="hidden" id="lng" name="lng" value="<%= oldInput?.lng || user?.lng || '' %>">
+      </div>
+
+      <div class="input-group" style="text-align:center; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+        <button type="button" id="useCurrentBtn" class="btn-primary">Use my current location</button>
+        <button type="button" id="pinFromMapBtn" class="btn-secondary">📍 Pin from Map</button>
+      </div>
+
+      <!-- Password fields only if NOT editing -->
+      <% if (!editing) { %>
+        <div class="input-group">
+          <input type="password" id="password" name="password" minlength="6" placeholder="Enter your password" required />
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="confirmPassword" name="confirmPassword" minlength="6" placeholder="Confirm your password" required />
+        </div>
+      <% } %>
+
+
+      <% if (!editing) { %>
+  <!-- Referral Code (optional - only shown during signup) -->
+  <div class="input-group">
+    <input type="text" id="referralCode" name="referralCode" placeholder="Referral Code (if you have one)"
+      value="<%= oldInput?.referralCode || '' %>" />
+    <small style="color: gray; font-size: 13px;">
+      Enter your friend’s referral code, if any?
+    </small>
+  </div>
+<% } %>
+
+      <button type="submit" class="btn-primary"><%= editing ? "Update Profile" : "Create Account" %></button>
+
+      <% if (!editing) { %>
+        <div class="login-link">Already have an account? <a href="/login"><strong>Log In</strong></a></div>
+      <% } %>
+    </form>
+  </div>
+
+  <!-- Map Modal -->
+  <div id="mapModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+    <div style="width:90%; max-width:600px; height:70%; background:#fff; border-radius:12px; overflow:hidden; position:relative;">
+      <div id="map" style="width:100%; height:100%;"></div>
+      <button id="closeMap" style="position:absolute; top:12px; width:15%; right:12px;
+        background:#ffffff; color:#007bff; font-weight:600; font-size:15px; border:1.5px solid #007bff;
+        border-radius:8px; padding:6px 14px; cursor:pointer;"
+        onmouseover="this.style.background='#007bff'; this.style.color='#fff'"
+        onmouseout="this.style.background='#fff'; this.style.color='#007bff'">Select</button>
+    </div>
+  </div>
+
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1TiKO0af2jD8gTGypRjaoOedqOUrbVD8&libraries=places&callback=initAutocomplete" async defer></script>
+
+  <script>
+    // Delete Profile Picture
+    const deleteProfileBtn = document.getElementById("deleteProfilePicBtn");
+    deleteProfileBtn?.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to delete your profile picture?")) return;
+      try {
+        const res = await fetch(`/delete-profile-pic/<%= user._id %>`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          alert("Profile picture deleted successfully!");
+          location.reload();
+        } else alert(data.message || "Could not delete profile picture.");
+      } catch (err) { alert("Error deleting profile picture."); console.error(err); }
+    });
+
+    const isEditing = document.getElementById("isEditing")?.value === "true";
+    const emailStage = document.getElementById("emailStage");
+    const otpStage = document.getElementById("otpStage");
+    const customerForm = document.getElementById("customerForm");
+    const sendOtpBtn = document.getElementById("sendOtpBtn");
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    let verifiedEmail = "";
+
+    if (!isEditing) {
+      sendOtpBtn?.addEventListener("click", async () => {
+        const email = document.getElementById("email").value;
+        if (!email) return alert("Enter email");
+        sendOtpBtn.textContent = "Sending OTP…";
+        sendOtpBtn.disabled = true;
+        try {
+          const res = await fetch("/api/send-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+          });
+          const data = await res.json();
+          if (data.success) {
+            verifiedEmail = email;
+            emailStage.classList.add("hidden");
+            otpStage.classList.remove("hidden");
+          } else alert(data.message);
+        } catch { alert("Error sending OTP"); }
+        finally { sendOtpBtn.textContent = "Send OTP"; sendOtpBtn.disabled = false; }
+      });
+
+      verifyOtpBtn?.addEventListener("click", async () => {
+        const otp = document.getElementById("otpInput").value;
+        if (!otp) return alert("Enter OTP");
+        verifyOtpBtn.textContent = "Verifying…";
+        verifyOtpBtn.disabled = true;
+        try {
+          const res = await fetch("/api/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ otp })
+          });
+          const data = await res.json();
+          if (data.success) {
+            otpStage.classList.add("hidden");
+            customerForm.classList.remove("hidden");
+            // Only add hidden email if not already present
+            if (!customerForm.querySelector('input[name="email"]')) {
+              const hiddenEmail = document.createElement("input");
+              hiddenEmail.type = "hidden";
+              hiddenEmail.name = "email";
+              hiddenEmail.value = verifiedEmail;
+              customerForm.prepend(hiddenEmail);
+            }
+          } else alert(data.message);
+        } catch { alert("Error verifying OTP"); }
+        finally { verifyOtpBtn.textContent = "Verify OTP"; verifyOtpBtn.disabled = false; }
+      });
+    }
+
+    // ============ MAP + LOCATION LOGIC ============
+    function initAutocomplete() {
+      const input = document.getElementById("location");
+      if (!window.google || !input) return;
+      const autocomplete = new google.maps.places.Autocomplete(input);
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place?.geometry) {
+          document.getElementById("lat").value = place.geometry.location.lat();
+          document.getElementById("lng").value = place.geometry.location.lng();
+        }
+      });
+    }
+
+    const useCurrentBtn = document.getElementById("useCurrentBtn");
+    const pinFromMapBtn = document.getElementById("pinFromMapBtn");
+    const mapModal = document.getElementById("mapModal");
+    const closeMap = document.getElementById("closeMap");
+    const locationInput = document.getElementById("location");
+    const latInput = document.getElementById("lat");
+    const lngInput = document.getElementById("lng");
+
+    useCurrentBtn?.addEventListener("click", () => {
+      if (!navigator.geolocation) return alert("Geolocation not supported.");
+      useCurrentBtn.disabled = true; useCurrentBtn.textContent = "Detecting…";
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        latInput.value = lat; lngInput.value = lng;
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+          if (status === "OK" && results[0]) locationInput.value = results[0].formatted_address;
+          useCurrentBtn.disabled = false; useCurrentBtn.textContent = "Use my current location";
+        });
+      }, (err) => {
+        alert("Could not get your location: " + err.message);
+        useCurrentBtn.disabled = false; useCurrentBtn.textContent = "Use my current location";
+      });
+    });
+
+    pinFromMapBtn?.addEventListener("click", () => {
+      mapModal.style.display = "flex";
+      if (navigator.geolocation)
+        navigator.geolocation.getCurrentPosition((pos) => initMap(pos.coords.latitude, pos.coords.longitude),
+          () => initMap(26.8467, 80.9462));
+      else initMap(26.8467, 80.9462);
+    });
+
+    function initMap(lat, lng) {
+      setTimeout(() => {
+        const map = new google.maps.Map(document.getElementById("map"), { center: { lat, lng }, zoom: 14 });
+        const marker = new google.maps.Marker({ position: { lat, lng }, map, draggable: true });
+        const geocoder = new google.maps.Geocoder();
+        updateLocation(geocoder, lat, lng);
+        map.addListener("click", (event) => {
+          const selectedLat = event.latLng.lat();
+          const selectedLng = event.latLng.lng();
+          marker.setPosition(event.latLng);
+          updateLocation(geocoder, selectedLat, selectedLng);
+        });
+      }, 200);
+    }
+
+    function updateLocation(geocoder, lat, lng) {
+      latInput.value = lat; lngInput.value = lng;
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === "OK" && results[0]) locationInput.value = results[0].formatted_address;
+      });
+    }
+
+    closeMap?.addEventListener("click", () => { mapModal.style.display = "none"; });
+  </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("customerForm"); // ✅ updated form ID
+  const submitBtn = form?.querySelector('button[type="submit"]'); // ✅ dynamic button detection
+  const isEditing = document.getElementById("isEditing")?.value === "true";
+
+  if (form && submitBtn) {
+    submitBtn.addEventListener("click", async (e) => {
+      if (isEditing) return; // Skip popup if editing profile
+      e.preventDefault(); // Stop immediate submit
+
+      // ✅ Show Terms & Conditions popup
+      const result = await Swal.fire({
+        title: 'Terms & Conditions',
+        html: `
+          <div style="text-align:left; font-size:15px; color:#444;">
+            <p style="margin-bottom:10px;">
+              Before creating your customer account, please confirm that you have read and accepted our
+              <a href="/terms-and-conditions" target="_blank" style="color:#007bff; font-weight:500; text-decoration:underline;">
+                Terms & Conditions
+              </a>.
+            </p>
+          </div>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Accept & Continue',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#e91e63',
+        cancelButtonColor: '#6c757d',
+        background: '#fff',
+        focusConfirm: false,
+        customClass: { popup: 'swal-popup-rounded' },
+      });
+
+      if (result.isConfirmed) {
+        // ✅ Dispatch native form submission so loader triggers
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        if (form.dispatchEvent(submitEvent)) {
+          // The form's "submit" listener (from loading partial) runs → loader appears
+          // Small delay to make loader visible before navigation
+          setTimeout(() => form.submit(), 150);
+        }
+      }
+    });
+  }
+});
+</script>
+
+  <%- include('../partials/loading') %>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!-- views/partials/nav.ejs -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+  /* ---------- Desktop header ---------- */
+  header {
+    background-color: #fffbf1;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .navbar {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 55px;
+    position: relative;
+  }
+
+  #logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #ff385c;
+    display: flex;
+    align-items: center;
+    height: 48px;
+    text-decoration: none;
+  }
+
+  .homeImg {
+    margin-left: 25px;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: black;
+    padding: 8px 14px;
+    border-radius: 20px;
+    transition: background .2s, color .2s;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.selected {
+    background: #f7f7f7;
+    color: #ff385c;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 6px 10px;
+    border: 1px solid #000000;
+    border-radius: 20px;
+    cursor: pointer;
+    user-select: none;
+    color: rgb(0, 0, 0);
+    background: #fffbf1;
+  }
+
+  .user-menu img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .hamburger {
+    display: none;
+    cursor: pointer;
+  }
+
+  .hamburger img {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* dropdown */
+  .user-dropdown {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    min-width: 200px;
+    z-index: 1000;
+    overflow: hidden;
+  }
+
+  .user-dropdown.active {
+    display: block;
+  }
+
+  .user-dropdown .profile-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .user-dropdown .profile-box img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #eee;
+  }
+
+  .user-dropdown .profile-box h4 {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+  }
+
+  .user-dropdown a {
+    display: block;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .user-dropdown a:hover {
+    background: #fce8ec;
+    color: #ff385c;
+  }
+
+  .user-dropdown .danger {
+    color: #e74c3c;
+  }
+
+  .user-dropdown .danger:hover {
+    background: #fdecea;
+  }
+
+  /* ---------- Mobile bottom nav ---------- */
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50px;
+    background: #fff;
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    z-index: 2000;
+    align-items: center;
+    justify-content: space-around;
+    padding: 6px 8px;
+    overflow-x: auto;
+  }
+
+  .mobile-bottom-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-bottom-nav .nav-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #666;
+    width: 64px;
+    height: 100%;
+    border-radius: 8px;
+  }
+
+  .mobile-bottom-nav .nav-item .icon {
+    font-size: 20px;
+    display: block;
+  }
+
+  .mobile-bottom-nav .nav-item.active {
+    color: #731919;
+    background: rgba(255, 56, 92, 0.05);
+  }
+
+  .mobile-bottom-nav .nav-item .label {
+    font-size: 10px;
+    display: none;
+  }
+
+  /* ===== Mobile bottom nav labels ===== */
+  .mobile-bottom-nav .nav-item {
+    gap: 2px;
+    /* icon–text spacing */
+  }
+
+  .mobile-bottom-nav .nav-item .label {
+    display: block;
+    /* SHOW text */
+    font-size: 9px;
+    /* very small */
+    line-height: 1;
+    color: #666;
+    font-weight: 500;
+  }
+
+  /* Active state */
+  .mobile-bottom-nav .nav-item.active .label {
+    color: #731919;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1050px) {
+    .nav-links {
+      display: none !important;
+    }
+
+    .hamburger {
+      display: none !important;
+    }
+
+    .mobile-bottom-nav {
+      display: flex;
+    }
+
+    body {
+      padding-bottom: 84px;
+    }
+  }
+
+  @media (min-width:1050px) {
+    .mobile-bottom-nav {
+      display: none;
+    }
+  }
+
+
+
+
+  /* --- Referral Highlight (Desktop) --- */
+  .nav-links a.referral-highlight {
+    background: linear-gradient(135deg, #ff8da1, #ff385c);
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(255, 56, 92, 0.35);
+    border-radius: 25px;
+    padding: 8px 16px;
+    animation: referralPulse 1.8s infinite ease-in-out;
+  }
+
+  @keyframes referralPulse {
+    0% {
+      box-shadow: 0 0 0px rgba(255, 56, 92, 0.6);
+    }
+
+    50% {
+      box-shadow: 0 0 14px rgba(255, 56, 92, 0.9);
+    }
+
+    100% {
+      box-shadow: 0 0 0px rgba(255, 56, 92, 0.6);
+    }
+  }
+
+  /* --- Referral Highlight (Mobile Icon) --- */
+  .mobile-bottom-nav .nav-item.referral-highlight-mobile {
+    background: rgba(255, 56, 92, 0.1);
+    color: #AB2182 !important;
+    border-radius: 14px;
+    animation: bounceReferral 1.5s infinite ease-in-out;
+  }
+
+  @keyframes bounceReferral {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  /* Notification dot */
+  .notif-dot {
+    width: 10px;
+    height: 10px;
+    background: #ff385c;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    right: -2px;
+    animation: notifBlink 1.5s infinite ease-in-out;
+  }
+
+  @keyframes notifBlink {
+    0% {
+      opacity: 0.6;
+      transform: scale(0.8);
+    }
+
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+    100% {
+      opacity: 0.6;
+      transform: scale(0.8);
+    }
+  }
+
+  /* Mobile icon wrapper tweak */
+  .mobile-bottom-nav .nav-item {
+    position: relative;
+  }
+</style>
+
+<header>
+  <div class="desktop-header">
+    <nav class="navbar">
+      <a href="/" id="logo" class="<%= currentPage === 'home' ? 'selected' : '' %>">
+        <img class="homeImg" src="/mainLogo.png" alt="Logo" style="width:60px; height:50px;">
+      </a>
+
+      <!-- nav-links hidden on mobile -->
+      <div class="nav-links" id="nav-links">
+        <% if (isLogedIn) { %>
+          <% if (user && user.userType==='guest' ) { %>
+            <a href="/user/favourite_list" class="<%= currentPage === 'favourite' ? 'selected' : '' %>">Favorites</a>
+            <a href="/user/booked" class="<%= currentPage === 'reserve' ? 'selected' : '' %>"
+              style="position:relative;">
+              My Meals
+              <% if (hasOrders) { %>
+                <span class="notif-dot"></span>
+                <% } %>
+            </a>
+            <a href="/user/options" class="<%= currentPage === 'options' ? 'selected' : '' %>">Check Options</a>
+            <a href="/user/message" class="<%= currentPage === 'message' ? 'selected' : '' %>">Message</a>
+            <a href="/user/referral"
+              class="<%= currentPage === 'referral' ? 'referral-highlight' : '' %> referral-link">
+              🎁 Referral
+            </a>
+            <% } else if (user && user.userType==='vender' ) { %>
+              <a href="/vender/add_meals" class="<%= currentPage === 'admin' ? 'selected' : '' %>">Add Your Meals</a>
+              <a href="/vender/meals_list" class="<%= currentPage === 'adminMeals' ? 'selected' : '' %>">My Meals</a>
+              <a href="/vender/orders" class="<%= currentPage === 'orders' ? 'selected' : '' %>"
+                style="position:relative;">
+                Orders
+                <% if (hasVendorOrders) { %>
+                  <span class="notif-dot"></span>
+                  <% } %>
+              </a>
+              <a href="/vender/add_details" class="<%= currentPage === 'addDetails' ? 'selected' : '' %>">Add More
+                Details</a>
+              <a href="/vender/customerChoice"
+                class="<%= currentPage === 'customerChoice' ? 'selected' : '' %>">Modifications</a>
+              <a href="/vender/problems" class="<%= currentPage === 'problems' ? 'selected' : '' %>">Customer
+                Problems</a>
+              <% } %>
+                <% } else { %>
+                  <a href="/logIn" class="<%= currentPage === 'logIn' ? 'selected' : '' %>">Log In</a>
+                  <% } %>
+      </div>
+
+      <!-- USER MENU -->
+      <div class="nav-right">
+        <% if (isLogedIn && user) { %>
+          <div class="user-menu-wrapper" style="position:relative;">
+            <div class="user-menu" id="user-menu-btn">
+              <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="<%= user.firstName %>">
+              <span style="max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <%= user.firstName %>
+              </span>
+              <i class="fas fa-caret-down"></i>
+            </div>
+
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="profile-box">
+                <img src="<%= user.profilePicture || '/user.jpeg' %>" alt="Profile">
+                <h4>
+                  <%= user.firstName %>
+                </h4>
+              </div>
+              <a href="/edit_details/<%= user._id %>?editing=true"><i class="fas fa-user-edit"></i> Edit Profile</a>
+              <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              <a href="/delete_user/<%= user._id %>" class="danger"><i class="fas fa-trash-alt"></i> Delete Account</a>
+            </div>
+          </div>
+          <% } %>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <% if (isLogedIn && user && user.userType==='guest' ) { %>
+    <a class="nav-item <%= currentPage === 'home' ? 'active' : '' %>" href="/" aria-label="Home"><i
+        class="fas fa-home icon"></i><span class="label">Home</span></a>
+
+    <a class="nav-item <%= currentPage === 'favourite' ? 'active' : '' %>" href="/user/favourite_list"
+      aria-label="Favorites"><i class="fas fa-heart icon"></i><span class="label">Fav's</span></a>
+
+    <a class="nav-item <%= currentPage === 'reserve' ? 'active' : '' %>" href="/user/booked" aria-label="My Meals">
+      <i class="fas fa-utensils icon"></i>
+      <% if (hasOrders) { %><span class="notif-dot"></span>
+        <% } %>
+          <span class="label">Booked</span>
+    </a>
+    <a class="nav-item <%= currentPage === 'options' ? 'active' : '' %>" href="/user/options" aria-label="Options"><i
+        class="fas fa-list icon"></i><span class="label">Options</span></a>
+
+    <a class="nav-item <%= currentPage === 'message' ? 'active' : '' %>" href="/user/message" aria-label="Message"><i
+        class="fas fa-comments icon"></i><span class="label">Message</span></a>
+
+    <a class="nav-item referral-highlight-mobile" href="/user/referral" aria-label="Referral">
+      <i class="fas fa-gift icon"></i>
+      <span class="label">Referral</span>
+    </a>
+
+    <% } else if (isLogedIn && user && user.userType==='vender' ) { %>
+      <a class="nav-item <%= currentPage === 'home' ? 'active' : '' %>" href="/" aria-label="Home"><i
+          class="fas fa-home icon"></i><span class="label">Home</span></a>
+      <a class="nav-item <%= currentPage === 'admin' ? 'active' : '' %>" href="/vender/add_meals"
+        aria-label="Add Meals"><i class="fas fa-plus-square icon"></i><span class="label">Add Meals</span></a>
+      <a class="nav-item <%= currentPage === 'adminMeals' ? 'active' : '' %>" href="/vender/meals_list"
+        aria-label="My Meals"><i class="fas fa-utensils icon"></i><span class="label">Meals</span></a>
+      <a class="nav-item <%= currentPage === 'orders' ? 'active' : '' %>" href="/vender/orders" aria-label="Orders">
+        <i class="fas fa-clipboard-list icon"></i>
+        <% if (hasVendorOrders) { %><span class="notif-dot"></span>
+          <% } %>
+            <span class="label">Orders</span>
+      </a>
+      <a class="nav-item <%= currentPage === 'addDetails' ? 'active' : '' %>" href="/vender/add_details"
+        aria-label="Add Details"><i class="fas fa-info-circle icon"></i><span class="label">+Details</span></a>
+      <a class="nav-item <%= currentPage === 'customerChoice' ? 'active' : '' %>" href="/vender/customerChoice"
+        aria-label="Modifications"><i class="fas fa-tools icon"></i><span class="label">Modifications</span></a>
+      <a class="nav-item <%= currentPage === 'problems' ? 'active' : '' %>" href="/vender/problems"
+        aria-label="Customer Problems"><i class="fas fa-exclamation-circle icon"></i><span
+          class="label">Problems</span></a>
+
+      <% } else { %>
+        <a class="nav-item <%= currentPage === 'home' ? 'active' : '' %>" href="/" aria-label="Home"><i
+            class="fas fa-home icon"></i><span class="label">Home</span></a>
+        <a class="nav-item <%= currentPage === 'logIn' ? 'active' : '' %>" href="/logIn" aria-label="Login"><i
+            class="fas fa-sign-in-alt icon"></i><span class="label">Login</span></a>
+        <% } %>
+</nav>
+
+<script>
+  // hamburger toggle for top nav on small screens
+  const hamburger = document.getElementById('hamburger-btn');
+  const navLinks = document.getElementById('nav-links');
+  hamburger?.addEventListener('click', () => {
+    navLinks?.classList.toggle('active');
+    const expanded = hamburger.getAttribute('aria-expanded') === 'true';
+    hamburger.setAttribute('aria-expanded', (!expanded).toString());
+  });
+
+  // user menu toggle
+  const userMenuBtn = document.getElementById('user-menu-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+  userMenuBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const expanded = userMenuBtn.getAttribute('aria-expanded') === 'true';
+    userMenuBtn.setAttribute('aria-expanded', (!expanded).toString());
+    userDropdown?.classList.toggle('active');
+  });
+
+  // close dropdowns on outside click or Escape
+  document.addEventListener('click', (e) => {
+    if (!userMenuBtn?.contains(e.target)) userDropdown?.classList.remove('active');
+    if (!navLinks?.contains(e.target) && window.innerWidth <= 768) navLinks?.classList.remove('active');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      userDropdown?.classList.remove('active');
+      navLinks?.classList.remove('active');
+    }
+  });
+
+  // mobile bottom nav visual feedback (client-side)
+  document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // dynamically adjust bottom padding for mobile nav
+  function adjustBodyPaddingForBottomNav() {
+    const bottomNav = document.querySelector('.mobile-bottom-nav');
+    if (!bottomNav) return;
+    document.body.style.paddingBottom = bottomNav.offsetHeight + 'px';
+  }
+  window.addEventListener('load', adjustBodyPaddingForBottomNav);
+  window.addEventListener('resize', adjustBodyPaddingForBottomNav);
+</script>

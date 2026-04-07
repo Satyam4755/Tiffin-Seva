@@ -1,0 +1,192 @@
+<%-include('../partials/head')%>
+<%-include('../partials/background')%>
+<style>
+body {
+    background: linear-gradient(to bottom, #fffde7, #fff9c4);
+    color: #333;
+}
+h1 {
+    text-align: center;
+    margin: 1rem 0;
+    color: #ff5a5f;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Grid layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+/* Card styling */
+.card {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    padding: 1rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+.card h3 {
+    margin-bottom: 0.75rem;
+    text-align: center;
+    color: #ff5a5f;
+}
+
+/* Meal section */
+.meal-section {
+    margin-bottom: 1rem;
+}
+.meal-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #444;
+    text-align: center;
+}
+.meal-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.meal-content img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.meal-content p {
+    flex: 1;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #555;
+}
+.meal-section hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 1rem 0;
+}
+
+/* Empty message styling */
+.empty-message {
+    text-align: center;
+    margin-top: 50px;
+    padding: 30px;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: 15px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+.empty-message h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+.empty-message p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+/* Add Meals button */
+.empty-message a button {
+    background: linear-gradient(45deg, #ff5a5f, #ff7e7e);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+.empty-message a button:hover {
+    background: linear-gradient(45deg, #e0484d, #ff5a5f);
+}
+/* Style for the Edit Meals button */
+.edit-meals-btn {
+  background-color: #4CAF50; /* fresh green for contrast */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.edit-meals-btn:hover {
+  background-color: #43a047; /* darker green on hover */
+  transform: translateY(-2px);
+}
+
+.edit-meals-btn:active {
+  transform: translateY(0);
+}
+</style>
+
+<%-include('../partials/nav')%>
+
+<% if (!mealsList || mealsList.length === 0) { %>
+  <div class="empty-message">
+    <h2>You haven’t added daily meals yet!</h2>
+    <p>Want to add?</p>
+    <a href="/vender/add_meals" class="<%= currentPage === 'admin' ? 'selected' : '' %>">
+      <button>Add Your Meals</button>
+    </a>
+  </div>
+<% } else { %>
+
+  <!-- ✏️ Edit button for the first meals doc -->
+  <div style="text-align:right; margin-bottom:15px;">
+    <a href="/vender/<%= mealsList[0]._id %>/edit_meals?editing=true">
+      <button class="edit-meals-btn">✏️ Edit Meals</button>
+    </a>
+  </div>
+
+  <!-- Single Grid for all 7 days -->
+  <div class="grid-container">
+    <% const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]; %>
+    <% days.forEach(day => { 
+        const lunchMeal = mealsList[0]?.meals?.[day.toLowerCase()]?.lunch || {};
+        const dinnerMeal = mealsList[0]?.meals?.[day.toLowerCase()]?.dinner || {};
+    %>
+    <div class="card">
+        <h3><%= day %></h3>
+
+        <!-- Lunch -->
+        <div class="meal-section">
+            <h4>Lunch</h4>
+            <div class="meal-content">
+                <img src="<%= lunchMeal.image || '/tiffin.png' %>" alt="<%= day %> Lunch" style="width:60px;height:60px;border-radius:6px;">
+                <p><%= lunchMeal.items?.join(", ") || "Not Available" %></p>
+            </div>
+            <hr>
+        </div>
+
+        <!-- Dinner -->
+        <div class="meal-section">
+            <h4>Dinner</h4>
+            <div class="meal-content">
+                <img src="<%= dinnerMeal.image || '/tiffin.png' %>" alt="<%= day %> Dinner" style="width:60px;height:60px;border-radius:6px;">
+                <p><%= dinnerMeal.items?.join(", ") || "Not Available" %></p>
+            </div>
+        </div>
+    </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/_chatbot') %>
+</body>
+</html>

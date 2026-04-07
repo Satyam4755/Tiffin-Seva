@@ -1,0 +1,296 @@
+<%- include('../partials/head') %>
+<%- include('../partials/background') %>
+
+<style>
+
+.cancelled-row {
+    background: #ffe5e5 !important;  /* soft red background */
+    border-left: 5px solid #ff4d4d;   /* red highlight on left */
+                }
+  body {
+    background: #fef9f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .container {
+    max-width: 95%;
+    margin: auto;
+    margin-top: 80px;
+    background: #fffdfb;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    border: 2px solid #ffe6cc;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 35px;
+    color: #ff7043;
+    font-weight: 700;
+    font-size: 36px;
+    text-shadow: 1px 1px 0px #ffd1b3;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    width: auto;
+    min-width: 1000px;
+    border-collapse: collapse;
+    background-color: #fff8f0;
+    border: 1px solid #ffccbc;
+  }
+
+  thead {
+    background-color: #ff7043;
+    color: #fff;
+  }
+
+  th, td {
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #ffccbc;
+  }
+
+  tr:nth-child(even) {
+    background-color: #fff3e0;
+  }
+
+  tr:hover {
+    background-color: #ffe0b2;
+    transition: background-color 0.3s ease;
+  }
+
+  td {
+    color: #5d4037;
+  }
+
+  p {
+    text-align: center;
+    font-size: 18px;
+    color: #777;
+    margin-top: 20px;
+  }
+
+  a {
+    color: #ff7043;
+    text-decoration: underline;
+  }
+
+  @media screen and (max-width: 768px) {
+    .container {
+      padding: 20px 15px;
+    }
+
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+
+    tbody{
+      width: fit-content;
+    }
+
+    table {
+      width: 40px;
+      background-color: #5d403700;
+      border-color: #5d403700;
+      overflow-x: scroll;
+    }
+    thead {
+      display: none;
+    }
+
+    tr {
+      margin-bottom: 25px;
+      width: fit-content;
+      border: 1px solid #ffccbc;
+      border-radius: 12px;
+      padding: 15px;
+      background: #fff3e0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    td {
+      width: 70vw;
+      overflow-y: scroll;
+      text-align: left;
+      padding: 14px 16px;
+      position: relative;
+      font-size: 15px;
+      border: none;
+      color: #5d4037;
+      background-color: #fff;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      font-size: 14px;
+      color: #ff7043;
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+  .badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<%- include('../partials/nav') %>
+
+<div class="badaDabba">
+  <div class="container">
+    <h1>🍱 Guest Food Orders</h1>
+
+    <%
+      // Step 1: Include ACTIVE + CANCELLED orders
+      let vendorOrders = (orders || []).filter(order =>
+        order.status === 'active' || order.status === 'cancelled'
+      );
+
+      // Step 2: Sort → ACTIVE first, CANCELLED later
+      vendorOrders.sort((a, b) => {
+        if (a.status === 'active' && b.status === 'cancelled') return -1;
+        if (a.status === 'cancelled' && b.status === 'active') return 1;
+        return 0;
+      });
+    %>
+
+    <% if (!vendorOrders.length) { %>
+      <p>No orders yet.</p>
+    <% } else { %>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Guest Name</th>
+              <th>Address</th>
+              <th>Phone</th>
+              <th>Subscription</th>
+              <th>Order Status</th>
+              <th>Duration</th>
+              <th>Quantity</th>
+              <th>Payment Method</th>
+              <th>Total Price</th>
+              <th>Time Type</th>
+              <th>Payment Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% 
+              let totalUnpaid = 0;
+
+              vendorOrders.forEach(order => {
+
+                let vendorAmount = 0;
+
+                if (order.status === 'active') {
+                  vendorAmount = order.totalAmount || 0;
+                } else if (order.status === 'cancelled') {
+                  vendorAmount = order.usedAmount || 0;
+                }
+
+                if (order.paymentStatus !== "paid") {
+                  totalUnpaid += vendorAmount;
+                }
+            %>
+
+              <!-- ⭐ ADD REDDISH BACKGROUND FOR CANCELLED ROWS -->
+              <tr class="<%= order.status === 'cancelled' ? 'cancelled-row' : '' %>">
+
+                <td data-label="Vendor">
+                  <%= order.vender ? order.vender.serviceName || order.vender.firstName : 'Deleted Vendor' %>
+                </td>
+
+                <td data-label="Guest Name"><%= order.name %></td>
+
+                <td data-label="Location">
+                  <% if (order.lat && order.lng) { %>
+                    <a href="https://www.google.com/maps?q=<%= order.lat %>,<%= order.lng %>"
+                       target="_blank" style="color: blue; text-decoration: underline;">View</a>
+                  <% } else { %>
+                    <%= order.address %>
+                  <% } %>
+                </td>
+
+                <td data-label="Phone"><%= order.phone %></td>
+
+                <td data-label="Subscription"><%= order.subscription_model %></td>
+
+                <td data-label="Order Status">
+                  <% if(order.status === 'active'){ %>
+                    <span style="color:green; font-weight:bold;">ACTIVE</span>
+                  <% } else { %>
+                    <span style="color:red; font-weight:bold;">CANCELLED</span>
+                  <% } %>
+                </td>
+
+                <td data-label="Duration">
+                  <%= new Date(order.startingDate).toDateString() %> -
+                  <%= new Date(order.endingDate).toDateString() %>
+                </td>
+
+                <td data-label="Quantity">
+                  <strong><%= order.quantity || 1 %></strong>
+                  Tiffin<%= (order.quantity > 1) ? 's' : '' %>
+                </td>
+
+                <td data-label="Payment Method"><%= order.payment %></td>
+
+                <td data-label="Total Price">
+                  ₹<%= vendorAmount %>
+                </td>
+
+                <td data-label="Time Type">
+                  <%= order.time_type?.length ? order.time_type.join(" & ").toUpperCase() : "Lunch & Dinner" %>
+                </td>
+
+                <td data-label="Payment Status">
+                  <% if (order.paymentStatus === "paid") { %>
+                    <span style="color: green; font-weight: bold;">Paid ✔</span>
+                  <% } else { %>
+                    <span style="color: red; font-weight: bold;">Unpaid ✘</span>
+                  <% } %>
+                </td>
+
+              </tr>
+
+            <% }) %>
+
+            <% 
+              const commission = totalUnpaid * 0.10;
+              const finalAmount = totalUnpaid - commission;
+            %>
+
+            <tr style="font-weight:bold; background:#f8f9fa;">
+              <td colspan="8" style="text-align:right;">TOTAL (Unpaid Orders)</td>
+              <td>₹<%= totalUnpaid %></td>
+
+              <td colspan="3" style="text-align:left;">
+                Commission: ₹<%= commission %><br>
+                Vendor Receives: ₹<%= finalAmount %>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    <% } %>
+
+  </div>
+</div>
+<%- include('../partials/_chatbot') %>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<%-include('../partials/head')%>
+<%-include('../partials/background')%>
+<style> 
+    h1, h2 {
+        text-align: center;
+        color: #333;
+        margin-top: 20px;
+        animation: slideDown 1s ease-in-out;
+    }
+
+    @keyframes slideDown {
+        0% {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 25px;
+        padding: 30px;
+        animation: fadeIn 1.5s ease;
+    }
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .card {
+        background-color: #fff;
+        width: 280px;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+        border-bottom: 1px solid #eee;
+    }
+
+    .card:hover img {
+        transform: scale(1.1);
+    }
+
+    .content {
+        padding: 15px;
+        background: #fff;
+    }
+
+    .card h3 {
+        margin: 10px 0;
+        color: #d81b60;
+        font-size: 20px;
+    }
+
+    .card p {
+        margin: 5px 0;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .reserve {
+        display: inline-block;
+        margin-top: 10px;
+        background-color: #d81b60;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .reserve:hover {
+        background-color: #c2185b;
+        transform: scale(1.05);
+    }
+
+    #favImg {
+        width: 30px;
+        height: 30px;
+        filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    #favImg:hover {
+        transform: scale(1.2) rotate(-10deg);
+        filter: brightness(1);
+        filter: grayscale(1);
+    }
+
+    .img1, .img2 {
+        position: absolute;
+        width: 25vw;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        border-radius: 50%;
+        transition: transform 0.4s ease;
+        z-index: -1;
+    }
+    .img1 { top: 15%; right: 2.5%; }
+    .img2 { top: 40%; left: 2.5%; }
+
+    .fav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .cards-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card {
+            width: 100%;
+        }
+    }
+
+    .badaDabba{
+        margin-bottom: 15%;
+    }
+</style>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <script>
+    alert("<%= messages.success[0] %>");
+  </script>
+<% } %>
+
+<%-include('../partials/nav')%>
+
+<h2 style="color: #d81b60; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-bottom: 30px; animation: bounce 7.5s infinite;">
+    ❤️ Favourite List ❤️
+</h2>
+
+<div class="badaDabba">
+    <img src="/IMG_3111 2.jpg" class="img1" alt="image">
+    <img src="/IMG_3112 2.jpg" class="img2" alt="image">
+
+    <div class="cards-container">
+        <% venders.forEach(vender => { %>
+            <div class="card">
+                <a href="/user/vender-list/<%=vender._id %>">
+                    <img src="<%= vender.bannerImage || '/tiffin.png' %>" alt="Vendor Banner">
+                </a>
+                <div class="content">
+                    <h3><%= vender.serviceName %></h3>
+                    <p><strong>Price Per Meal:</strong> ₹<%= vender.pricePerDay || 0 %>
+                    </p>
+                    <p><strong>Price Per Month:</strong>
+                        <% if (typeof vender.pricePerMonthSingle !=='undefined' && typeof vender.pricePerMonthBoth !=='undefined' ) { %>
+                            ₹<%= vender.pricePerMonthSingle %> (Single meal) / ₹<%= vender.pricePerMonthBoth %> (Both meals)
+                                    <% } else { %>
+                                        ₹<%= vender.pricePerMonth || 0 %>
+                                            <% } %>
+                    </p>
+                    <p><strong>Location:</strong> <%= vender.location %></p>
+                    <p><strong>Ratings:</strong>
+                        <% const fullStars = Math.floor(vender.averageRating || 0); %>
+                        <% for(let i=0; i < fullStars; i++) { %> ⭐ <% } %>
+                        <span style="margin-left: 5px; font-weight: 700; color: red;">
+                            (<%= vender.averageRating || 0 %>/5)
+                        </span>
+                    </p>
+                    <div class="fav-container">
+                        <a href="/user/booking/<%=vender._id%>">
+                            <button class="reserve">ORDER</button>
+                        </a>
+                        <form action="/user/unfavourite/<%=vender._id%>" method="post">
+                            <input type="hidden" name="id" value="<%=vender._id%>">
+                            <button style="background: none; border: none; cursor: pointer;">
+                                <img id="favImg" src="/pngtree-red-3d-heart-emoji-realistic-shadow-png-image_4539964.png" alt="Favourite">
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<%-include('../partials/loading')%>
+</body>
+</html>

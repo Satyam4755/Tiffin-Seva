@@ -1,0 +1,159 @@
+<style>
+    h3 {
+        text-align: left;
+    }
+
+    /* Footer */
+    footer {
+        background-color: var(--dark);
+        color: white;
+        padding: 60px 0 30px;
+    }
+
+    .footer-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .footer-column h3 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        color: var(--secondary);
+    }
+
+    .footer-column ul {
+        list-style: none;
+    }
+
+    .footer-column ul li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .footer-column ul li i {
+        margin-right: 10px;
+        color: var(--secondary);
+        width: 20px;
+    }
+
+    .footer-column ul li a {
+        color: #ddd;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .footer-column ul li a:hover {
+        color: var(--secondary);
+    }
+
+    .social-icons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .social-icons a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .social-icons a:hover {
+        background-color: var(--primary);
+        transform: translateY(-3px);
+    }
+
+    .copyright {
+        text-align: center;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #aaa;
+        font-size: 0.9rem;
+    }
+</style>
+
+<!-- Footer -->
+<footer style="background-color: #000000a6;" id="contact">
+    <div class="container">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3 style="color: orange; ">Tiffin Seva</h3>
+                <p>Homemade taste delivered to your office. We bring you fresh, healthy and delicious food.</p>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/share/17JAeM8oPL/" target="_blank"><i
+                            class="fab fa-facebook-f"></i></a>
+                    <a href="https://x.com/TiffinSeva68978" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.instagram.com/thetiffinseva" target="_blank"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919621965441" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <!-- Mobile App Section -->
+
+
+            <div class="footer-column" style="text-align: left;">
+                <img style="width: 120px;
+                    height: 120px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    margin-bottom: 10px;
+                    border: 3px solid #ff385c;" src="/satti.jpeg" alt="Owner">
+                <h4 style="color: orange; font-size: 1.1rem; margin-bottom: 8px;">About the Founder</h4>
+                <p style="font-size: 0.9rem;">Satyam Sharma! Just helping people to enjoy delicious home-cooked meals
+                    online without any hassle.</p>
+            </div>
+
+            <div class="footer-column">
+                <h3 style="color: orange;">Contact Information</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> Lucknow, Uttar Pradesh</li>
+                    <li><i class="fas fa-phone"></i> +91 96219 65441</li>
+                    <li><i class="fas fa-envelope"></i> tiffinseva07@gmail.com</li>
+                    <li><i class="fas fa-clock"></i> 8:00 AM - 10:00 PM</li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3 style="color: orange;">Quick Links</h3>
+                <ul>
+                    <li><a href="/contact-us"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                    <li><a href="/privacy-policy"><i class="fas fa-user-shield"></i> Privacy Policy</a></li>
+                    <li><a href="/terms-and-conditions"><i class="fas fa-file-contract"></i> Terms & Conditions</a></li>
+                    <li><a href="/cancellation-refund-policy"><i class="fas fa-undo-alt"></i> Refund Policy</a></li>
+                    <li><a href="/shipping-delivery-policy"><i class="fas fa-shipping-fast"></i> Shipping Policy</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3 style="color: orange;">Service Areas</h3>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Goel</li>
+                    <li><i class="fas fa-check-circle"></i> BBD</li>
+                    <li><i class="fas fa-check-circle"></i> Matiyari</li>
+                    <li><i class="fas fa-check-circle"></i> Chinhat</li>
+                    <li><i class="fas fa-check-circle"></i> Gomti Nagar</li>
+                    <li><i class="fas fa-check-circle"></i> Polytechnic</li>
+                    <li><i class="fas fa-check-circle"></i> AMITY University </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="copyright">
+            <p>&copy; 2026 Tiffin Seva. All Rights Reserved. | Founded by Satyam Sharma</p>
+        </div>
+    </div>
+</footer>
+
+<script>

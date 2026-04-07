@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://tiffin-seva.com/sitemap.xml
