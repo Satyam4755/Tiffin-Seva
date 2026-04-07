@@ -1795,3 +1795,10 @@ exports.getReferral = async (req, res, next) => {
     res.redirect(req.get('Referrer') || '/');
   }
 };
+
+exports.developer= async (req, res) => {
+  res.render('./store/developer', {
+    title: "Developer Page",
+    currentPage: 'developer'
+  });
+}

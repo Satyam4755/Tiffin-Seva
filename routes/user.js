@@ -20,7 +20,8 @@ const {
   postProblem,
   deleteProfilePicture,
   deleteBannerPicture,
-  getReferral
+  getReferral,
+  developer
 } = require('../controller/user');
 
 // GET routes
@@ -29,10 +30,11 @@ userRouter.get('/user/vender-list/:venderId', venderDetails);
 userRouter.get('/user/favourite_list', favouriteList);
 userRouter.get('/user/booking/:venderId', booking);
 userRouter.get('/user/booked', booked);
+userRouter.get('/developer', developer);
 userRouter.get('/user/submit_booking', submitBooking);
 userRouter.get('/user/options',getOption)
 userRouter.get('/user/message', getMessage); // ✅ added
-userRouter.get('/user/referral', getReferral); // ✅ added
+userRouter.get('/user/referral', getReferral);
 
 // POST routes
 userRouter.post('/user/favourite_list', postfavouriteList);
