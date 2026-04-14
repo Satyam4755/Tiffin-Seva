@@ -304,7 +304,7 @@ exports.homePage = async (req, res, next) => {
     // 4️⃣ Render
     res.render("./store/vender", {
       venders: registervenders,
-      title: "Tiffsi",
+      title: "Tiffin Seva",
       currentPage: "home",
       isLogedIn: req.isLogedIn,
       user: user || null,
@@ -1191,7 +1191,7 @@ Used Days: ${daysUsed}
 Penalty: ₹${(penaltyPaise / 100).toFixed(2)}
 
 Thanks,
-tiffsi`
+Tiffin Seva`
     });
 
     // ---------------------------------------------------------
