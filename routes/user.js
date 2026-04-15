@@ -30,7 +30,7 @@ userRouter.get('/user/vender-list/:venderId', venderDetails);
 userRouter.get('/user/favourite_list', favouriteList);
 userRouter.get('/user/booking/:venderId', booking);
 userRouter.get('/user/booked', booked);
-userRouter.get('/developer', developer);
+userRouter.get('/developedBy', developer);
 userRouter.get('/user/submit_booking', submitBooking);
 userRouter.get('/user/options',getOption)
 userRouter.get('/user/message', getMessage); // ✅ added
